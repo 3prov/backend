@@ -3,11 +3,20 @@ import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
+from django.db import transaction
 
 
 class AuthSocialID(models.Model):
     vkontakte = models.PositiveIntegerField(null=True, blank=True)
     telegram = models.PositiveIntegerField(null=True, blank=True)
+
+    @transaction.atomic
+    def delete(self, *args, **kwargs):
+        self.user.delete()
+        return super(self.__class__, self).delete(*args, **kwargs)
+
+    def __str__(self):
+        return f'vk:{self.vkontakte}, tg:{self.telegram}'
 
 
 class User(AbstractUser):
@@ -20,7 +29,8 @@ class User(AbstractUser):
         to=AuthSocialID,
         on_delete=models.CASCADE,
         verbose_name='Социальная сеть',
-        null=True
+        null=True,
+        related_name='user',
     )
 
 
@@ -39,9 +49,14 @@ class Task(models.Model):
         verbose_name_plural = 'Задания для Пользователей'
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    teacher = models.ForeignKey(to=User, on_delete=models.CASCADE, verbose_name='Учитель, который дал работу')
+    teacher = models.ForeignKey(
+        to=User,
+        on_delete=models.CASCADE,
+        verbose_name='Учитель, который дал работу',
+        related_name='tasks'
+    )
     created_at = models.DateTimeField(default=timezone.now, verbose_name='Дата создания')
-    week = models.ForeignKey(to=Week, on_delete=models.CASCADE, verbose_name='Неделя')
+    week = models.ForeignKey(to=Week, on_delete=models.CASCADE, verbose_name='Неделя', related_name='tasks')
 
 
 class Work(models.Model):
@@ -51,7 +66,7 @@ class Work(models.Model):
         verbose_name_plural = 'Работы Пользователя'
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    author = models.ForeignKey(to=User, on_delete=models.CASCADE, verbose_name='Автор работы')
+    author = models.ForeignKey(to=User, on_delete=models.CASCADE, verbose_name='Автор работы', related_name='works')
     created_at = models.DateTimeField(default=timezone.now, verbose_name='Дата создания')
 
     def create_relation_to_task(self):

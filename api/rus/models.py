@@ -7,7 +7,8 @@ class Essay(Work):
         task = models.ForeignKey(
             to=Text,
             on_delete=models.CASCADE,
-            verbose_name='Текст, по которому написано сочинение'
+            verbose_name='Текст, по которому написано сочинение',
+            related_name='essays'
         )
     body = models.TextField(verbose_name='Поле для сочинения')
 
@@ -21,5 +22,5 @@ class Text(Task):
 class TextKeys(models.Model):
     range_of_problems = models.TextField(verbose_name='Примерный круг проблем')
     authors_position = models.TextField(verbose_name='Авторская позиция')
-    text = models.ForeignKey(to=Text, on_delete=models.CASCADE, verbose_name='Проблемы текста')
+    text = models.ForeignKey(to=Text, on_delete=models.CASCADE, verbose_name='Проблемы текста', related_name='keys')
 
