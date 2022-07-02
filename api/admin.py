@@ -1,5 +1,5 @@
 from django.contrib import admin
-from api.models import User, AuthSocialID
+from api.models import User
 from api.rus.models import Text, Essay
 
 
@@ -16,9 +16,3 @@ class TextAdmin(admin.ModelAdmin):
 @admin.register(Essay)
 class EssayAdmin(admin.ModelAdmin):
     list_display = ('id',)
-
-
-@admin.register(AuthSocialID)
-class EssayAdmin(admin.ModelAdmin):
-    pass
-

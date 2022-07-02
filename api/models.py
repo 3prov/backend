@@ -3,20 +3,6 @@ import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
-from django.db import transaction
-
-
-class AuthSocialID(models.Model):
-    vkontakte = models.PositiveIntegerField(null=True, blank=True)
-    telegram = models.PositiveIntegerField(null=True, blank=True)
-
-    @transaction.atomic
-    def delete(self, *args, **kwargs):
-        self.user.delete()
-        return super(self.__class__, self).delete(*args, **kwargs)
-
-    def __str__(self):
-        return f'vk:{self.vkontakte}, tg:{self.telegram}'
 
 
 class User(AbstractUser):
@@ -25,13 +11,8 @@ class User(AbstractUser):
         verbose_name_plural = 'Пользователи'
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    social_network = models.OneToOneField(
-        to=AuthSocialID,
-        on_delete=models.CASCADE,
-        verbose_name='Социальная сеть',
-        null=True,
-        related_name='user',
-    )
+    vkontakte_id = models.PositiveIntegerField(null=True, blank=True)
+    telegram_id = models.PositiveIntegerField(null=True, blank=True)
 
 
 class Week(models.Model):
