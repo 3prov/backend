@@ -1,7 +1,7 @@
 from django.urls import path, include
 
-from api.rus.views import TestAddView
+from api.rus.views import TextCreate
 
 urlpatterns = [
-    path('hello', TestAddView.as_view()),
+    path('text_assign', TextCreate.as_view()),
 ]

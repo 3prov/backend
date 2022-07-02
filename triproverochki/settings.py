@@ -158,3 +158,5 @@ DJOSER = {
         'current_user': 'api.serializers.UserDetailSerializer',
     },
 }
+
+STUDY_YEAR = os.getenv('STUDY_YEAR')

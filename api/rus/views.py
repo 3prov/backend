@@ -1,9 +1,7 @@
-from django.http import JsonResponse
-from rest_framework.views import APIView
+from rest_framework import generics, permissions
+from .serializers import TextCreateSerializer
 
 
-class TestAddView(APIView):
-
-    @staticmethod
-    def get(request):
-        return JsonResponse({'status': "OK"})
+class TextCreate(generics.CreateAPIView):
+    serializer_class = TextCreateSerializer
+    permission_classes = [permissions.IsAdminUser]

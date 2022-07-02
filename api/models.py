@@ -39,7 +39,12 @@ class Task(models.Model):
         related_name='tasks'
     )
     created_at = models.DateTimeField(default=timezone.now, verbose_name='Дата создания')
-    stage = models.ForeignKey(to=Stage, on_delete=models.CASCADE, verbose_name='Неделя', related_name='tasks')
+    week_id = models.CharField(
+        max_length=12,
+        unique=True,
+        verbose_name='Номер недели',
+        help_text='Пример формата: 2022-2023_07, где 2022 - это начало учебного года, 2023 - конец, 07 - номер недели',
+    )
 
 
 class Work(models.Model):
