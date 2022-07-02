@@ -7,4 +7,5 @@ urlpatterns = [
     path('rus/', include('api.rus.urls')),
     path('users/', views.UserListView.as_view()),
     path('users/<slug:pk>', views.UserDetailView.as_view()),
+    path('management/', include('api.management.urls')),
 ]

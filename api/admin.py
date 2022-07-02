@@ -1,6 +1,7 @@
 from django.contrib import admin
-from api.models import User
-from api.rus.models import Text, Essay
+from .models import User
+from .rus.models import Text, Essay
+from .management.models import Stage
 
 
 @admin.register(User)
@@ -16,3 +17,8 @@ class TextAdmin(admin.ModelAdmin):
 @admin.register(Essay)
 class EssayAdmin(admin.ModelAdmin):
     list_display = ('id',)
+
+
+@admin.register(Stage)
+class StageAdmin(admin.ModelAdmin):
+    list_display = ('stage', )

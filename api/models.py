@@ -3,6 +3,9 @@ import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
+from .management.models import Stage
+from rest_framework.authtoken.models import Token
+from django.db import transaction
 
 
 class User(AbstractUser):
@@ -14,13 +17,12 @@ class User(AbstractUser):
     vkontakte_id = models.PositiveIntegerField(null=True, blank=True)
     telegram_id = models.PositiveIntegerField(null=True, blank=True)
 
-
-class Week(models.Model):
-    class Meta:
-        verbose_name = 'Неделя'
-        verbose_name_plural = 'Недели'
-
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    @transaction.atomic
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            return
+        Token.objects.get_or_create(user=self)
+        return super(User, self).save(*args, **kwargs)
 
 
 class Task(models.Model):
@@ -37,7 +39,7 @@ class Task(models.Model):
         related_name='tasks'
     )
     created_at = models.DateTimeField(default=timezone.now, verbose_name='Дата создания')
-    week = models.ForeignKey(to=Week, on_delete=models.CASCADE, verbose_name='Неделя', related_name='tasks')
+    stage = models.ForeignKey(to=Stage, on_delete=models.CASCADE, verbose_name='Неделя', related_name='tasks')
 
 
 class Work(models.Model):
