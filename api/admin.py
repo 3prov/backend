@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import User
 from .rus.models import Text, Essay, TextKey
-from .management.models import Stage
+from .management.models import Stage, WeekID
 
 
 @admin.register(User)
@@ -22,6 +22,11 @@ class EssayAdmin(admin.ModelAdmin):
 @admin.register(Stage)
 class StageAdmin(admin.ModelAdmin):
     list_display = ('stage', )
+
+
+@admin.register(WeekID)
+class WeekIDAdmin(admin.ModelAdmin):
+    pass
 
 
 @admin.register(TextKey)

@@ -34,5 +34,5 @@ class EssayCreateSerializer(serializers.ModelSerializer):
     task = TextDetailSerializer(read_only=True)
 
     def create(self, validated_data):
-        current_text = Text.get_current_task()
+        current_text = Text.get_current()
         return Essay.objects.create(task=current_text, **validated_data)

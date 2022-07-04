@@ -4,7 +4,7 @@ from abc import abstractmethod
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
-from .management.models import Stage
+from .management.models import Stage, WeekID
 from rest_framework.authtoken.models import Token
 from django.db import transaction
 
@@ -40,17 +40,22 @@ class Task(models.Model):
         related_name='tasks'
     )
     created_at = models.DateTimeField(default=timezone.now, verbose_name='Дата создания')
-    week_id = models.CharField(
-        max_length=12,
-        unique=True,
-        verbose_name='Номер недели',
-        help_text='Пример формата: 2022-2023_07, где 2022 - это начало учебного года, 2023 - конец, 07 - номер недели',
+    week_id = models.OneToOneField(
+        to=WeekID,
+        on_delete=models.CASCADE,
+        verbose_name='Идентификатор недели',
+        related_name='task',
+        null=True,  # signal handles it
     )
 
     @staticmethod
     @abstractmethod
-    def get_current_task():
-        raise NotImplementedError('Необходимо создать метод определения текущего задания')
+    def get_current():
+        raise NotImplementedError('Необходимо создать метод определения текущего задания.')
+
+    # @abstractmethod
+    # def save(self, *args, **kwargs):
+    #     raise NotImplementedError('Необходимо переопределить метод save для инкремента week_number в WeekID.')
 
 
 class Work(models.Model):
@@ -69,4 +74,8 @@ class Work(models.Model):
 
     @property
     def task(self):
-        raise NotImplementedError('Необходимо создать связь с моделью Task')
+        raise NotImplementedError('Необходимо создать связь с моделью Task.')
+
+    #@abstractmethod
+    #def save(self, *args, **kwargs):
+    #    raise NotImplementedError('Необходимо переопределить метод save для генерации ссылок получения формы FormUrl.')

@@ -1,12 +1,13 @@
 import uuid
 
-from django.db import models
-from ..models import Work, Task
+from django.db import models, transaction
+from api.models import Work, Task
+from api.management.models import WeekID
 
 
 class Text(Task):
     class Meta:
-        verbose_name = 'Тест'
+        verbose_name = 'Текст'
         verbose_name_plural = 'Тексты'
 
     body = models.TextField(verbose_name='Поле для текста')
@@ -14,8 +15,12 @@ class Text(Task):
     author_description = models.TextField(verbose_name='Описание автора текста')
 
     @staticmethod
-    def get_current_task():
+    def get_current():
         return Text.objects.order_by('-created_at').first()
+
+    @transaction.atomic
+    def save(self, *args, **kwargs):
+        return super(Text, self).save(*args, **kwargs)
 
 
 class Essay(Work):

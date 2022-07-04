@@ -37,6 +37,6 @@ class StatisticsAddView(APIView):
     def get(request):
         return JsonResponse({
             'rus': {
-                'essays_passed': Essay.objects.filter(task=Text.get_current_task()).count(),
+                'essays_passed': Essay.objects.filter(task=Text.get_current()).count(),
             }
         })

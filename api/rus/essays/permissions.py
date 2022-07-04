@@ -40,6 +40,6 @@ class IsWorkAlreadyExists(permissions.BasePermission):
     def has_permission(self, request, view) -> bool:
         if not EssayCreateSerializer(data=request.data).is_valid():
             raise permissions.exceptions.ValidationError
-        current_text = Text.get_current_task()
+        current_text = Text.get_current()
         already_sent_essay = Essay.objects.filter(author=request.data['author'], task=current_text)
         return not already_sent_essay.exists()

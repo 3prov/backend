@@ -6,6 +6,8 @@ class ApiConfig(AppConfig):
     name = 'api'
 
     def ready(self):
+        import api.signals
+
         from django.conf import settings
         from .models import User
         from django.db import utils

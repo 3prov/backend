@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from ..models import Text, TextKey
-from django.conf import settings
 import re
+
+from ...management.models import WeekID
 
 
 class TextKeySerializer(serializers.ModelSerializer):
@@ -41,19 +42,16 @@ class TextDetailSerializer(serializers.ModelSerializer):
         return serializer.data
 
 
+class WeekIDSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WeekID
+        exclude = ['id', 'created_at']
+
+
 class TextCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Text
         fields = '__all__'
 
-    week_id = serializers.CharField(read_only=True)
+    week_id = WeekIDSerializer(read_only=True)
     created_at = serializers.DateTimeField(read_only=True)
-
-    def create(self, validated_data):
-        previous_text = Text.get_current_task()
-        if not previous_text:
-            return Text.objects.create(week_id=f"{settings.STUDY_YEAR}_00", **validated_data)
-
-        next_week_number = int(previous_text.week_id.split('_')[-1]) + 1
-        return Text.objects.create(week_id=f"{settings.STUDY_YEAR}_{next_week_number:02d}", **validated_data)
-
