@@ -1,4 +1,5 @@
 import uuid
+from abc import abstractmethod
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
@@ -45,6 +46,11 @@ class Task(models.Model):
         verbose_name='Номер недели',
         help_text='Пример формата: 2022-2023_07, где 2022 - это начало учебного года, 2023 - конец, 07 - номер недели',
     )
+
+    @staticmethod
+    @abstractmethod
+    def get_current_task():
+        raise NotImplementedError('Необходимо создать метод определения текущего задания')
 
 
 class Work(models.Model):

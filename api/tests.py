@@ -166,3 +166,14 @@ class UserTest(APITestCase):
         }
         response = self.client.post(reverse('user-list'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class HealthTest(APITestCase):
+
+    def setUp(self) -> None:
+        self.client = APIClient()
+
+    def test_check_user_from_model(self):
+        response = self.client.get(reverse('health_check'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()['health'], "OK")

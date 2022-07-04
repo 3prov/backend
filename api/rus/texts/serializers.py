@@ -1,7 +1,13 @@
 from rest_framework import serializers
-from ..models import Text
+from ..models import Text, TextKey
 from django.conf import settings
 import re
+
+
+class TextKeySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TextKey
+        fields = '__all__'
 
 
 class TextListSerializer(serializers.ModelSerializer):
@@ -15,6 +21,8 @@ class TextDetailSerializer(serializers.ModelSerializer):
         model = Text
         fields = '__all__'
 
+    keys = serializers.SerializerMethodField(read_only=True)
+
     def validate(self, data):
         if 'week_id' not in data.keys():
             return data
@@ -26,6 +34,12 @@ class TextDetailSerializer(serializers.ModelSerializer):
                                                           '07 - номер недели.'})
         return data
 
+    @staticmethod
+    def get_keys(obj):
+        text_keys = TextKey.objects.filter(text=obj)
+        serializer = TextKeySerializer(text_keys, many=True)
+        return serializer.data
+
 
 class TextCreateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -36,7 +50,7 @@ class TextCreateSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(read_only=True)
 
     def create(self, validated_data):
-        previous_text = Text.objects.order_by('-created_at').first()
+        previous_text = Text.get_current_task()
         if not previous_text:
             return Text.objects.create(week_id=f"{settings.STUDY_YEAR}_00", **validated_data)
 

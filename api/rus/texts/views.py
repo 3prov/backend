@@ -1,7 +1,7 @@
 from rest_framework import generics, permissions
 
 from ..models import Text
-from .serializers import TextCreateSerializer, TextListSerializer, TextDetailSerializer
+from .serializers import TextCreateSerializer, TextListSerializer, TextDetailSerializer, TextKeySerializer
 
 
 class TextCreate(generics.CreateAPIView):
@@ -18,4 +18,9 @@ class TextListView(generics.ListAPIView):
 class TextDetailView(generics.RetrieveUpdateAPIView):
     queryset = Text.objects.all()
     serializer_class = TextDetailSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+
+class TextKeyCreate(generics.CreateAPIView):
+    serializer_class = TextKeySerializer
     permission_classes = [permissions.IsAdminUser]
