@@ -49,25 +49,25 @@ class ManagementTest(APITestCase):
         admin_user = User.objects.create_superuser(username='test_admin')
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {admin_user.auth_token}')
         response = self.client.get(reverse('switch_stage_to_next'))
-        self.assertEqual(list(response.json()['current_stage'].keys())[0], 'S2')
+        self.assertEqual(response.json()['current_stage'], 'S2')
         response = self.client.get(reverse('switch_stage_to_next'))
-        self.assertEqual(list(response.json()['current_stage'].keys())[0], 'S3')
+        self.assertEqual(response.json()['current_stage'], 'S3')
         response = self.client.get(reverse('switch_stage_to_next'))
-        self.assertEqual(list(response.json()['current_stage'].keys())[0], 'S4')
+        self.assertEqual(response.json()['current_stage'], 'S4')
         response = self.client.get(reverse('switch_stage_to_next'))
-        self.assertEqual(list(response.json()['current_stage'].keys())[0], 'S1')
+        self.assertEqual(response.json()['current_stage'], 'S1')
         response = self.client.get(reverse('switch_stage_to_next'))
-        self.assertEqual(list(response.json()['current_stage'].keys())[0], 'S2')
+        self.assertEqual(response.json()['current_stage'], 'S2')
 
     def test_admin_user_switch_stage_to_next_many_times(self):
         admin_user = User.objects.create_superuser(username='test_admin')
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {admin_user.auth_token}')
         responses_set = set()
         response = self.client.get(reverse('switch_stage_to_next'))
-        prev = list(response.json()['current_stage'].keys())[0]
+        prev = response.json()['current_stage']
         for i in range(1, 30):
             response = self.client.get(reverse('switch_stage_to_next'))
-            _key_stage = list(response.json()['current_stage'].keys())[0]
+            _key_stage = response.json()['current_stage']
             responses_set.add(_key_stage)
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertNotEqual(_key_stage, prev)

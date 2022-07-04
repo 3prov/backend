@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 class Stage(models.Model):
@@ -7,21 +8,23 @@ class Stage(models.Model):
         verbose_name = 'Этап'
         verbose_name_plural = 'Этап'
 
-    NO_TASK = 'S1'
-    WORK_ACCEPTING = 'S2'
-    CHECK_ACCEPTING = 'S3'
-    CLOSED_ACCEPT = 'S4'
-    STAGES = [
-        (NO_TASK, 'Нет задания'),
-        (WORK_ACCEPTING, 'Приём работ'),
-        (CHECK_ACCEPTING, 'Приём проверок'),
-        (CLOSED_ACCEPT, 'Нет приёма работ')
-    ]
+    class StagesEnum(models.TextChoices):
+        NO_TASK = 'S1', _('Нет задания')
+        WORK_ACCEPTING = 'S2', _('Приём работ')
+        CHECK_ACCEPTING = 'S3', _('Приём проверок')
+        CLOSED_ACCEPT = 'S4', _('Нет приёма работ')
+
+    _dict_of_stages = {
+        'S1': StagesEnum.NO_TASK,
+        'S2': StagesEnum.WORK_ACCEPTING,
+        'S3': StagesEnum.CHECK_ACCEPTING,
+        'S4': StagesEnum.CLOSED_ACCEPT
+    }
 
     stage = models.CharField(
         max_length=2,
-        choices=STAGES,
-        default=NO_TASK,
+        choices=StagesEnum.choices,
+        default=StagesEnum.NO_TASK,
         verbose_name='Этап'
     )
 
@@ -34,17 +37,16 @@ class Stage(models.Model):
         return super().save(*args, **kwargs)
 
     @staticmethod
-    def get_stage() -> dict[str, str]:
-        current_stage = Stage.object().stage
-        for one_tuple in Stage.STAGES:
-            if one_tuple[0] == current_stage:
-                return {current_stage: one_tuple[1]}
-        raise Exception('List of tuples: Key doesnt exists')
+    def get_stage() -> StagesEnum:
+        current_stage = Stage._dict_of_stages[Stage.object().stage]
+        for possible_stage in Stage.StagesEnum.choices:
+            if Stage._dict_of_stages[possible_stage[0]] == current_stage:
+                return current_stage
 
     @staticmethod
-    def switch_stage_to_next() -> dict[str, str]:
+    def switch_stage_to_next() -> StagesEnum:
         current_stage = Stage.object().stage
-        iterator = iter(Stage.STAGES * 2)
+        iterator = iter(Stage.StagesEnum.choices * 2)
         while next(iterator)[0] != current_stage:
             continue
         next_stage = next(iterator)

@@ -57,5 +57,10 @@ class Work(models.Model):
     author = models.ForeignKey(to=User, on_delete=models.CASCADE, verbose_name='Автор работы', related_name='works')
     created_at = models.DateTimeField(default=timezone.now, verbose_name='Дата создания')
 
-    def create_relation_to_task(self):
+    def __init__(self, *args, **kwargs):
+        super(Work, self).__init__(*args, **kwargs)
+        self.task
+
+    @property
+    def task(self):
         raise NotImplementedError('Необходимо создать связь с моделью Task')

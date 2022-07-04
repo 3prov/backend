@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Text
+from ..models import Text
 from django.conf import settings
 import re
 
@@ -32,8 +32,8 @@ class TextCreateSerializer(serializers.ModelSerializer):
         model = Text
         fields = '__all__'
 
-    week_id = serializers.CharField(read_only=Text)
-    created_at = serializers.DateTimeField(read_only=Text)
+    week_id = serializers.CharField(read_only=True)
+    created_at = serializers.DateTimeField(read_only=True)
 
     def create(self, validated_data):
         previous_text = Text.objects.order_by('-created_at').first()

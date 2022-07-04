@@ -1,6 +1,6 @@
 from rest_framework import generics, permissions
 
-from .models import Text
+from ..models import Text
 from .serializers import TextCreateSerializer, TextListSerializer, TextDetailSerializer
 
 

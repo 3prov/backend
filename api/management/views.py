@@ -12,7 +12,7 @@ class StageAddView(APIView):
     def get(request):
         return JsonResponse({
             'current_stage': Stage.get_stage(),
-            'possible_stages': [{x[0]: x[1]} for x in Stage.STAGES],
+            'possible_stages': [{x[0]: x[1]} for x in Stage.StagesEnum.choices],
         })
 
 
@@ -24,5 +24,5 @@ class SwitchStageAddView(APIView):
     def get(request):
         return JsonResponse({
             'current_stage': Stage.switch_stage_to_next(),
-            'possible_stages': [{x[0]: x[1]} for x in Stage.STAGES],
+            'possible_stages': [{x[0]: x[1]} for x in Stage.StagesEnum.choices],
         })

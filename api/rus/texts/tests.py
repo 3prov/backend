@@ -2,8 +2,8 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase, APIClient, APIRequestFactory
 
-from .models import Text
-from ..models import User
+from ..models import Text
+from api.models import User
 
 
 class ManagementTest(APITestCase):
