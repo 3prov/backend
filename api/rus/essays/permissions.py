@@ -1,9 +1,9 @@
 from rest_framework import permissions
 
 from ..models import Essay, Text
-from ...management.models import Stage
-from ...models import User
-from .serializers import EssayCreateSerializer
+from ...management.models import Stage, WeekID
+from ...models import User, FormURL
+from .serializers import EssayCreateSerializer, EssayGetLinkToFormCreateSerializer
 
 
 class OwnUserPermission(permissions.BasePermission):
@@ -43,3 +43,17 @@ class IsWorkAlreadyExists(permissions.BasePermission):
         current_text = Text.get_current()
         already_sent_essay = Essay.objects.filter(author=request.data['author'], task=current_text)
         return not already_sent_essay.exists()
+
+
+class IsFormURLAlreadyExists(permissions.BasePermission):
+    """
+    Проверяет, чтобы пользователь мог получить не более одной ссылки на форму.
+    """
+    message = "Ссылка на форму уже выдана."
+
+    def has_permission(self, request, view) -> bool:
+        if not EssayGetLinkToFormCreateSerializer(data=request.data).is_valid():
+            raise permissions.exceptions.ValidationError
+        current_week_id = WeekID.get_current()
+        already_given_url = FormURL.objects.filter(user=request.data['user'], week_id=current_week_id)
+        return not already_given_url.exists()

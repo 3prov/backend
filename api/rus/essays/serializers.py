@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from ..models import Essay, Text
+from ...models import FormURL
 from ...serializers import UserDetailSerializer
-from ..texts.serializers import TextDetailSerializer
+from ..texts.serializers import TextDetailSerializer, WeekIDSerializer
 
 
 class EssayListSerializer(serializers.ModelSerializer):
@@ -36,3 +37,20 @@ class EssayCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         current_text = Text.get_current()
         return Essay.objects.create(task=current_text, **validated_data)
+
+
+class EssayGetLinkToFormCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FormURL
+        fields = '__all__'
+
+    url = serializers.SerializerMethodField(read_only=True)  # TODO: URLField
+    week_id = WeekIDSerializer(read_only=True)
+
+    @staticmethod
+    def get_url(obj):
+        return obj.url
+
+    @staticmethod
+    def get_week_id(obj):
+        return obj.week_id

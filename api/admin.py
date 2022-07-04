@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User
+from .models import User, FormURL
 from .rus.models import Text, Essay, TextKey
 from .management.models import Stage, WeekID
 
@@ -32,3 +32,10 @@ class WeekIDAdmin(admin.ModelAdmin):
 @admin.register(TextKey)
 class TextKeyAdmin(admin.ModelAdmin):
     list_display = ('id', )
+
+
+@admin.register(FormURL)
+class FormURLAdmin(admin.ModelAdmin):
+    list_display = ('user', 'week_id', )
+    readonly_fields = ('url', )
+

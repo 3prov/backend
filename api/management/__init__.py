@@ -5,7 +5,10 @@ def init_stage():
         if not Stage.objects.all().exists():
             Stage.objects.create()
             print('"Stage" initialized successfully')  # TODO: to logger
+    except utils.OperationalError as e:
+        print('EXCEPTION OperationalError:', e)  # TODO: to logger
 
+    try:
         if not WeekID.objects.all().exists():
             WeekID.objects.create()
             print('"WeekID" initialized successfully')  # TODO: to logger

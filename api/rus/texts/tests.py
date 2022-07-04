@@ -4,11 +4,13 @@ from rest_framework.test import APITestCase, APIClient, APIRequestFactory
 
 from ..models import Text
 from api.models import User
+from ...management import init_stage
 
 
 class ManagementTest(APITestCase):
 
     def setUp(self) -> None:
+        init_stage()
         self.factory = APIRequestFactory()
         self.client = APIClient()
 

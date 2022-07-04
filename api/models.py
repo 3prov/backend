@@ -1,5 +1,5 @@
+import abc
 import uuid
-from abc import abstractmethod
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
@@ -7,9 +7,14 @@ from django.utils import timezone
 from .management.models import Stage, WeekID
 from rest_framework.authtoken.models import Token
 from django.db import transaction
+import hashlib
 
 
-class User(AbstractUser):
+class AbstractModelMeta(abc.ABCMeta, type(models.Model)):
+    pass
+
+
+class User(AbstractUser, metaclass=AbstractModelMeta):
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
@@ -26,7 +31,32 @@ class User(AbstractUser):
         return super(User, self).save(*args, **kwargs)
 
 
-class Task(models.Model):
+class FormURL(models.Model):
+    class Meta:
+        verbose_name = 'Ссылка на форму'
+        verbose_name_plural = 'Ссылки на формы'
+
+    user = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name='form_urls', verbose_name='Пользователь')
+    url = models.URLField(
+        unique=True,
+        null=True,  # signal handles it
+        verbose_name='Ссылка на форму',
+    )
+    week_id = models.ForeignKey(
+        to=WeekID,
+        on_delete=models.CASCADE,
+        related_name='form_urls',
+        verbose_name='Номер недели',
+        null=True,  # signal handles it
+    )
+    # TODO: add null=True field, referenced to required checks
+
+    @staticmethod
+    def _hash_string(string: str) -> str:
+        return str(hashlib.sha1(bytes(string, "UTF-8")).hexdigest())[:16]
+
+
+class Task(models.Model, metaclass=AbstractModelMeta):
     class Meta:
         abstract = True
         verbose_name = 'Задание для Пользователей'
@@ -49,16 +79,12 @@ class Task(models.Model):
     )
 
     @staticmethod
-    @abstractmethod
+    @abc.abstractmethod
     def get_current():
-        raise NotImplementedError('Необходимо создать метод определения текущего задания.')
-
-    # @abstractmethod
-    # def save(self, *args, **kwargs):
-    #     raise NotImplementedError('Необходимо переопределить метод save для инкремента week_number в WeekID.')
+        pass
 
 
-class Work(models.Model):
+class Work(models.Model, metaclass=AbstractModelMeta):
     class Meta:
         abstract = True
         verbose_name = 'Работа Пользователя'
@@ -76,6 +102,6 @@ class Work(models.Model):
     def task(self):
         raise NotImplementedError('Необходимо создать связь с моделью Task.')
 
-    #@abstractmethod
-    #def save(self, *args, **kwargs):
-    #    raise NotImplementedError('Необходимо переопределить метод save для генерации ссылок получения формы FormUrl.')
+    # @abc.abstractmethod
+    # def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+    #     pass
