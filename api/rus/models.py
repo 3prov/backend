@@ -31,11 +31,6 @@ class Essay(Work):
     )
     body = models.TextField(verbose_name='Поле для сочинения')
 
-    # @transaction.atomic
-    # def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-    #     FormURL.objects.create(user=self.author, week_id=self.task.week_id)
-    #     return super(Essay, self).save(force_insert, force_update, using, update_fields)
-
 
 class TextKey(models.Model):
     class Meta:

@@ -101,7 +101,3 @@ class Work(models.Model, metaclass=AbstractModelMeta):
     @property
     def task(self):
         raise NotImplementedError('Необходимо создать связь с моделью Task.')
-
-    # @abc.abstractmethod
-    # def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-    #     pass

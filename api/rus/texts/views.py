@@ -21,6 +21,6 @@ class TextDetailView(generics.RetrieveUpdateAPIView):
     permission_classes = [permissions.IsAdminUser]
 
 
-class TextKeyCreate(generics.CreateAPIView):
+class TextKeyCreateView(generics.CreateAPIView):
     serializer_class = TextKeySerializer
     permission_classes = [permissions.IsAdminUser]

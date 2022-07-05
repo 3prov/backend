@@ -14,7 +14,7 @@ class EssayListSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_week_id(obj):
-        return obj.task.week_id
+        return str(obj.task.week_id)
 
 
 class EssayDetailSerializer(serializers.ModelSerializer):

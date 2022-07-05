@@ -18,7 +18,15 @@ class OwnUserPermission(permissions.BasePermission):
         user_token = request.META.get('HTTP_AUTHORIZATION', None)
         if not user_token:
             return False
-        return obj.author == User.objects.get(auth_token=user_token)
+        if not user_token.startswith('Token '):
+            return False
+        user_token = user_token.replace('Token ', '')
+
+        try:
+            user_with_token = User.objects.get(auth_token=user_token)
+        except User.DoesNotExist:
+            return False
+        return obj.author == user_with_token
 
 
 class IsWorkAcceptingStage(permissions.BasePermission):

@@ -1,15 +1,18 @@
 from rest_framework import generics, permissions
-from rest_framework.views import APIView
 
 from ..models import Essay
 from .serializers import (
     EssayCreateSerializer,
     EssayListSerializer,
     EssayDetailSerializer,
-    EssayGetLinkToFormCreateSerializer
+    EssayGetLinkToFormCreateSerializer,
 )
-from .permissions import OwnUserPermission, IsWorkAcceptingStage, IsWorkAlreadyExists, IsFormURLAlreadyExists
-from ...models import FormURL
+from .permissions import (
+    OwnUserPermission,
+    IsWorkAcceptingStage,
+    IsWorkAlreadyExists,
+    IsFormURLAlreadyExists,
+)
 
 
 class EssayCreate(generics.CreateAPIView):
@@ -21,12 +24,6 @@ class EssayListView(generics.ListAPIView):
     queryset = Essay.objects.all()
     serializer_class = EssayListSerializer
     permission_classes = [permissions.IsAdminUser]
-
-
-class EssayDetailView(generics.RetrieveUpdateAPIView):
-    queryset = Essay.objects.all()
-    serializer_class = EssayDetailSerializer
-    permission_classes = [OwnUserPermission, IsWorkAcceptingStage]
 
 
 class EssayDetailView(generics.RetrieveUpdateAPIView):
