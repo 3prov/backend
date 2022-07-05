@@ -1,7 +1,7 @@
 import uuid
 
-from django.db import models, transaction
-from api.models import Work, Task, FormURL
+from django.db import models
+from api.models import Work, Task
 
 
 class Text(Task):

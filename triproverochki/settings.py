@@ -155,3 +155,9 @@ DJOSER = {
 STUDY_YEAR = os.getenv('STUDY_YEAR')
 
 STRING_HASH_TEMPLATE = '{user_id}{week_id}{hash_type}{django_secret_key}'
+
+
+SETTINGS_PATH = os.path.dirname(os.path.dirname(__file__))
+TEMPLATE_DIRS = (
+    os.path.join(SETTINGS_PATH, 'api', 'rus', 'essays', 'templates'),
+)

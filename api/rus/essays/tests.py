@@ -103,7 +103,6 @@ class EssaysTest(APITestCase):
         response = self.pass_essay(self.common_user)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    # TODO: test to patch Essay
     def test_essay_patch(self):
         self.switch_stage(self.common_user)
         response = self.pass_essay(self.common_user)

@@ -1,0 +1,13 @@
+{% load rest_framework %}
+
+<html lang="ru"><body>
+
+<h2>Форма для сдачи сочинений</h2>
+
+<form action="{% url 'essay_from_url' pk=profile.pk %}" method="POST">
+    {% csrf_token %}
+    {% render_form serializer %}
+    <input type="submit" value="Отправить">
+</form>
+
+</body></html>

@@ -55,6 +55,13 @@ class FormURL(models.Model):
     def _hash_string(string: str) -> str:
         return str(hashlib.sha1(bytes(string, "UTF-8")).hexdigest())[:16]
 
+    @staticmethod
+    def get_from_url(url: str):  # -> FormURL | None:
+        try:
+            return FormURL.objects.get(url=url)
+        except FormURL.DoesNotExist:
+            return None
+
 
 class Task(models.Model, metaclass=AbstractModelMeta):
     class Meta:

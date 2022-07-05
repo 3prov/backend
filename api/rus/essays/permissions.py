@@ -3,7 +3,7 @@ from rest_framework import permissions
 from ..models import Essay, Text
 from ...management.models import Stage, WeekID
 from ...models import User, FormURL
-from .serializers import EssayCreateSerializer, EssayGetLinkToFormCreateSerializer
+from .serializers import EssayCreateSerializer, EssayGetLinkToFormCreateSerializer, EssayFormURLCreateSerializer
 
 
 class OwnUserPermission(permissions.BasePermission):
@@ -39,7 +39,7 @@ class IsWorkAcceptingStage(permissions.BasePermission):
         return Stage.get_stage() == Stage.StagesEnum.WORK_ACCEPTING
 
 
-class IsWorkAlreadyExists(permissions.BasePermission):
+class IsWorkDoesNotAlreadyExists(permissions.BasePermission):
     """
     Проверяет, чтобы пользователь мог отправить не более одной работы за одну волну (неделю).
     """
@@ -47,7 +47,7 @@ class IsWorkAlreadyExists(permissions.BasePermission):
 
     def has_permission(self, request, view) -> bool:
         if not EssayCreateSerializer(data=request.data).is_valid():
-            raise permissions.exceptions.ValidationError
+            raise permissions.exceptions.ValidationError({'detail': 'Ошибка сериализации данных.'})
         current_text = Text.get_current()
         already_sent_essay = Essay.objects.filter(author=request.data['author'], task=current_text)
         return not already_sent_essay.exists()
@@ -61,7 +61,25 @@ class IsFormURLAlreadyExists(permissions.BasePermission):
 
     def has_permission(self, request, view) -> bool:
         if not EssayGetLinkToFormCreateSerializer(data=request.data).is_valid():
-            raise permissions.exceptions.ValidationError
+            raise permissions.exceptions.ValidationError({'detail': 'Ошибка сериализации данных.'})
         current_week_id = WeekID.get_current()
         already_given_url = FormURL.objects.filter(user=request.data['user'], week_id=current_week_id)
         return not already_given_url.exists()
+
+
+class IsWorkDoesNotAlreadyExistsFromFormURL(permissions.BasePermission):
+    """
+    Проверяет, чтобы пользователь мог отправить не более одной работы за одну волну (неделю).
+    Принимает данные по ссылкам FormURL.
+    """
+    message = "Сочинение на этой неделе уже существует."
+
+    def has_permission(self, request, view) -> bool:
+        if not EssayFormURLCreateSerializer(data=request.data).is_valid():
+            raise permissions.exceptions.ValidationError({'detail': 'Ошибка сериализации данных.'})
+        current_text = Text.get_current()
+        form_url = FormURL.get_from_url(view.kwargs['pk'])
+        if not form_url:
+            raise permissions.exceptions.ValidationError({'detail': 'Ссылка недействительна.'})
+        already_sent_essay = Essay.objects.filter(author=form_url.user, task=current_text)
+        return not already_sent_essay.exists()

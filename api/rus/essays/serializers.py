@@ -54,3 +54,15 @@ class EssayGetLinkToFormCreateSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_week_id(obj):
         return obj.week_id
+
+
+class EssayFormURLCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Essay
+        fields = '__all__'
+
+    created_at = serializers.DateTimeField(read_only=True)
+    task = TextDetailSerializer(read_only=True)
+    author = UserDetailSerializer(read_only=True)
+
+
