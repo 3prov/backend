@@ -1,6 +1,6 @@
 from django.db import models
 
-from .exceptions import UsersCountLessThenFour
+from .exceptions import UsersCountLessThenFour, WorkDistributionAlreadyExists
 from ..models import WeekID, User
 from ..rus.models import Essay
 
@@ -29,10 +29,27 @@ class WorkDistributionToEvaluate(models.Model):
         related_name='work_distributions'
     )
 
-    def _check_before_make(self):
-        if Essay.objects.filter(task__week_id=self.week_id.get_current()).count() < 4:
+    @staticmethod
+    def _check_before_make():
+        if Essay.objects.filter(task__week_id=WeekID.get_current()).count() < 4:
             raise UsersCountLessThenFour('Невозможно сделать распределение работ. Число пользователей меньше четырех.')
+        if WorkDistributionToEvaluate.objects.filter(week_id=WeekID.get_current()).count() > 0:
+            raise WorkDistributionAlreadyExists('Распределение для текущей недели уже сделано.')
 
-    def make(self):
-        self._check_before_make()
+    @staticmethod
+    def make_necessary_for_week_participants():
+        WorkDistributionToEvaluate._check_before_make()
         # TODO: Hungarian algo here
+        work_authors = set()
+        for essay in Essay.objects.filter(task__week_id=WeekID.get_current()):
+            work_authors.add(essay.author)
+
+        # WorkDistributionToEvaluate.objects.create(week_id=WeekID.get_current(), evaluator=..., work=...)
+
+    @staticmethod
+    def make_optionally_for_volunteer(volunteer: User):
+        pass
+
+        work_authors = set()
+        for essay in Essay.objects.filter(task__week_id=WeekID.get_current()):
+            work_authors.add(essay.author)

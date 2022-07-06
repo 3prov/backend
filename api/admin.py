@@ -3,7 +3,10 @@ from .models import User, FormURL
 from .rus.evaluations.models import EssayEvaluation, EssayCriteria
 from .rus.models import Text, Essay, TextKey
 from .management.models import Stage, WeekID
+from .work_distribution.models import WorkDistributionToEvaluate
 
+
+# TODO: move admins to their apps
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
@@ -51,3 +54,7 @@ class EssayCriteriaAdmin(admin.ModelAdmin):
     list_display = ['id']
     inlines = [EssayEvaluationInline]
 
+
+@admin.register(WorkDistributionToEvaluate)
+class WorkDistributionToEvaluateAdmin(admin.ModelAdmin):
+    list_display = ['id']

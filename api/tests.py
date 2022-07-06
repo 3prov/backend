@@ -173,7 +173,7 @@ class HealthTest(APITestCase):
     def setUp(self) -> None:
         self.client = APIClient()
 
-    def test_check_user_from_model(self):
+    def test_health_api(self):
         response = self.client.get(reverse('health_check'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()['health'], "OK")
