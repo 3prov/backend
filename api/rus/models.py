@@ -1,7 +1,8 @@
 import uuid
 
-from django.db import models
-from api.models import Work, Task
+from django.conf import settings
+from django.db import models, transaction
+from api.models import Work, Task, User
 
 
 class Text(Task):
@@ -30,6 +31,11 @@ class Essay(Work):
         related_name='essays'
     )
     body = models.TextField(verbose_name='Поле для сочинения')
+
+    @transaction.atomic
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        User.increase_rating(self.author, settings.RATINGS_CONFIGURATION['increase_essay_pass'])
+        return super(Essay, self).save(force_insert, force_update, using, update_fields)
 
 
 class TextKey(models.Model):

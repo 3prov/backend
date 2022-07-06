@@ -1,12 +1,11 @@
 import abc
 import uuid
 
-from django.db import models
+from django.db import models, transaction
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from .management.models import Stage, WeekID
 from rest_framework.authtoken.models import Token
-from django.db import transaction
 import hashlib
 
 
@@ -22,6 +21,10 @@ class User(AbstractUser, metaclass=AbstractModelMeta):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     vkontakte_id = models.PositiveIntegerField(null=True, blank=True)
     telegram_id = models.PositiveIntegerField(null=True, blank=True)
+    rating = models.PositiveIntegerField(
+        default=50,
+        verbose_name='Рейтинг',
+    )
 
     @transaction.atomic
     def save(self, *args, **kwargs):
@@ -29,6 +32,22 @@ class User(AbstractUser, metaclass=AbstractModelMeta):
             return
         Token.objects.get_or_create(user=self)
         return super(User, self).save(*args, **kwargs)
+
+    @transaction.atomic
+    def delete(self, using=None, keep_parents=False):
+        Token.objects.get(user=self).delete()
+        return super(User, self).delete(using, keep_parents)
+
+    def increase_rating(self, value: int):
+        self.rating += value
+        self.save()
+
+    def reduce_rating(self, value: int):
+        if self.rating - value < 0:
+            self.rating = 0
+        else:
+            self.rating -= value
+        self.save()
 
 
 class FormURL(models.Model):
@@ -49,7 +68,7 @@ class FormURL(models.Model):
         verbose_name='Номер недели',
         null=True,  # signal handles it
     )
-    # TODO: add null=True field, referenced to required checks
+    # TODO: add null=True field, referenced to required evaluations
 
     @staticmethod
     def _hash_string(string: str) -> str:
@@ -101,10 +120,60 @@ class Work(models.Model, metaclass=AbstractModelMeta):
     author = models.ForeignKey(to=User, on_delete=models.CASCADE, verbose_name='Автор работы', related_name='works')
     created_at = models.DateTimeField(default=timezone.now, verbose_name='Дата создания')
 
-    def __init__(self, *args, **kwargs):
-        super(Work, self).__init__(*args, **kwargs)
-        self.task
-
     @property
+    @abc.abstractmethod
     def task(self):
         raise NotImplementedError('Необходимо создать связь с моделью Task.')
+
+    @abc.abstractmethod
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        """
+        Необходимо переопределить метод save для изменения рейтинга пользователя.
+        """
+        return super(Work, self).save(force_insert, force_update, using, update_fields)
+
+
+class Evaluation(models.Model, metaclass=AbstractModelMeta):
+    class Meta:
+        abstract = True
+        verbose_name = 'Проверка'
+        verbose_name_plural = 'Проверки'
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    checker = models.ForeignKey(
+        to=User,
+        on_delete=models.CASCADE,
+        verbose_name='Проверяющий',
+        related_name='evaluations'
+    )
+    created_at = models.DateTimeField(default=timezone.now, verbose_name='Дата создания')
+
+    @property
+    @abc.abstractmethod
+    def work(self):
+        raise NotImplementedError('Необходимо создать связь с моделью Work.')
+
+    @property
+    @abc.abstractmethod
+    def criteria(self):
+        raise NotImplementedError('Необходимо создать OneToOne связь с моделью Criteria.')
+
+    @abc.abstractmethod
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        """
+        Необходимо переопределить метод save для изменения рейтинга пользователя.
+        """
+        return super(Evaluation, self).save(force_insert, force_update, using, update_fields)
+
+
+class Criteria(models.Model, metaclass=AbstractModelMeta):
+    class Meta:
+        abstract = True
+        verbose_name = 'Критерий оценивая'
+        verbose_name_plural = 'Критерии оценивания'
+
+    @property
+    @abc.abstractmethod
+    def score(self):
+        raise NotImplementedError('Необходимо объявить свойство подсчета балла по критериям.')
+

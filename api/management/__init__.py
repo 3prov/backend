@@ -1,6 +1,7 @@
 def init_stage():
     from .models import Stage, WeekID
     from django.db import utils
+
     try:
         if not Stage.objects.all().exists():
             Stage.objects.create()

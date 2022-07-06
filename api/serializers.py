@@ -24,6 +24,9 @@ class UserCreateSerializer(serializers.ModelSerializer):
     required = ['username', 'password', 'vkontakte_id', 'telegram_id']
 
     def create(self, validated_data):
+        """
+        Хеширует пароль при создании пользователя.
+        """
         user = super(UserCreateSerializer, self).create(validated_data)
         user.set_password(validated_data['password'])
         user.save()
