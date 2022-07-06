@@ -78,7 +78,7 @@ class IsWorkDoesNotAlreadyExistsFromFormURL(permissions.BasePermission):
         if not EssayFormURLCreateSerializer(data=request.data).is_valid():
             raise permissions.exceptions.ValidationError({'detail': 'Ошибка сериализации данных.'})
         current_text = Text.get_current()
-        form_url = FormURL.get_from_url(view.kwargs['pk'])
+        form_url = FormURL.get_from_url(view.kwargs['encoded_part'])
         if not form_url:
             raise permissions.exceptions.ValidationError({'detail': 'Ссылка недействительна.'})
         already_sent_essay = Essay.objects.filter(author=form_url.user, task=current_text)

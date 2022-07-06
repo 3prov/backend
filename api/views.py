@@ -13,16 +13,12 @@ def health_check_view(request):
 
 
 class UserListView(generics.ListAPIView):
+    queryset = User.objects.all()
     serializer_class = UserListSerializer
     permission_classes = [permissions.IsAdminUser]
-
-    def get_queryset(self):
-        users = User.objects.all()
-        return users
 
 
 class UserDetailView(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserDetailSerializer
     permission_classes = [permissions.IsAdminUser]
-

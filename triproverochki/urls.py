@@ -6,6 +6,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),
     path('api/v1/', include('api.urls')),
-    path('authtoken/', include('djoser.urls')),
-    path('authtoken/', include('djoser.urls.authtoken'), name='djoser_url_token'),
+    path('f/', include('api.decode_from_url.urls')),
 ]

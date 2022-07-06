@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase, APIClient, APIRequestFactory
 
-from ..models import Text, TextKey, Essay
+from ..models import Text, Essay
 from api.models import User, FormURL
 from ...management import init_stage
 
@@ -163,4 +163,85 @@ class EssaysTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(FormURL.objects.all().count(), 1)
         self.assertEqual(response.json()['detail'], 'Ссылка на форму уже выдана.')
+
+    def test_pass_essay_by_form_url_link_common_user(self):
+        self.switch_stage(self.common_user)
+        data = {
+            'user': self.common_user.id
+        }
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.common_user.auth_token}')
+        response = self.client.post(reverse('essay_get_link_to_form'), data, format='json')
+        form_url_url = response.json()['url']
+        data = {
+            'body': 'essay from common user!'
+        }
+        response = self.client.post(reverse('essay_from_url_post', args=[form_url_url]), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Essay.objects.all().count(), 1)
+
+        response = self.client.post(reverse('essay_from_url_post', args=[form_url_url]), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(Essay.objects.all().count(), 1)
+        self.assertEqual(response.json()['detail'], 'Сочинение на этой неделе уже существует.')
+
+    def test_pass_essay_by_form_url_link_anon_user_without_creds(self):
+        self.switch_stage(self.common_user)
+        data = {
+            'user': self.common_user.id
+        }
+        response = self.client.post(reverse('essay_get_link_to_form'), data, format='json')
+        form_url_url = response.json()['url']
+        data = {
+            'body': 'essay from common user!'
+        }
+        response = self.client.post(reverse('essay_from_url_post', args=[form_url_url]), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Essay.objects.all().count(), 1)
+
+        response = self.client.post(reverse('essay_from_url_post', args=[form_url_url]), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(Essay.objects.all().count(), 1)
+        self.assertEqual(response.json()['detail'], 'Сочинение на этой неделе уже существует.')
+
+    def test_pass_essay_by_form_url_link_common_user_wrong_stage(self):
+        data = {
+            'user': self.common_user.id
+        }
+        response = self.client.post(reverse('essay_get_link_to_form'), data, format='json')
+        form_url_url = response.json()['url']
+        data = {
+            'body': 'essay from common user!'
+        }
+        response = self.client.post(reverse('essay_from_url_post', args=[form_url_url]), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(Essay.objects.all().count(), 0)
+        self.assertEqual(response.json()['detail'],
+                         "Ошибка текущего этапа. Для отправки сочинения необходим 'S2' этап.")
+
+        response = self.client.post(reverse('essay_from_url_post', args=[form_url_url]), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(Essay.objects.all().count(), 0)
+        self.assertEqual(response.json()['detail'],
+                         "Ошибка текущего этапа. Для отправки сочинения необходим 'S2' этап.")
+
+        self.switch_stage(self.common_user)  # to S2
+        self.switch_stage(self.common_user)  # to S3
+        response = self.client.post(reverse('essay_from_url_post', args=[form_url_url]), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(Essay.objects.all().count(), 0)
+        self.assertEqual(response.json()['detail'],
+                         "Ошибка текущего этапа. Для отправки сочинения необходим 'S2' этап.")
+        self.switch_stage(self.common_user)  # to S4
+        response = self.client.post(reverse('essay_from_url_post', args=[form_url_url]), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(Essay.objects.all().count(), 0)
+        self.assertEqual(response.json()['detail'],
+                         "Ошибка текущего этапа. Для отправки сочинения необходим 'S2' этап.")
+        self.switch_stage(self.common_user)  # to S1
+        response = self.client.post(reverse('essay_from_url_post', args=[form_url_url]), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(Essay.objects.all().count(), 0)
+        self.assertEqual(response.json()['detail'],
+                         "Ошибка текущего этапа. Для отправки сочинения необходим 'S2' этап.")
+
 

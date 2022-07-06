@@ -24,6 +24,7 @@ class EssayDetailSerializer(serializers.ModelSerializer):
 
     author = UserDetailSerializer(read_only=True)
     task = TextDetailSerializer(read_only=True)
+    created_at = serializers.DateTimeField(read_only=True)
 
 
 class EssayCreateSerializer(serializers.ModelSerializer):

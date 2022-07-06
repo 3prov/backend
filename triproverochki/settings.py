@@ -38,16 +38,20 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    'django.contrib.staticfiles',  # required for serving swagger ui's css/js files
     'rest_framework',
     'rest_framework_swagger',
     'rest_framework.authtoken',  # token
     'djoser',  # token
+    'django_filters',
+    'drf_yasg',
+    'django_hosts',
 
     'api',
 ]
 
 MIDDLEWARE = [
+    'django_hosts.middleware.HostsRequestMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -55,6 +59,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_hosts.middleware.HostsResponseMiddleware',
 ]
 
 ROOT_URLCONF = 'triproverochki.urls'
@@ -136,7 +141,11 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         # 'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ]
+    ],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ],
+
 }
 
 AUTH_USER_MODEL = 'api.User'
@@ -152,12 +161,11 @@ DJOSER = {
     },
 }
 
+ROOT_HOSTCONF = 'triproverochki.hosts'
+DEFAULT_HOST = 'triproverochki'
+
+
 STUDY_YEAR = os.getenv('STUDY_YEAR')
 
 STRING_HASH_TEMPLATE = '{user_id}{week_id}{hash_type}{django_secret_key}'
 
-
-SETTINGS_PATH = os.path.dirname(os.path.dirname(__file__))
-TEMPLATE_DIRS = (
-    os.path.join(SETTINGS_PATH, 'api', 'rus', 'essays', 'templates'),
-)
