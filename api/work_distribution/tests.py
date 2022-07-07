@@ -111,7 +111,7 @@ class WorkDistributionTest(APITestCase):
     def test_random_essays(self):
         for i in range(6, 50, 5):
             self.make_N_essay_distribution(i)
-        self.make_N_essay_distribution(150)
+        self.make_N_essay_distribution(100)
 
     def test_1_volunteer(self):
         participants_count = 12
@@ -199,4 +199,6 @@ class WorkDistributionTest(APITestCase):
             for future_eval in WorkDistributionToEvaluate.objects.filter(week_id=WeekID.get_current(), evaluator=participant):
                 self.assertNotEqual(future_eval.work.author, participant)
 
-
+    def test_double_distribution(self):
+        self.make_N_essay_distribution(10, clear_after=False)
+        self.assertRaises(WorkDistributionAlreadyExists, WorkDistributionToEvaluate.make_necessary_for_week_participants)

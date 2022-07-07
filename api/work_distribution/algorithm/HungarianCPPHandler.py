@@ -1,4 +1,3 @@
-from typing import NamedTuple
 from .mcximings_HungarianAlgorithm import HungarianAlgorithm
 
 from api.models import User
@@ -15,7 +14,7 @@ class HungarianCPPAlgorithm:
         """
         Создание матрицы для первого распределения (с наименьшей разницей в рейтинге).
         """
-        matrix: list[list[int]] = []
+        matrix = []
         for i in range(len(users_ratings)):
             tmp = []
             for j in range(len(users_ratings)):
@@ -35,7 +34,7 @@ class HungarianCPPAlgorithm:
         """
         Создание матрицы для N распределения (с наименьшей разницей в рейтинге).
         """
-        matrix: list[list[int]] = []
+        matrix = []
         for i in range(len(users_ratings)):
             tmp = []
             for j in range(len(users_ratings)):
@@ -47,6 +46,23 @@ class HungarianCPPAlgorithm:
             matrix.append(tmp)
         return matrix
 
+    def _make_distribution_and_append_result(
+            self,
+            participants: list[User],
+            matrix: list[list[int]],
+            result: list[ResultPair]
+    ) -> OneDistribution:
+        distribution = OneDistribution(
+            pairs=self._HungarianLibrary.Solve(matrix),
+            cost=self._HungarianLibrary.cost
+        )
+        if distribution.cost >= self._blocking_value:
+            print(f'ERROR: {distribution.cost=} too big!')  # TODO: to logger
+        # print(f'{distribution=}')  # TODO: to logger?
+        for pair in distribution.pairs:
+            result.append(ResultPair(evaluator=participants[pair[0]], work_author=participants[pair[1]]))
+        return distribution
+
     def make_necessary_distribution_for_week_participants(self, participants: list[User]) -> list[ResultPair]:
         """
         Создание распределения для участников недели.
@@ -56,25 +72,13 @@ class HungarianCPPAlgorithm:
             ratings.append(participant.rating)
 
         result: list[ResultPair] = []
-        matrix: list[list[int]] = []
-        for i in range(len(participants) - 1):
+
+        matrix = self._create_first_matrix(ratings)
+        distribution = self._make_distribution_and_append_result(participants, matrix, result)
+        for i in range(1, len(participants) - 1):
             print(f"распределение #{i}")  # TODO: to logger
             # print(f'{matrix=}')  # TODO: to logger?
-
-            if i == 0:
-                matrix = self._create_first_matrix(ratings)
-            else:
-                matrix = self._create_matrix_with_pair_blocks(ratings, distribution.pairs, matrix)
-
-            distribution = OneDistribution(
-                pairs=self._HungarianLibrary.Solve(matrix),
-                cost=self._HungarianLibrary.cost
-            )
-            # print(f'{distribution=}')  # TODO: to logger?
-            if distribution.cost >= self._blocking_value:
-                print(f'ERROR: {distribution.cost=} too big!')  # TODO: to logger
-
-            for pair in distribution.pairs:
-                result.append(ResultPair(evaluator=participants[pair[0]], work_author=participants[pair[1]]))
+            matrix = self._create_matrix_with_pair_blocks(ratings, distribution.pairs, matrix)
+            distribution = self._make_distribution_and_append_result(participants, matrix, result)
 
         return result

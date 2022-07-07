@@ -4,6 +4,9 @@ from django.utils.translation import gettext_lazy as _
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.conf import settings
 
+# from api.rus.models import Essay
+# from api.work_distribution.models import WorkDistributionToEvaluate
+
 
 class Configuration(models.Model):
     """Модель с единственной строкой"""
