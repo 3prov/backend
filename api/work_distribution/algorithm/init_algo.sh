@@ -1,9 +1,10 @@
 #!/bin/bash
 
-cd hungarian_algorithm_cpp &&
+DIR=$(find . -name "hungarian_algorithm_cpp")
+cd $DIR &&
 mkdir -p build &&
 cd build &&
 cmake .. &&
 make &&
-cd .. &&
-cp "hungarian_algorithm_cpp/build/*.so" .  # не работает
+cd ../../ &&
+cp ./hungarian_algorithm_cpp/build/*.so .

@@ -1,4 +1,4 @@
-from hungarian_algorithm_cpp.build.mcximings_HungarianAlgorithm import HungarianAlgorithm
+from mcximings_HungarianAlgorithm import HungarianAlgorithm
 
 
 cost_matrix = [
@@ -10,5 +10,9 @@ cost_matrix = [
 ]
 
 a = HungarianAlgorithm()
-print(a.Solve(cost_matrix))
-print(a.cost)
+distribution = a.Solve(cost_matrix)
+print(f'{distribution=}')
+print(f'{a.cost=}')
+
+for d in distribution:
+    print(type(d))
