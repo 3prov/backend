@@ -47,7 +47,7 @@ class HungarianCPPAlgorithm:
             matrix.append(tmp)
         return matrix
 
-    def make_necessary_distribution_for_week_participants(self, participants: list[User]) -> set[ResultPair]:
+    def make_necessary_distribution_for_week_participants(self, participants: list[User]) -> list[ResultPair]:
         """
         Создание распределения для участников недели.
         """
@@ -55,7 +55,7 @@ class HungarianCPPAlgorithm:
         for participant in participants:
             ratings.append(participant.rating)
 
-        result = set()
+        result: list[ResultPair] = []
         matrix: list[list[int]] = []
         for i in range(len(participants) - 1):
             print(f"распределение #{i}")  # TODO: to logger
@@ -75,6 +75,6 @@ class HungarianCPPAlgorithm:
                 print(f'ERROR: {distribution.cost=} too big!')  # TODO: to logger
 
             for pair in distribution.pairs:
-                result.add(ResultPair(evaluator=participants[pair[0]], work_author=participants[pair[1]]))
+                result.append(ResultPair(evaluator=participants[pair[0]], work_author=participants[pair[1]]))
 
         return result

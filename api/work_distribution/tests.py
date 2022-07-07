@@ -1,3 +1,5 @@
+import random
+
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase, APIClient, APIRequestFactory
@@ -5,6 +7,7 @@ from rest_framework.test import APITestCase, APIClient, APIRequestFactory
 from .exceptions import UsersCountLessThenFour, WorkDistributionAlreadyExists
 from .models import WorkDistributionToEvaluate
 from ..management import init_stage
+from ..management.models import WeekID
 from ..models import User
 from ..rus.models import Essay
 
@@ -88,7 +91,7 @@ class WorkDistributionTest(APITestCase):
 
         self.assertEqual(WorkDistributionToEvaluate.objects.all().count(), 4 * 5)  # по 4 назначения для 5 пользователей
 
-    def make_N_essay_distribution(self, n: int):
+    def make_N_essay_distribution(self, n: int, clear_after: bool = True):
         participants_count = n
         for i in range(4, participants_count + 4):
             self.create_common_user_and_send_essay(f'common_user_{i}')
@@ -98,8 +101,9 @@ class WorkDistributionTest(APITestCase):
             WorkDistributionToEvaluate.objects.all().count(),
             (participants_count - 1) * participants_count
         )  # по (participants_count - 1) назначения для participants_count пользователей
-        Essay.objects.all().delete()
-        User.objects.filter(username__startswith='common_user_').delete()
+        if clear_after:
+            Essay.objects.all().delete()
+            User.objects.filter(username__startswith='common_user_').delete()
 
     def test_10_essays(self):
         self.make_N_essay_distribution(10)
@@ -107,7 +111,92 @@ class WorkDistributionTest(APITestCase):
     def test_random_essays(self):
         for i in range(6, 50, 5):
             self.make_N_essay_distribution(i)
-        for i in range(6, 200, 40):
-            self.make_N_essay_distribution(i)
+        self.make_N_essay_distribution(150)
+
+    def test_1_volunteer(self):
+        participants_count = 12
+        for i in range(4, participants_count + 4):
+            self.create_common_user_and_send_essay(f'common_user_{i}')
+
+        WorkDistributionToEvaluate.make_optionally_for_volunteer(self.admin_user)
+        self.assertEqual(WorkDistributionToEvaluate.objects.all().count(), participants_count)
+
+    def test_1_volunteer_with_eq_rating(self):
+        participants_count = 12
+        for i in range(4, participants_count + 4):
+            self.create_common_user_and_send_essay(f'common_user_{i}')
+
+        common_user_4 = User.objects.get(username='common_user_4')
+        common_user_4.rating = 100
+        common_user_4.save()
+        self.admin_user.rating = 100
+        self.admin_user.save()
+
+        WorkDistributionToEvaluate.make_optionally_for_volunteer(self.admin_user)
+        first_work_to_evaluate = WorkDistributionToEvaluate.objects.filter(evaluator=self.admin_user).first()
+        self.assertEqual(
+            first_work_to_evaluate.work.author,
+            common_user_4
+        )
+        for future_eval in WorkDistributionToEvaluate.objects.filter(evaluator=self.admin_user):
+            self.assertEqual(
+                future_eval.is_required,
+                False
+            )
+
+    def test_10_distributions_is_required(self):
+        self.make_N_essay_distribution(10, clear_after=False)
+
+        picked_user = User.objects.get(username='common_user_7')
+
+        i = 0
+        for future_eval in WorkDistributionToEvaluate.objects.filter(evaluator=picked_user, week_id=WeekID.get_current()):
+            if i in [0, 1, 2]:
+                self.assertEqual(future_eval.is_required, True)
+            else:
+                self.assertEqual(future_eval.is_required, False)
+            i += 1
+
+        self.assertEqual(
+            WorkDistributionToEvaluate.objects.filter(week_id=WeekID.get_current(), is_required=True).count(),
+            3 * 10
+        )
+
+    def test_distribution_no_ourself_user(self):
+        self.make_N_essay_distribution(25, clear_after=False)
+
+        for participant in User.objects.filter(username__startswith='common_user_'):
+            for future_eval in WorkDistributionToEvaluate.objects.filter(week_id=WeekID.get_current(), evaluator=participant):
+                self.assertNotEqual(future_eval.work.author, participant)
+
+    def test_distribution_set_user_ratings(self):
+        participants_count = 15
+        for i in range(1, participants_count + 1):
+            self.create_common_user_and_send_essay(f'iuweqng_user_{i}')
+
+        for participant in User.objects.filter(username__startswith='iuweqng_user_'):
+            participant.rating = random.randint(10, 300)
+            participant.save()
+        WorkDistributionToEvaluate.make_necessary_for_week_participants()
+        self.assertEqual(
+            WorkDistributionToEvaluate.objects.all().count(),
+            (participants_count - 1) * participants_count
+        )
+        self.assertEqual(
+            WorkDistributionToEvaluate.objects.filter(week_id=WeekID.get_current(), is_required=True).count(),
+            3 * participants_count
+        )
+        for participant in User.objects.filter(username__startswith='iuweqng_user_'):
+            i = 0
+            for future_eval in WorkDistributionToEvaluate.objects.filter(evaluator=participant, week_id=WeekID.get_current()):
+                if i in [0, 1, 2]:
+                    self.assertEqual(future_eval.is_required, True)
+                else:
+                    self.assertEqual(future_eval.is_required, False)
+                i += 1
+
+        for participant in User.objects.filter(username__startswith='iuweqng_user_'):
+            for future_eval in WorkDistributionToEvaluate.objects.filter(week_id=WeekID.get_current(), evaluator=participant):
+                self.assertNotEqual(future_eval.work.author, participant)
 
 
