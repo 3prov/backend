@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from ..models import Essay, Text
-from ...models import FormURL
+from ...form_url.models import EssayFormURL
 from ...serializers import UserDetailSerializer
 from ..texts.serializers import TextDetailSerializer, WeekIDSerializer
 
@@ -42,7 +42,7 @@ class EssayCreateSerializer(serializers.ModelSerializer):
 
 class EssayGetLinkToFormCreateSerializer(serializers.ModelSerializer):
     class Meta:
-        model = FormURL
+        model = EssayFormURL
         fields = '__all__'
 
     url = serializers.SerializerMethodField(read_only=True)  # TODO: URLField

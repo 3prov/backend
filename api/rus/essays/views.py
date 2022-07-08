@@ -13,10 +13,10 @@ from .permissions import (
     OwnUserPermission,
     IsWorkAcceptingStage,
     IsWorkDoesNotAlreadyExists,
-    IsFormURLAlreadyExists,
+    IsEssayFormURLAlreadyExists,
     IsWorkDoesNotAlreadyExistsFromFormURL,
 )
-from ...models import FormURL
+from ...form_url.models import EssayFormURL
 
 
 class EssayCreate(generics.CreateAPIView):
@@ -34,7 +34,7 @@ class EssayListView(generics.ListAPIView):
 
 class EssayGetLinkToFormView(generics.CreateAPIView):
     serializer_class = EssayGetLinkToFormCreateSerializer
-    permission_classes = [permissions.IsAuthenticated, IsFormURLAlreadyExists]
+    permission_classes = [permissions.IsAuthenticated, IsEssayFormURLAlreadyExists]
 
 
 class EssayDetailView(generics.RetrieveUpdateAPIView):
@@ -44,12 +44,12 @@ class EssayDetailView(generics.RetrieveUpdateAPIView):
 
 
 class EssayFormURLCreate(generics.CreateAPIView):
-    queryset = FormURL.objects.all()
+    queryset = EssayFormURL.objects.all()
     serializer_class = EssayFormURLCreateSerializer
     permission_classes = [permissions.AllowAny, IsWorkAcceptingStage, IsWorkDoesNotAlreadyExistsFromFormURL]
 
     def create(self, request, *args, **kwargs):
-        form_url = FormURL.get_from_url(url=kwargs['encoded_part'])
+        form_url = EssayFormURL.get_from_url(url=kwargs['encoded_part'])
         if not form_url:
             raise permissions.exceptions.ValidationError({'detail': 'Ссылка недействительна.'})
         added_essay = Essay.objects.create(

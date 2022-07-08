@@ -3,7 +3,7 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.models import FormURL
+from api.form_url.models import EssayFormURL
 from api.rus.models import Essay
 
 
@@ -38,7 +38,7 @@ class DecodeURLView(APIView):
             },
         }
 
-        form_url = FormURL.get_from_url(kwargs['encoded_part'])
+        form_url = EssayFormURL.get_from_url(kwargs['encoded_part'])  # ?
         if not form_url:
             raise permissions.exceptions.ValidationError({'detail': 'Ссылка недействительна.'})
 

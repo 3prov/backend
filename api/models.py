@@ -50,12 +50,18 @@ class User(AbstractUser, metaclass=AbstractModelMeta):
         self.save()
 
 
-class FormURL(models.Model):
+class FormURL(models.Model, metaclass=AbstractModelMeta):
     class Meta:
+        abstract = True
         verbose_name = 'Ссылка на форму'
         verbose_name_plural = 'Ссылки на формы'
 
-    user = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name='form_urls', verbose_name='Пользователь')
+    user = models.ForeignKey(
+        to=User,
+        on_delete=models.CASCADE,
+        related_name='%(app_label)s_%(class)s_form_urls',
+        verbose_name='Пользователь'
+    )
     url = models.URLField(
         unique=True,
         null=True,  # signal handles it
@@ -64,22 +70,19 @@ class FormURL(models.Model):
     week_id = models.ForeignKey(
         to=WeekID,
         on_delete=models.CASCADE,
-        related_name='form_urls',
+        related_name='%(app_label)s_%(class)s_form_urls',
         verbose_name='Номер недели',
         null=True,  # signal handles it
     )
-    # TODO: add null=True field, referenced to required evaluations
 
     @staticmethod
     def _hash_string(string: str) -> str:
         return str(hashlib.sha1(bytes(string, "UTF-8")).hexdigest())[:16]
 
     @staticmethod
+    @abc.abstractmethod
     def get_from_url(url: str):  # -> FormURL | None:
-        try:
-            return FormURL.objects.get(url=url)
-        except FormURL.DoesNotExist:
-            return None
+        pass
 
 
 class Task(models.Model, metaclass=AbstractModelMeta):

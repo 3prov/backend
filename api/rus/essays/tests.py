@@ -3,8 +3,10 @@ from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase, APIClient, APIRequestFactory
 
 from ..models import Text, Essay
-from api.models import User, FormURL
+from api.models import User
+from ...form_url.models import EssayFormURL
 from ...management import init_stage
+from ...management.models import Stage
 
 
 class EssaysTest(APITestCase):
@@ -15,6 +17,10 @@ class EssaysTest(APITestCase):
         self.client = APIClient()
 
         self.common_user = User.objects.create_user(username='common_user')
+        self.common_user_2 = User.objects.create_user(username='common_user_2')
+        self.common_user_3 = User.objects.create_user(username='common_user_3')
+        self.common_user_4 = User.objects.create_user(username='common_user_4')
+
         self.admin_user = User.objects.create_superuser(username='test_admin')
         self.assign_text()
 
@@ -122,7 +128,12 @@ class EssaysTest(APITestCase):
     def test_essay_patch_wrong_stage(self):
         self.switch_stage(self.common_user)
         response = self.pass_essay(self.common_user)
+        response = self.pass_essay(self.common_user_2)
+        response = self.pass_essay(self.common_user_3)
+        response = self.pass_essay(self.common_user_4)
+
         self.switch_stage(self.common_user)
+
 
         data = {
             'id': response.json()['id'],
@@ -141,14 +152,14 @@ class EssaysTest(APITestCase):
         data = {
             'user': self.common_user.id
         }
-        self.assertEqual(FormURL.objects.all().count(), 0)
+        self.assertEqual(EssayFormURL.objects.all().count(), 0)
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.common_user.auth_token}')
         response = self.client.post(reverse('essay_get_link_to_form'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertIsNotNone(response.json()['url'])
         self.assertEqual(len(response.json()['url']), 16)
         self.assertEqual(response.json()['id'], 1)
-        self.assertEqual(FormURL.objects.all().count(), 1)
+        self.assertEqual(EssayFormURL.objects.all().count(), 1)
         self.assertEqual(response.json()['user'], str(self.common_user.id))
 
     def test_get_link_to_form_more_times(self):
@@ -161,7 +172,7 @@ class EssaysTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         response = self.client.post(reverse('essay_get_link_to_form'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(FormURL.objects.all().count(), 1)
+        self.assertEqual(EssayFormURL.objects.all().count(), 1)
         self.assertEqual(response.json()['detail'], 'Ссылка на форму уже выдана.')
 
     def test_pass_essay_by_form_url_link_common_user(self):

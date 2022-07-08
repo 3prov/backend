@@ -1,9 +1,10 @@
 from rest_framework import permissions
 
 from ..models import Essay, Text
+from ...form_url.models import EssayFormURL
 from ...management.models import Stage, WeekID
-from ...models import User, FormURL
 from .serializers import EssayCreateSerializer, EssayGetLinkToFormCreateSerializer, EssayFormURLCreateSerializer
+from ...models import User
 
 
 class OwnUserPermission(permissions.BasePermission):
@@ -53,7 +54,7 @@ class IsWorkDoesNotAlreadyExists(permissions.BasePermission):
         return not already_sent_essay.exists()
 
 
-class IsFormURLAlreadyExists(permissions.BasePermission):
+class IsEssayFormURLAlreadyExists(permissions.BasePermission):
     """
     Проверяет, чтобы пользователь мог получить не более одной ссылки на форму.
     """
@@ -63,7 +64,7 @@ class IsFormURLAlreadyExists(permissions.BasePermission):
         if not EssayGetLinkToFormCreateSerializer(data=request.data).is_valid():
             raise permissions.exceptions.ValidationError({'detail': 'Ошибка сериализации данных.'})
         current_week_id = WeekID.get_current()
-        already_given_url = FormURL.objects.filter(user=request.data['user'], week_id=current_week_id)
+        already_given_url = EssayFormURL.objects.filter(user=request.data['user'], week_id=current_week_id)
         return not already_given_url.exists()
 
 
@@ -78,7 +79,7 @@ class IsWorkDoesNotAlreadyExistsFromFormURL(permissions.BasePermission):
         if not EssayFormURLCreateSerializer(data=request.data).is_valid():
             raise permissions.exceptions.ValidationError({'detail': 'Ошибка сериализации данных.'})
         current_text = Text.get_current()
-        form_url = FormURL.get_from_url(view.kwargs['encoded_part'])
+        form_url = EssayFormURL.get_from_url(view.kwargs['encoded_part'])
         if not form_url:
             raise permissions.exceptions.ValidationError({'detail': 'Ссылка недействительна.'})
         already_sent_essay = Essay.objects.filter(author=form_url.user, task=current_text)
