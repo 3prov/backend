@@ -40,7 +40,7 @@ class EssayCreateSerializer(serializers.ModelSerializer):
         return Essay.objects.create(task=current_text, **validated_data)
 
 
-class EssayGetLinkToFormCreateSerializer(serializers.ModelSerializer):
+class EssayFormCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = EssayFormURL
         fields = '__all__'

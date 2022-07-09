@@ -1,9 +1,9 @@
-from rest_framework import permissions
+from rest_framework import exceptions, permissions
 
 from ..models import Essay, Text
 from ...form_url.models import EssayFormURL
 from ...management.models import Stage, WeekID
-from .serializers import EssayCreateSerializer, EssayGetLinkToFormCreateSerializer, EssayFormURLCreateSerializer
+from .serializers import EssayCreateSerializer, EssayFormCreateSerializer, EssayFormURLCreateSerializer
 from ...models import User
 
 
@@ -37,7 +37,9 @@ class IsWorkAcceptingStage(permissions.BasePermission):
     message = f"Ошибка текущего этапа. Для отправки сочинения необходим '{Stage.StagesEnum.WORK_ACCEPTING}' этап."
 
     def has_permission(self, request, view) -> bool:
-        return Stage.get_stage() == Stage.StagesEnum.WORK_ACCEPTING
+        if Stage.get_stage() != Stage.StagesEnum.WORK_ACCEPTING:
+            raise exceptions.PermissionDenied(detail=self.message)
+        return True
 
 
 class IsWorkDoesNotAlreadyExists(permissions.BasePermission):
@@ -61,7 +63,7 @@ class IsEssayFormURLAlreadyExists(permissions.BasePermission):
     message = "Ссылка на форму уже выдана."
 
     def has_permission(self, request, view) -> bool:
-        if not EssayGetLinkToFormCreateSerializer(data=request.data).is_valid():
+        if not EssayFormCreateSerializer(data=request.data).is_valid():
             raise permissions.exceptions.ValidationError({'detail': 'Ошибка сериализации данных.'})
         current_week_id = WeekID.get_current()
         already_given_url = EssayFormURL.objects.filter(user=request.data['user'], week_id=current_week_id)

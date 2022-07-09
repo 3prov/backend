@@ -16,7 +16,7 @@ schema_view = get_schema_view(
       license=openapi.License(name="BSD License"),
    ),
    public=True,
-   permission_classes=[permissions.AllowAny],
+   permission_classes=(permissions.AllowAny, ),
 )
 
 
@@ -31,7 +31,7 @@ urlpatterns = [
 
     path('rus/', include('api.rus.urls')),
     path('users/', views.UserListView.as_view()),
-    path('users/<slug:pk>', views.UserDetailView.as_view()),
+    path('users/<uuid:pk>', views.UserDetailView.as_view()),
     path('management/', include('api.management.urls')),
     path('health_check/', views.health_check_view, name='health_check'),
 

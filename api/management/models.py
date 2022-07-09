@@ -32,13 +32,13 @@ class Stage(Configuration):
     class StagesEnum(models.TextChoices):
         NO_TASK = 'S1', _('Нет задания')
         WORK_ACCEPTING = 'S2', _('Приём работ')
-        CHECK_ACCEPTING = 'S3', _('Приём проверок')
+        EVALUATION_ACCEPTING = 'S3', _('Приём проверок')
         CLOSED_ACCEPT = 'S4', _('Нет приёма работ')
 
     _dict_of_stages = {
         'S1': StagesEnum.NO_TASK,
         'S2': StagesEnum.WORK_ACCEPTING,
-        'S3': StagesEnum.CHECK_ACCEPTING,
+        'S3': StagesEnum.EVALUATION_ACCEPTING,
         'S4': StagesEnum.CLOSED_ACCEPT
     }
 

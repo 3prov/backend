@@ -1,5 +1,5 @@
-from api.rus.evaluations.models import EssayEvaluation
 from api.models import FormURL
+from api.rus.models import Essay
 
 from django.db import models
 
@@ -22,9 +22,8 @@ class EvaluationFormURL(FormURL):
         verbose_name = 'Ссылка на форму сдачи проверок'
         verbose_name_plural = 'Ссылки на формы сдачи проверок'
 
-    # TODO: add null=True field, referenced to required evaluations
     evaluation_work = models.ForeignKey(
-        to=EssayEvaluation,
+        to=Essay,
         on_delete=models.CASCADE,
         related_name='evaluation_form_urls',
         verbose_name='Работа для проверки'

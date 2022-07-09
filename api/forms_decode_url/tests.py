@@ -35,15 +35,15 @@ class ManagementTest(APITestCase):
         data = {
             'user': user.id
         }
-        return self.client.post(reverse('essay_get_link_to_form'), data, format='json').json()['url']
+        return self.client.post(reverse('create_link_to_essay_form'), data, format='json').json()['url']
 
     def test_simulate(self):
         self.assign_text(self.common_user)
         self.switch_stage(self.common_user)
         encoded_url = self.get_link_to_form(self.common_user)
-        response = self.client.get(reverse('form_distribution_by_encoded_part', args=[encoded_url]))
+        response = self.client.get(reverse('form_essay_by_encoded_part', args=[encoded_url]))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json()['already_sent'], False)
+        self.assertEqual(response.json()['work_already_sent'], False)
         to_post_url = response.json()['urls']['to_POST']
         to_patch_url = response.json()['urls']['to_PATCH']
         self.assertNotEqual(to_post_url, False)
@@ -54,9 +54,9 @@ class ManagementTest(APITestCase):
         response = self.client.post(to_post_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        response = self.client.get(reverse('form_distribution_by_encoded_part', args=[encoded_url]))
+        response = self.client.get(reverse('form_essay_by_encoded_part', args=[encoded_url]))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json()['already_sent'], True)
+        self.assertEqual(response.json()['work_already_sent'], True)
         to_post_url = response.json()['urls']['to_POST']
         to_patch_url = response.json()['urls']['to_PATCH']
         self.assertEqual(to_post_url, False)
@@ -70,9 +70,9 @@ class ManagementTest(APITestCase):
         response = self.client.patch(to_patch_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        response = self.client.get(reverse('form_distribution_by_encoded_part', args=[encoded_url]))
+        response = self.client.get(reverse('form_essay_by_encoded_part', args=[encoded_url]))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json()['already_sent'], True)
+        self.assertEqual(response.json()['work_already_sent'], True)
         to_post_url = response.json()['urls']['to_POST']
         to_patch_url = response.json()['urls']['to_PATCH']
         self.assertEqual(to_post_url, False)

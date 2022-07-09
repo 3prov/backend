@@ -1,8 +1,8 @@
 from django.contrib import admin
 
-from .form_url.models import EssayFormURL
+from .form_url.models import EssayFormURL, EvaluationFormURL
 from .models import User
-from .rus.evaluations.models import EssayEvaluation, EssayCriteria
+from .rus.evaluations.models import EssayEvaluation, EssayCriteria, EssaySentenceReview
 from .rus.models import Text, Essay, TextKey
 from .management.models import Stage, WeekID
 from .work_distribution.models import WorkDistributionToEvaluate
@@ -46,6 +46,12 @@ class EssayFormURLAdmin(admin.ModelAdmin):
     readonly_fields = ['url']
 
 
+@admin.register(EvaluationFormURL)
+class EvaluationFormURLAdmin(admin.ModelAdmin):
+    list_filter = ['week_id', 'user', 'evaluation_work']
+    readonly_fields = ['url']
+
+
 class EssayEvaluationInline(admin.StackedInline):
     model = EssayEvaluation
     min_num = 2
@@ -59,4 +65,9 @@ class EssayCriteriaAdmin(admin.ModelAdmin):
 
 @admin.register(WorkDistributionToEvaluate)
 class WorkDistributionToEvaluateAdmin(admin.ModelAdmin):
+    list_display = ['id']
+
+
+@admin.register(EssaySentenceReview)
+class EssaySentenceReviewAdmin(admin.ModelAdmin):
     list_display = ['id']

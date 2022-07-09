@@ -143,7 +143,7 @@ class Evaluation(models.Model, metaclass=AbstractModelMeta):
         verbose_name_plural = 'Проверки'
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    checker = models.ForeignKey(
+    evaluator = models.ForeignKey(
         to=User,
         on_delete=models.CASCADE,
         verbose_name='Проверяющий',
