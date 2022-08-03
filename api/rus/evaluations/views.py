@@ -5,6 +5,7 @@ from rest_framework.response import Response
 
 from api.form_url.models import EvaluationFormURL
 from api.management.models import WeekID
+from api.models import User
 from api.rus.evaluations.models import EssayEvaluation, EssaySentenceReview
 from api.rus.evaluations.permissions import IsEvaluationAcceptingStage
 from api.rus.evaluations.serializers import EvaluationFormURLGetCurrentWeekListSerializer, \
@@ -15,10 +16,60 @@ from api.work_distribution.models import WorkDistributionToEvaluate
 from django_filters.rest_framework import DjangoFilterBackend
 
 
-class EssaySentenceReviewCreate(generics.CreateAPIView):
-
+class EssaySentenceReviewFromFormURLCreate(generics.CreateAPIView):
+    queryset = EssaySentenceReview.objects.all()
     serializer_class = EssaySentenceReviewCreateSerializer
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [permissions.AllowAny, IsEvaluationAcceptingStage]
+
+    def create(self, request, *args, **kwargs):
+        form_url = EvaluationFormURL.get_from_url(url=kwargs['encoded_part'])
+        if not form_url:
+            raise permissions.exceptions.ValidationError({'detail': 'Ссылка недействительна.'})
+
+        if not EssaySentenceReviewCreateSerializer(data=request.data).is_valid():
+            raise permissions.exceptions.ValidationError(detail='Ошибка сериализации модели проверки предложений.')
+
+        if 0 > request.data['sentence_number'] > form_url.evaluation_work.sentences_count:
+            raise permissions.exceptions.ValidationError(detail='Номер оцениваемого предложения не может быть больше '
+                                                                'количества предложений сочинения.')
+
+        if EssaySentenceReview.objects.filter(
+            evaluator=form_url.user,
+            essay=form_url.evaluation_work,
+            sentence_number=request.data['sentence_number']
+        ).exists():
+            raise permissions.exceptions.ValidationError({'detail': 'Проверка этого предложения уже отправлена.'})
+
+        added_sentence_review = EssaySentenceReview.objects.create(
+            sentence_number=request.data['sentence_number'],
+            evaluator_comment=request.data['evaluator_comment'],
+            mistake_type=request.data['mistake_type'],
+            essay=form_url.evaluation_work,
+            evaluator=form_url.user
+        )
+        return Response(
+            EssaySentenceReviewCreateSerializer(added_sentence_review).data,
+            status=status.HTTP_201_CREATED
+        )
+
+
+class EssaySentenceReviewFormURLView(generics.RetrieveUpdateAPIView):
+    queryset = EssaySentenceReview.objects.all()
+    permission_classes = [permissions.AllowAny, IsEvaluationAcceptingStage]
+    serializer_class = EssaySentenceReviewCreateSerializer
+
+    def get_object(self):
+        form_url = EvaluationFormURL.get_from_url(url=self.kwargs['encoded_part'])
+        if not form_url:
+            raise permissions.exceptions.ValidationError({'detail': 'Ссылка недействительна.'})
+        queryset = self.get_queryset()
+        obj = get_object_or_404(
+            queryset,
+            evaluator=form_url.user,
+            essay=form_url.evaluation_work,
+            sentence_number=self.kwargs['sentence_number']
+        )
+        return obj
 
 
 class EvaluationFormURLGetCurrentWeekList(generics.ListAPIView):
@@ -86,4 +137,20 @@ class EvaluationFormURLView(generics.RetrieveUpdateAPIView):
         obj = get_object_or_404(queryset, evaluator=form_url.user, work=form_url.evaluation_work)
         return obj
 
+
+class WorkDistributionToEvaluateVolunteerListView(generics.ListAPIView):
+    serializer_class = EvaluationFormURLGetCurrentWeekListSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+    def get_queryset(self):
+        volunteer_uuid = self.kwargs['user']
+        try:
+            volunteer = User.objects.get(id=volunteer_uuid)
+        except User.DoesNotExist:
+            raise permissions.exceptions.ValidationError(detail='Пользователь с таким UUID не найден.')
+
+        if WorkDistributionToEvaluate.objects.filter(evaluator=volunteer, week_id=WeekID.get_current()).exists():
+            raise permissions.exceptions.PermissionDenied(detail='Распределение для пользователя уже произведено.')
+        WorkDistributionToEvaluate.make_optionally_for_volunteer(volunteer)
+        return WorkDistributionToEvaluate.objects.filter(evaluator=volunteer, week_id=WeekID.get_current())
 

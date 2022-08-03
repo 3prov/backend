@@ -31,7 +31,7 @@ class EssayListView(generics.ListAPIView):
     serializer_class = EssayListSerializer
     permission_classes = [permissions.IsAdminUser]
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['task__week_id__study_year_from']
+    filterset_fields = ['task__week_id__study_year_from', 'task__week_id']  # TODO: `task__week_id` is id
 
 
 class EssayFormURLUserCreate(generics.CreateAPIView):

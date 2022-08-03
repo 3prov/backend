@@ -1,3 +1,4 @@
+from __future__ import annotations
 import uuid
 
 from django.conf import settings
@@ -36,6 +37,11 @@ class Essay(Work):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         User.increase_rating(self.author, settings.RATINGS_CONFIGURATION['increase_essay_pass'])
         return super(Essay, self).save(force_insert, force_update, using, update_fields)
+
+    @property
+    def sentences_count(self):
+        return len(self.body.split('.'))
+
 
 
 class TextKey(models.Model):

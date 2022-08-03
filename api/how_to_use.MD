@@ -1,6 +1,15 @@
 ## Создание пользователя
-- POST: /api/v1/authtoken/users/
+- POST: /api/v1/authtoken/users/ # TODO: убрать `password`
 - GET: ... #получить token, uuid пользователя
+
+
+## Загрузка текста недели
+- POST: /api/v1/rus/text/assign/
+- POST: /api/v1/rus/text/keys/add/
+
+
+## Смена этапа недели на этап приёма работ (S1 -> S2)
+- GET: /api/v1/management/switch_stage_to_next/ # TODO: to celery
 
 
 ## Отправка работы
@@ -12,21 +21,34 @@
   - GET, PUT, PATCH: /api/v1/rus/essay/detail/{str:endoded_part}/edit/
 
 
+## Смена этапа недели на этап приёма проверок (S2 -> S3)
+> **Warning**:
+> Возможно при наличии хотя бы 4 работ
+
+TODO: при переходе на этап S3 необходимо проверить все работы на правильность
+- GET: /api/v1/management/switch_stage_to_next/ # TODO: to celery
+
+
 ## Отправка проверок
-1. Участники недели
-  - GET: /api/v1/rus/evaluation/get_form_urls/<uuid:user>/ #отправка пользователю трёх работ вместе с ссылками на формы
-  - GET: /f/e/<str:encoded_part>/
-    - POST: /api/v1/rus/evaluation/form-url/<str:encoded_part>/post/
-    - GET, PUT, PATCH: /api/v1/rus/evaluation/form-url/<str:encoded_part>/edit/
-    - POST: /api/v1/rus/evaluation/sentence_review/
-  #после проверки трёх этих работ участник становится волонтёром
+### Участники недели
+- GET: /api/v1/rus/evaluation/get_form_urls/<uuid:user>/ #отправка пользователю трёх работ вместе с ссылками на формы
+- GET: /f/e/<str:encoded_part>/
+  - POST: /api/v1/rus/evaluation/form-url/<str:encoded_part>/post/
+  - GET, PUT, PATCH: /api/v1/rus/evaluation/form-url/<str:encoded_part>/edit/
+  - POST: /api/v1/rus/evaluation/sentence_review/form-url/<str:encoded_part>/post/
+  - GET, PUT, PATCH: /api/v1/rus/evaluation/sentence_review/form-url/<str:encoded_part>/edit/
+#после проверки трёх этих работ участник становится волонтёром
+
+### Волонтеры (не отправляли работы на текущей неделе)
+- GET: /api/v1/rus/evaluation/volunteer_get_evaluation_list/<uuid:user>/
+- POST: /api/v1/rus/evaluation/get_link_to_form/ (user_uuid)
+- GET: /f/e/<str:endoded_part>/
+  - POST: /api/v1/rus/evaluation/form-url/<str:encoded_part>/post/
+  - GET, PUT, PATCH: /api/v1/rus/evaluation/form-url/<str:encoded_part>/edit/
+  - POST: /api/v1/rus/evaluation/sentence_review/form-url/<str:encoded_part>/post/
+  - GET, PUT, PATCH: /api/v1/rus/evaluation/sentence_review/form-url/<str:encoded_part>/edit/
 
 
-2. Волонтеры
-  - POST: /api/v1/rus/evaluation/get_link_to_form/ (user_uuid)
-  - GET: /f/e/<str:endoded_part>
-
-
-  #отображение всех работ через Бота
-  #генерация EvaluationFormURL при запросе на проверку
-  #(чем меньше проверок у работы, тем больше баллов рейтинга нужно начислять проверяющему)
+#отображение всех работ через Бота
+#генерация EvaluationFormURL при запросе на проверку
+#(чем меньше проверок у работы, тем больше баллов рейтинга нужно начислять проверяющему)

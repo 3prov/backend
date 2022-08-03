@@ -21,6 +21,9 @@ class EssaySentenceReviewCreateSerializer(serializers.ModelSerializer):
         model = EssaySentenceReview
         fields = '__all__'
 
+    essay = EssayDetailSerializer(read_only=True)
+    evaluator = UserDetailSerializer(read_only=True)
+
 
 class EvaluationFormURLListViewSerializer(serializers.ModelSerializer):
     class Meta:
