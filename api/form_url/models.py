@@ -36,3 +36,16 @@ class EvaluationFormURL(FormURL):
             return EvaluationFormURL.objects.get(url=url)
         except EvaluationFormURL.DoesNotExist:
             return None
+
+
+class ResultsFormURL(FormURL):
+    class Meta:
+        verbose_name = 'Ссылка на форму просмотра результата'
+        verbose_name_plural = 'Ссылки на формы просмотра результатов'
+
+    @staticmethod
+    def get_from_url(url: str) -> ResultsFormURL | None:
+        try:
+            return ResultsFormURL.objects.get(url=url)
+        except ResultsFormURL.DoesNotExist:
+            return None

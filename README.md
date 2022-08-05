@@ -1,3 +1,10 @@
+# Документация API v1
+
+- /api/v1/docs/
+- /api/v1/redoc/
+- /api/v1/swagger/
+
+
 ## Создание пользователя
 - POST: /api/v1/authtoken/users/ # TODO: убрать `password`
 - GET: ... #получить token, uuid пользователя
@@ -13,7 +20,7 @@
 
 
 ## Отправка работы
-- POST: /api/v1/rus/essay/create_link_to_form/ (user_uuid)
+- POST: /api/v1/rus/essay/create_link_to_form/
 - GET: /api/v1/rus/essay/get_user_form_links/<uuid:user>/
 
 - GET: /f/w/{encoded_part}/
@@ -41,14 +48,16 @@ TODO: при переходе на этап S3 необходимо провер
 
 ### Волонтеры (не отправляли работы на текущей неделе)
 - GET: /api/v1/rus/evaluation/volunteer_get_evaluation_list/<uuid:user>/
-- POST: /api/v1/rus/evaluation/get_link_to_form/ (user_uuid)
+- POST: /api/v1/rus/evaluation/get_link_to_form/
 - GET: /f/e/<str:endoded_part>/
   - POST: /api/v1/rus/evaluation/form-url/<str:encoded_part>/post/
   - GET, PUT, PATCH: /api/v1/rus/evaluation/form-url/<str:encoded_part>/edit/
   - POST: /api/v1/rus/evaluation/sentence_review/form-url/<str:encoded_part>/post/
   - GET, PUT, PATCH: /api/v1/rus/evaluation/sentence_review/form-url/<str:encoded_part>/edit/<int:sentence_number>/
 
+### Результаты недели
+- POST: /api/v1/rus/results/create_link_to_form/ # TODO: to celery auto create
 
-#отображение всех работ через Бота
+
 #генерация EvaluationFormURL при запросе на проверку
 #(чем меньше проверок у работы, тем больше баллов рейтинга нужно начислять проверяющему)

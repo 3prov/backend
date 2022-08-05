@@ -4,7 +4,7 @@ from django.dispatch import receiver
 from django.db.models import signals
 from django.db.utils import IntegrityError
 
-from api.form_url.models import EssayFormURL, EvaluationFormURL
+from api.form_url.models import EssayFormURL, EvaluationFormURL, ResultsFormURL
 from api.rus.models import Text, Essay
 from api.management.models import WeekID, Stage
 from api.work_distribution.models import WorkDistributionToEvaluate
@@ -29,6 +29,7 @@ def post_save_text(sender, instance, created, **kwargs):
 
 
 @receiver(signals.post_save, sender=EssayFormURL)
+@receiver(signals.post_save, sender=ResultsFormURL)
 def post_save_essay_form_url(sender, instance, created, **kwargs):
     """
     Привязывает url и week_id к модели FormURL после её создания.
@@ -39,7 +40,7 @@ def post_save_essay_form_url(sender, instance, created, **kwargs):
                 settings.STRING_HASH_TEMPLATE.format(
                     user_id=instance.user.id,
                     week_id=WeekID.get_current().id,
-                    hash_type='essay',
+                    hash_type=sender.__name__,
                     django_secret_key=settings.SECRET_KEY,
                 )
             )

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .form_url.models import EssayFormURL, EvaluationFormURL
+from .form_url.models import EssayFormURL, EvaluationFormURL, ResultsFormURL
 from .models import User
 from .rus.evaluations.models import EssayEvaluation, EssayCriteria, EssaySentenceReview
 from .rus.models import Text, Essay, TextKey
@@ -72,3 +72,9 @@ class WorkDistributionToEvaluateAdmin(admin.ModelAdmin):
 @admin.register(EssaySentenceReview)
 class EssaySentenceReviewAdmin(admin.ModelAdmin):
     list_display = ['id']
+
+
+@admin.register(ResultsFormURL)
+class ResultsFormURLAdmin(admin.ModelAdmin):
+    list_display = ['user', 'week_id']
+    readonly_fields = ['url']

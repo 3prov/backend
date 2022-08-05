@@ -1,3 +1,4 @@
+from __future__ import annotations
 import abc
 import uuid
 
@@ -81,7 +82,7 @@ class FormURL(models.Model, metaclass=AbstractModelMeta):
 
     @staticmethod
     @abc.abstractmethod
-    def get_from_url(url: str):  # -> FormURL | None:
+    def get_from_url(url: str) -> FormURL | None:
         pass
 
 

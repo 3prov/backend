@@ -20,6 +20,12 @@ class EvaluationFormURLGetCurrentWeekListSerializer(serializers.ModelSerializer)
     # evaluator = UserDetailSerializer(read_only=True)
 
 
+class EssaySentenceReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EssaySentenceReview
+        fields = ['sentence_number', 'evaluator_comment', 'mistake_type']
+
+
 class EssaySentenceReviewCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = EssaySentenceReview
@@ -63,9 +69,17 @@ class EssayEvaluationDetailSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(read_only=True)
     evaluator = UserDetailSerializer(read_only=True)
     criteria = EssayCriteriaDetailSerializer()
+    sentences_review = serializers.SerializerMethodField(read_only=True)
 
     def update(self, instance, validated_data):
         EssayCriteria.objects.filter(evaluation=instance).update(
             **validated_data['criteria']
         )
         return instance
+
+    @staticmethod
+    def get_sentences_review(obj):
+        essay_sentences_review = EssaySentenceReview.objects.filter(
+            evaluator=obj.evaluator, essay=obj.work
+        )
+        return EssaySentenceReviewSerializer(essay_sentences_review, many=True).data
