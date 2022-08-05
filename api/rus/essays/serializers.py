@@ -65,5 +65,3 @@ class EssayFormURLCreateSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(read_only=True)
     task = TextDetailSerializer(read_only=True)
     author = UserDetailSerializer(read_only=True)
-
-

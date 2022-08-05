@@ -29,7 +29,6 @@ class TextDetailSerializer(serializers.ModelSerializer):
     keys = serializers.SerializerMethodField(read_only=True)
     week_id = WeekIDSerializer(read_only=True)
 
-
     @staticmethod
     def get_keys(obj):
         text_keys = TextKey.objects.filter(text=obj)

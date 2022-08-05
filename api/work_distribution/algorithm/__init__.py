@@ -4,9 +4,7 @@ def build_algorithm():
 
     def run_shell_command(command: list[str]):
         process = subprocess.run(
-            command,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
         print(process.stdout.decode('utf-8'))  # TODO: to logger
         if process.stderr.decode('utf-8') != '':

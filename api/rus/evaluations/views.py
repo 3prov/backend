@@ -8,9 +8,14 @@ from api.management.models import WeekID
 from api.models import User
 from api.rus.evaluations.models import EssayEvaluation, EssaySentenceReview
 from api.rus.evaluations.permissions import IsEvaluationAcceptingStage
-from api.rus.evaluations.serializers import EvaluationFormURLGetCurrentWeekListSerializer, \
-    EssaySentenceReviewCreateSerializer, EvaluationFormURLListViewSerializer, EvaluationFormURLCreateSerializer, \
-    EssayCriteriaDetailSerializer, EssayEvaluationDetailSerializer
+from api.rus.evaluations.serializers import (
+    EvaluationFormURLGetCurrentWeekListSerializer,
+    EssaySentenceReviewCreateSerializer,
+    EvaluationFormURLListViewSerializer,
+    EvaluationFormURLCreateSerializer,
+    EssayCriteriaDetailSerializer,
+    EssayEvaluationDetailSerializer,
+)
 from api.work_distribution.models import WorkDistributionToEvaluate
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -24,33 +29,45 @@ class EssaySentenceReviewFromFormURLCreate(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         form_url = EvaluationFormURL.get_from_url(url=kwargs['encoded_part'])
         if not form_url:
-            raise permissions.exceptions.ValidationError({'detail': 'Ссылка недействительна.'})
+            raise permissions.exceptions.ValidationError(
+                {'detail': 'Ссылка недействительна.'}
+            )
 
         serialized = EssaySentenceReviewCreateSerializer(data=request.data)
         if not serialized.is_valid():
-            raise permissions.exceptions.ValidationError(detail='Ошибка сериализации модели проверки предложений.')
+            raise permissions.exceptions.ValidationError(
+                detail='Ошибка сериализации модели проверки предложений.'
+            )
 
-        if not (0 < serialized.data['sentence_number'] <= form_url.evaluation_work.sentences_count):
-            raise permissions.exceptions.ValidationError(detail='Номер оцениваемого предложения не может быть больше '
-                                                                'количества предложений сочинения.')
+        if not (
+            0
+            < serialized.data['sentence_number']
+            <= form_url.evaluation_work.sentences_count
+        ):
+            raise permissions.exceptions.ValidationError(
+                detail='Номер оцениваемого предложения не может быть больше '
+                'количества предложений сочинения.'
+            )
 
         if EssaySentenceReview.objects.filter(
             evaluator=form_url.user,
             essay=form_url.evaluation_work,
-            sentence_number=serialized.data['sentence_number']
+            sentence_number=serialized.data['sentence_number'],
         ).exists():
-            raise permissions.exceptions.ValidationError({'detail': 'Проверка этого предложения уже отправлена.'})
+            raise permissions.exceptions.ValidationError(
+                {'detail': 'Проверка этого предложения уже отправлена.'}
+            )
 
         added_sentence_review = EssaySentenceReview.objects.create(
             sentence_number=serialized.data['sentence_number'],
             evaluator_comment=serialized.data['evaluator_comment'],
             mistake_type=serialized.data['mistake_type'],
             essay=form_url.evaluation_work,
-            evaluator=form_url.user
+            evaluator=form_url.user,
         )
         return Response(
             EssaySentenceReviewCreateSerializer(added_sentence_review).data,
-            status=status.HTTP_201_CREATED
+            status=status.HTTP_201_CREATED,
         )
 
 
@@ -62,13 +79,15 @@ class EssaySentenceReviewFormURLView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         form_url = EvaluationFormURL.get_from_url(url=self.kwargs['encoded_part'])
         if not form_url:
-            raise permissions.exceptions.ValidationError({'detail': 'Ссылка недействительна.'})
+            raise permissions.exceptions.ValidationError(
+                {'detail': 'Ссылка недействительна.'}
+            )
         queryset = self.get_queryset()
         obj = get_object_or_404(
             queryset,
             evaluator=form_url.user,
             essay=form_url.evaluation_work,
-            sentence_number=self.kwargs['sentence_number']
+            sentence_number=self.kwargs['sentence_number'],
         )
         return obj
 
@@ -89,10 +108,12 @@ class EvaluationFormURLListView(generics.ListAPIView):
     serializer_class = EvaluationFormURLListViewSerializer
 
     def get_queryset(self):
-        return EvaluationFormURL.objects.filter(week_id=WeekID.get_current(), user=self.kwargs['user'])
+        return EvaluationFormURL.objects.filter(
+            week_id=WeekID.get_current(), user=self.kwargs['user']
+        )
 
 
-#class EvaluationFormURLGetUserLink(generics.ListAPIView):
+# class EvaluationFormURLGetUserLink(generics.ListAPIView):
 
 
 class EvaluationFormURLCreate(generics.CreateAPIView):
@@ -104,25 +125,38 @@ class EvaluationFormURLCreate(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         form_url = EvaluationFormURL.get_from_url(url=kwargs['encoded_part'])
         if not form_url:
-            raise permissions.exceptions.ValidationError({'detail': 'Ссылка недействительна.'})
+            raise permissions.exceptions.ValidationError(
+                {'detail': 'Ссылка недействительна.'}
+            )
 
-        if EssayEvaluation.objects.filter(evaluator=form_url.user, work=form_url.evaluation_work).exists():
-            raise permissions.exceptions.ValidationError({'detail': 'Проверка уже отправлена.'})
+        if EssayEvaluation.objects.filter(
+            evaluator=form_url.user, work=form_url.evaluation_work
+        ).exists():
+            raise permissions.exceptions.ValidationError(
+                {'detail': 'Проверка уже отправлена.'}
+            )
 
         if 'criteria' not in request.data.keys():
-            raise permissions.exceptions.ValidationError(detail='Ошибка сериализации модели Критериев.')
+            raise permissions.exceptions.ValidationError(
+                detail='Ошибка сериализации модели Критериев.'
+            )
 
         criteria = EssayCriteriaDetailSerializer(data=request.data['criteria'])
         if not criteria.is_valid():
-            raise permissions.exceptions.ValidationError(detail='Ошибка сериализации модели Критериев.')
+            raise permissions.exceptions.ValidationError(
+                detail='Ошибка сериализации модели Критериев.'
+            )
         criteria_instance = criteria.save()
         added_evaluation = EssayEvaluation.objects.create(
             work=form_url.evaluation_work,
             evaluator=form_url.user,
-            criteria=criteria_instance
+            criteria=criteria_instance,
         )
         # EssaySentenceReview.objects.filter(essay=form_url.evaluation_work, evaluator=form_url.user) <--- RETURN IN TOO
-        return Response(EvaluationFormURLCreateSerializer(added_evaluation).data, status=status.HTTP_201_CREATED)  # TODO: change EvaluationFormURLCreateSerializer
+        return Response(
+            EvaluationFormURLCreateSerializer(added_evaluation).data,
+            status=status.HTTP_201_CREATED,
+        )  # TODO: change EvaluationFormURLCreateSerializer
 
 
 class EvaluationFormURLView(generics.RetrieveUpdateAPIView):
@@ -133,9 +167,13 @@ class EvaluationFormURLView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         form_url = EvaluationFormURL.get_from_url(url=self.kwargs['encoded_part'])
         if not form_url:
-            raise permissions.exceptions.ValidationError({'detail': 'Ссылка недействительна.'})
+            raise permissions.exceptions.ValidationError(
+                {'detail': 'Ссылка недействительна.'}
+            )
         queryset = self.get_queryset()
-        obj = get_object_or_404(queryset, evaluator=form_url.user, work=form_url.evaluation_work)
+        obj = get_object_or_404(
+            queryset, evaluator=form_url.user, work=form_url.evaluation_work
+        )
         return obj
 
 
@@ -148,10 +186,17 @@ class WorkDistributionToEvaluateVolunteerListView(generics.ListAPIView):
         try:
             volunteer = User.objects.get(id=volunteer_uuid)
         except User.DoesNotExist:
-            raise permissions.exceptions.ValidationError(detail='Пользователь с таким UUID не найден.')
+            raise permissions.exceptions.ValidationError(
+                detail='Пользователь с таким UUID не найден.'
+            )
 
-        if WorkDistributionToEvaluate.objects.filter(evaluator=volunteer, week_id=WeekID.get_current()).exists():
-            raise permissions.exceptions.PermissionDenied(detail='Распределение для пользователя уже произведено.')
+        if WorkDistributionToEvaluate.objects.filter(
+            evaluator=volunteer, week_id=WeekID.get_current()
+        ).exists():
+            raise permissions.exceptions.PermissionDenied(
+                detail='Распределение для пользователя уже произведено.'
+            )
         WorkDistributionToEvaluate.make_optionally_for_volunteer(volunteer)
-        return WorkDistributionToEvaluate.objects.filter(evaluator=volunteer, week_id=WeekID.get_current())
-
+        return WorkDistributionToEvaluate.objects.filter(
+            evaluator=volunteer, week_id=WeekID.get_current()
+        )

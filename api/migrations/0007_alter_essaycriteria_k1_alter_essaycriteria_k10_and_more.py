@@ -14,61 +14,133 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='essaycriteria',
             name='k1',
-            field=models.PositiveIntegerField(validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(1)], verbose_name='К1: Формулировка проблем исходного текста'),
+            field=models.PositiveIntegerField(
+                validators=[
+                    django.core.validators.MinValueValidator(0),
+                    django.core.validators.MaxValueValidator(1),
+                ],
+                verbose_name='К1: Формулировка проблем исходного текста',
+            ),
         ),
         migrations.AlterField(
             model_name='essaycriteria',
             name='k10',
-            field=models.PositiveIntegerField(validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(2)], verbose_name='К10: Соблюдение речевых норм'),
+            field=models.PositiveIntegerField(
+                validators=[
+                    django.core.validators.MinValueValidator(0),
+                    django.core.validators.MaxValueValidator(2),
+                ],
+                verbose_name='К10: Соблюдение речевых норм',
+            ),
         ),
         migrations.AlterField(
             model_name='essaycriteria',
             name='k11',
-            field=models.PositiveIntegerField(validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(1)], verbose_name='К11: Соблюдение этических норм'),
+            field=models.PositiveIntegerField(
+                validators=[
+                    django.core.validators.MinValueValidator(0),
+                    django.core.validators.MaxValueValidator(1),
+                ],
+                verbose_name='К11: Соблюдение этических норм',
+            ),
         ),
         migrations.AlterField(
             model_name='essaycriteria',
             name='k12',
-            field=models.PositiveIntegerField(validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(1)], verbose_name='К12: Соблюдение фактологической точности в фоновом материале'),
+            field=models.PositiveIntegerField(
+                validators=[
+                    django.core.validators.MinValueValidator(0),
+                    django.core.validators.MaxValueValidator(1),
+                ],
+                verbose_name='К12: Соблюдение фактологической точности в фоновом материале',
+            ),
         ),
         migrations.AlterField(
             model_name='essaycriteria',
             name='k2',
-            field=models.PositiveIntegerField(validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(6)], verbose_name='К2: Комментарий к сформулированной проблеме исходного текста'),
+            field=models.PositiveIntegerField(
+                validators=[
+                    django.core.validators.MinValueValidator(0),
+                    django.core.validators.MaxValueValidator(6),
+                ],
+                verbose_name='К2: Комментарий к сформулированной проблеме исходного текста',
+            ),
         ),
         migrations.AlterField(
             model_name='essaycriteria',
             name='k3',
-            field=models.PositiveIntegerField(validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(1)], verbose_name='К3: Отражение позиции автора исходного текста'),
+            field=models.PositiveIntegerField(
+                validators=[
+                    django.core.validators.MinValueValidator(0),
+                    django.core.validators.MaxValueValidator(1),
+                ],
+                verbose_name='К3: Отражение позиции автора исходного текста',
+            ),
         ),
         migrations.AlterField(
             model_name='essaycriteria',
             name='k4',
-            field=models.PositiveIntegerField(validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(1)], verbose_name='К4: Отношение к позиции автора по проблеме исходного текста'),
+            field=models.PositiveIntegerField(
+                validators=[
+                    django.core.validators.MinValueValidator(0),
+                    django.core.validators.MaxValueValidator(1),
+                ],
+                verbose_name='К4: Отношение к позиции автора по проблеме исходного текста',
+            ),
         ),
         migrations.AlterField(
             model_name='essaycriteria',
             name='k5',
-            field=models.PositiveIntegerField(validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(2)], verbose_name='К5: Смысловая цельность, речевая связность и последовательность изложения'),
+            field=models.PositiveIntegerField(
+                validators=[
+                    django.core.validators.MinValueValidator(0),
+                    django.core.validators.MaxValueValidator(2),
+                ],
+                verbose_name='К5: Смысловая цельность, речевая связность и последовательность изложения',
+            ),
         ),
         migrations.AlterField(
             model_name='essaycriteria',
             name='k6',
-            field=models.PositiveIntegerField(validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(2)], verbose_name='К6: Точность и выразительность речи'),
+            field=models.PositiveIntegerField(
+                validators=[
+                    django.core.validators.MinValueValidator(0),
+                    django.core.validators.MaxValueValidator(2),
+                ],
+                verbose_name='К6: Точность и выразительность речи',
+            ),
         ),
         migrations.AlterField(
             model_name='essaycriteria',
             name='k7',
-            field=models.PositiveIntegerField(validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(3)], verbose_name='К7: Соблюдение орфографических норм'),
+            field=models.PositiveIntegerField(
+                validators=[
+                    django.core.validators.MinValueValidator(0),
+                    django.core.validators.MaxValueValidator(3),
+                ],
+                verbose_name='К7: Соблюдение орфографических норм',
+            ),
         ),
         migrations.AlterField(
             model_name='essaycriteria',
             name='k8',
-            field=models.PositiveIntegerField(validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(3)], verbose_name='К8: Соблюдение пунктуационных норм'),
+            field=models.PositiveIntegerField(
+                validators=[
+                    django.core.validators.MinValueValidator(0),
+                    django.core.validators.MaxValueValidator(3),
+                ],
+                verbose_name='К8: Соблюдение пунктуационных норм',
+            ),
         ),
         migrations.AlterField(
             model_name='essaycriteria',
             name='k9',
-            field=models.PositiveIntegerField(validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(2)], verbose_name='К9: Соблюдение грамматических норм'),
+            field=models.PositiveIntegerField(
+                validators=[
+                    django.core.validators.MinValueValidator(0),
+                    django.core.validators.MaxValueValidator(2),
+                ],
+                verbose_name='К9: Соблюдение грамматических норм',
+            ),
         ),
     ]

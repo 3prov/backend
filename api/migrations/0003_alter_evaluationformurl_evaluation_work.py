@@ -14,6 +14,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='evaluationformurl',
             name='evaluation_work',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='evaluation_form_urls', to='api.essay', verbose_name='Работа для проверки'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='evaluation_form_urls',
+                to='api.essay',
+                verbose_name='Работа для проверки',
+            ),
         ),
     ]

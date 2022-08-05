@@ -5,7 +5,6 @@ from .models import User
 
 
 class UserTest(APITestCase):
-
     def setUp(self) -> None:
         self.factory = APIRequestFactory()
         self.client = APIClient()
@@ -111,11 +110,17 @@ class UserTest(APITestCase):
         response = self.client.post(reverse('user-list'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(User.objects.all().count(), 1)
-        self.assertNotEqual(User.objects.get(username='username_full').password, 'aboba22')
+        self.assertNotEqual(
+            User.objects.get(username='username_full').password, 'aboba22'
+        )
         self.assertEqual(User.objects.get(username='username_full').first_name, 'John')
         self.assertEqual(User.objects.get(username='username_full').last_name, 'Doe')
-        self.assertEqual(User.objects.get(username='username_full').vkontakte_id, 6127584)
-        self.assertEqual(User.objects.get(username='username_full').telegram_id, 891267646512)
+        self.assertEqual(
+            User.objects.get(username='username_full').vkontakte_id, 6127584
+        )
+        self.assertEqual(
+            User.objects.get(username='username_full').telegram_id, 891267646512
+        )
         self.assertIsNotNone(User.objects.get(username='username_full').id)
         self.assertIsNotNone(User.objects.get(username='username_full').auth_token)
 
@@ -169,7 +174,6 @@ class UserTest(APITestCase):
 
 
 class HealthTest(APITestCase):
-
     def setUp(self) -> None:
         self.client = APIClient()
 

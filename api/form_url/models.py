@@ -27,7 +27,7 @@ class EvaluationFormURL(FormURL):
         to=Essay,
         on_delete=models.CASCADE,
         related_name='evaluation_form_urls',
-        verbose_name='Работа для проверки'
+        verbose_name='Работа для проверки',
     )
 
     @staticmethod

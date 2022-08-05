@@ -29,15 +29,25 @@ class EssayDecodeURLView(APIView):
 
         form_url = EssayFormURL.get_from_url(kwargs['encoded_part'])
         if not form_url:
-            raise permissions.exceptions.ValidationError({'detail': 'Ссылка недействительна.'})
+            raise permissions.exceptions.ValidationError(
+                {'detail': 'Ссылка недействительна.'}
+            )
 
         try:
-            essay = Essay.objects.get(author=form_url.user, task__week_id=WeekID.get_current())
+            essay = Essay.objects.get(
+                author=form_url.user, task__week_id=WeekID.get_current()
+            )
             data_to_response['work_already_sent'] = True
-            data_to_response['work']['essay_body'] = essay.body  # TODO: change serializer
-            data_to_response['urls']['to_PATCH'] = reverse('essay_from_url_edit', args=[form_url.url])
+            data_to_response['work'][
+                'essay_body'
+            ] = essay.body  # TODO: change serializer
+            data_to_response['urls']['to_PATCH'] = reverse(
+                'essay_from_url_edit', args=[form_url.url]
+            )
         except Essay.DoesNotExist:
-            data_to_response['urls']['to_POST'] = reverse('essay_from_url_post', args=[form_url.url])
+            data_to_response['urls']['to_POST'] = reverse(
+                'essay_from_url_post', args=[form_url.url]
+            )
 
         return Response(data_to_response)
 
@@ -60,14 +70,24 @@ class EvaluationDecodeURLView(APIView):
 
         form_url = EvaluationFormURL.get_from_url(kwargs['encoded_part'])
         if not form_url:
-            raise permissions.exceptions.ValidationError({'detail': 'Ссылка недействительна.'})
+            raise permissions.exceptions.ValidationError(
+                {'detail': 'Ссылка недействительна.'}
+            )
 
         try:
-            evaluation = EssayEvaluation.objects.get(evaluator=form_url.user, work=form_url.evaluation_work)
+            evaluation = EssayEvaluation.objects.get(
+                evaluator=form_url.user, work=form_url.evaluation_work
+            )
             data_to_response['evaluation_already_sent'] = True
-            data_to_response['evaluation']['body'] = EssayEvaluationDetailSerializer(evaluation).data
-            data_to_response['urls']['to_PATCH'] = reverse('evaluation_from_url_edit', args=[form_url.url])  # TODO: change serializer
+            data_to_response['evaluation']['body'] = EssayEvaluationDetailSerializer(
+                evaluation
+            ).data
+            data_to_response['urls']['to_PATCH'] = reverse(
+                'evaluation_from_url_edit', args=[form_url.url]
+            )  # TODO: change serializer
         except EssayEvaluation.DoesNotExist:
-            data_to_response['urls']['to_POST'] = reverse('evaluation_from_url_post', args=[form_url.url])
+            data_to_response['urls']['to_POST'] = reverse(
+                'evaluation_from_url_post', args=[form_url.url]
+            )
 
         return Response(data_to_response)

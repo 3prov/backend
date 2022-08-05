@@ -60,7 +60,7 @@ class FormURL(models.Model, metaclass=AbstractModelMeta):
         to=User,
         on_delete=models.CASCADE,
         related_name='%(app_label)s_%(class)s_form_urls',
-        verbose_name='Пользователь'
+        verbose_name='Пользователь',
     )
     url = models.URLField(
         unique=True,
@@ -96,9 +96,11 @@ class Task(models.Model, metaclass=AbstractModelMeta):
         to=User,
         on_delete=models.CASCADE,
         verbose_name='Учитель, который дал работу',
-        related_name='tasks'
+        related_name='tasks',
     )
-    created_at = models.DateTimeField(default=timezone.now, verbose_name='Дата создания')
+    created_at = models.DateTimeField(
+        default=timezone.now, verbose_name='Дата создания'
+    )
     week_id = models.OneToOneField(
         to=WeekID,
         on_delete=models.CASCADE,
@@ -120,8 +122,15 @@ class Work(models.Model, metaclass=AbstractModelMeta):
         verbose_name_plural = 'Работы Пользователя'
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    author = models.ForeignKey(to=User, on_delete=models.CASCADE, verbose_name='Автор работы', related_name='works')
-    created_at = models.DateTimeField(default=timezone.now, verbose_name='Дата создания')
+    author = models.ForeignKey(
+        to=User,
+        on_delete=models.CASCADE,
+        verbose_name='Автор работы',
+        related_name='works',
+    )
+    created_at = models.DateTimeField(
+        default=timezone.now, verbose_name='Дата создания'
+    )
 
     @property
     @abc.abstractmethod
@@ -129,7 +138,9 @@ class Work(models.Model, metaclass=AbstractModelMeta):
         raise NotImplementedError('Необходимо создать связь с моделью Task.')
 
     @abc.abstractmethod
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+    def save(
+        self, force_insert=False, force_update=False, using=None, update_fields=None
+    ):
         """
         Необходимо переопределить метод save для изменения рейтинга пользователя.
         """
@@ -147,9 +158,11 @@ class Evaluation(models.Model, metaclass=AbstractModelMeta):
         to=User,
         on_delete=models.CASCADE,
         verbose_name='Проверяющий',
-        related_name='evaluations'
+        related_name='evaluations',
     )
-    created_at = models.DateTimeField(default=timezone.now, verbose_name='Дата создания')
+    created_at = models.DateTimeField(
+        default=timezone.now, verbose_name='Дата создания'
+    )
 
     @property
     @abc.abstractmethod
@@ -159,14 +172,20 @@ class Evaluation(models.Model, metaclass=AbstractModelMeta):
     @property
     @abc.abstractmethod
     def criteria(self):
-        raise NotImplementedError('Необходимо создать OneToOne связь с моделью Criteria.')
+        raise NotImplementedError(
+            'Необходимо создать OneToOne связь с моделью Criteria.'
+        )
 
     @abc.abstractmethod
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+    def save(
+        self, force_insert=False, force_update=False, using=None, update_fields=None
+    ):
         """
         Необходимо переопределить метод save для изменения рейтинга пользователя.
         """
-        return super(Evaluation, self).save(force_insert, force_update, using, update_fields)
+        return super(Evaluation, self).save(
+            force_insert, force_update, using, update_fields
+        )
 
 
 class Criteria(models.Model, metaclass=AbstractModelMeta):
@@ -178,5 +197,6 @@ class Criteria(models.Model, metaclass=AbstractModelMeta):
     @property
     @abc.abstractmethod
     def score(self):
-        raise NotImplementedError('Необходимо объявить свойство подсчета балла по критериям.')
-
+        raise NotImplementedError(
+            'Необходимо объявить свойство подсчета балла по критериям.'
+        )

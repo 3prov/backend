@@ -8,7 +8,6 @@ from ...management import init_stage
 
 
 class TextsTest(APITestCase):
-
     def setUp(self) -> None:
         init_stage()
         self.factory = APIRequestFactory()
@@ -26,7 +25,7 @@ class TextsTest(APITestCase):
             "body": "inu2fg38",
             "author": "92m8yn823",
             "author_description": "g2yn8g2y3g923",
-            "teacher": self.get_teacher_uuid()
+            "teacher": self.get_teacher_uuid(),
         }
         response = self.client.post(reverse('text_assign'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -37,9 +36,11 @@ class TextsTest(APITestCase):
             "body": "inu2fg38",
             "author": "92m8yn823",
             "author_description": "g2yn8g2y3g923",
-            "teacher": self.get_teacher_uuid()
+            "teacher": self.get_teacher_uuid(),
         }
-        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.common_user.auth_token}')
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f'Token {self.common_user.auth_token}'
+        )
         response = self.client.post(reverse('text_assign'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(Text.objects.all().count(), 0)
@@ -49,9 +50,11 @@ class TextsTest(APITestCase):
             "body": "inu2fg38",
             "author": "92m8yn823",
             "author_description": "g2yn8g2y3g923",
-            "teacher": self.get_teacher_uuid()
+            "teacher": self.get_teacher_uuid(),
         }
-        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.admin_user.auth_token}')
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f'Token {self.admin_user.auth_token}'
+        )
         response = self.client.post(reverse('text_assign'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Text.objects.all().count(), 1)
@@ -64,12 +67,16 @@ class TextsTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_common_user_texts_list_all(self):
-        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.common_user.auth_token}')
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f'Token {self.common_user.auth_token}'
+        )
         response = self.client.get(reverse('texts_list_all'))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_admin_user_texts_list_all(self):
-        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.admin_user.auth_token}')
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f'Token {self.admin_user.auth_token}'
+        )
         response = self.client.get(reverse('texts_list_all'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()), 0)
@@ -79,9 +86,11 @@ class TextsTest(APITestCase):
             "body": "inu2fg38",
             "author": "92m8yn823",
             "author_description": "g2yn8g2y3g923",
-            "teacher": self.get_teacher_uuid()
+            "teacher": self.get_teacher_uuid(),
         }
-        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.admin_user.auth_token}')
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f'Token {self.admin_user.auth_token}'
+        )
         response = self.client.post(reverse('text_assign'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Text.objects.all().count(), 1)
@@ -99,12 +108,10 @@ class TextsTest(APITestCase):
         self.assertEqual(len(response.json()), 2)
 
     def test_admin_user_add_text_keys_empty(self):
-        data = {
-            "range_of_problems": "",
-            "authors_position": "",
-            "text": None
-        }
-        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.admin_user.auth_token}')
+        data = {"range_of_problems": "", "authors_position": "", "text": None}
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f'Token {self.admin_user.auth_token}'
+        )
         response = self.client.post(reverse('add_text_keys'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(TextKey.objects.all().count(), 0)
@@ -114,9 +121,11 @@ class TextsTest(APITestCase):
             "body": "inu2fg38",
             "author": "92m8yn823",
             "author_description": "g2yn8g2y3g923",
-            "teacher": self.get_teacher_uuid()
+            "teacher": self.get_teacher_uuid(),
         }
-        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.admin_user.auth_token}')
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f'Token {self.admin_user.auth_token}'
+        )
         response = self.client.post(reverse('text_assign'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Text.objects.all().count(), 1)
@@ -127,22 +136,25 @@ class TextsTest(APITestCase):
         data = {
             "range_of_problems": "wkjeuhweriohiowg",
             "authors_position": "weiuguiweunguweugowegwenguweohigwegwe",
-            "text": text_id
+            "text": text_id,
         }
-        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.admin_user.auth_token}')
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f'Token {self.admin_user.auth_token}'
+        )
         response = self.client.post(reverse('add_text_keys'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(TextKey.objects.all().count(), 1)
-
 
     def test_admin_user_add_text_keys_good_many(self):
         data = {
             "body": "inu2fg38",
             "author": "92m8yn823",
             "author_description": "g2yn8g2y3g923",
-            "teacher": self.get_teacher_uuid()
+            "teacher": self.get_teacher_uuid(),
         }
-        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.admin_user.auth_token}')
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f'Token {self.admin_user.auth_token}'
+        )
         response = self.client.post(reverse('text_assign'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Text.objects.all().count(), 1)
@@ -153,9 +165,11 @@ class TextsTest(APITestCase):
         data = {
             "range_of_problems": "wkjeuhweriohiowg",
             "authors_position": "weiuguiweunguweugowegwenguweohigwegwe",
-            "text": text_id
+            "text": text_id,
         }
-        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.admin_user.auth_token}')
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f'Token {self.admin_user.auth_token}'
+        )
         response = self.client.post(reverse('add_text_keys'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(TextKey.objects.all().count(), 1)
@@ -163,9 +177,8 @@ class TextsTest(APITestCase):
         data = {
             "range_of_problems": "289f2jivo",
             "authors_position": "ogjroigjo3jop[g3p",
-            "text": text_id
+            "text": text_id,
         }
         response = self.client.post(reverse('add_text_keys'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(TextKey.objects.all().count(), 2)
-

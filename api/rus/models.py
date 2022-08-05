@@ -29,13 +29,17 @@ class Essay(Work):
         to=Text,
         on_delete=models.CASCADE,
         verbose_name='Текст, по которому написано сочинение',
-        related_name='essays'
+        related_name='essays',
     )
     body = models.TextField(verbose_name='Поле для сочинения')
 
     @transaction.atomic
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        User.increase_rating(self.author, settings.RATINGS_CONFIGURATION['increase_essay_pass'])
+    def save(
+        self, force_insert=False, force_update=False, using=None, update_fields=None
+    ):
+        User.increase_rating(
+            self.author, settings.RATINGS_CONFIGURATION['increase_essay_pass']
+        )
         return super(Essay, self).save(force_insert, force_update, using, update_fields)
 
     @property
@@ -54,5 +58,6 @@ class TextKey(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     range_of_problems = models.TextField(verbose_name='Примерный круг проблем')
     authors_position = models.TextField(verbose_name='Авторская позиция')
-    text = models.ForeignKey(to=Text, on_delete=models.CASCADE, verbose_name='Текст', related_name='keys')
-
+    text = models.ForeignKey(
+        to=Text, on_delete=models.CASCADE, verbose_name='Текст', related_name='keys'
+    )

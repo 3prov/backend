@@ -10,6 +10,7 @@ from .work_distribution.models import WorkDistributionToEvaluate
 
 # TODO: move admins to their apps
 
+
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = ['username']

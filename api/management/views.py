@@ -11,10 +11,12 @@ class StageAddView(APIView):
 
     @staticmethod
     def get(request):
-        return JsonResponse({
-            'current_stage': Stage.get_stage(),
-            'possible_stages': [{x[0]: x[1]} for x in Stage.StagesEnum.choices],
-        })
+        return JsonResponse(
+            {
+                'current_stage': Stage.get_stage(),
+                'possible_stages': [{x[0]: x[1]} for x in Stage.StagesEnum.choices],
+            }
+        )
 
 
 class SwitchStageAddView(APIView):
@@ -23,10 +25,12 @@ class SwitchStageAddView(APIView):
 
     @staticmethod
     def get(request):
-        return JsonResponse({
-            'current_stage': Stage.switch_stage_to_next(),
-            'possible_stages': [{x[0]: x[1]} for x in Stage.StagesEnum.choices],
-        })
+        return JsonResponse(
+            {
+                'current_stage': Stage.switch_stage_to_next(),
+                'possible_stages': [{x[0]: x[1]} for x in Stage.StagesEnum.choices],
+            }
+        )
 
 
 class StatisticsAddView(APIView):
@@ -35,8 +39,12 @@ class StatisticsAddView(APIView):
 
     @staticmethod
     def get(request):
-        return JsonResponse({
-            'rus': {
-                'essays_passed': Essay.objects.filter(task=Text.get_current()).count(),
+        return JsonResponse(
+            {
+                'rus': {
+                    'essays_passed': Essay.objects.filter(
+                        task=Text.get_current()
+                    ).count(),
+                }
             }
-        })
+        )

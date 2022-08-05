@@ -7,7 +7,6 @@ from ..models import User
 
 
 class ManagementTest(APITestCase):
-
     def setUp(self) -> None:
         init_stage()
         self.factory = APIRequestFactory()
@@ -96,7 +95,7 @@ class ManagementTest(APITestCase):
             "body": "inu2fg38",
             "author": "92m8yn823",
             "author_description": "g2yn8g2y3g923",
-            "teacher": teacher_user.id
+            "teacher": teacher_user.id,
         }
 
         response = self.client.post(reverse('text_assign'), data, format='json')
@@ -109,7 +108,7 @@ class ManagementTest(APITestCase):
     def pass_essay(self, admin_user):
         data = {
             "body": "vrhnuivwq9ov3vn 8 9 234n834f7834v83vyo3n4i8348ov3y4vgony8giv o34viuo4qvi",
-            "author": admin_user.id
+            "author": admin_user.id,
         }
         response = self.client.post(reverse('essay_pass'), data, format='json')
 
@@ -127,5 +126,3 @@ class ManagementTest(APITestCase):
         response = self.client.get(reverse('statistics'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()['rus']['essays_passed'], 1)
-
-

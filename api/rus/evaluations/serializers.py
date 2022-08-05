@@ -2,7 +2,11 @@ from rest_framework import serializers, exceptions
 
 from api.form_url.models import EvaluationFormURL
 from api.rus.essays.serializers import EssayDetailSerializer
-from api.rus.evaluations.models import EssayEvaluation, EssaySentenceReview, EssayCriteria
+from api.rus.evaluations.models import (
+    EssayEvaluation,
+    EssaySentenceReview,
+    EssayCriteria,
+)
 from api.serializers import UserDetailSerializer
 from api.work_distribution.models import WorkDistributionToEvaluate
 
@@ -61,6 +65,7 @@ class EssayEvaluationDetailSerializer(serializers.ModelSerializer):
     criteria = EssayCriteriaDetailSerializer()
 
     def update(self, instance, validated_data):
-        EssayCriteria.objects.filter(evaluation=instance).update(**validated_data['criteria'])
+        EssayCriteria.objects.filter(evaluation=instance).update(
+            **validated_data['criteria']
+        )
         return instance
-

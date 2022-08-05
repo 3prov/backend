@@ -15,10 +15,40 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='EssayFormURL',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('url', models.URLField(null=True, unique=True, verbose_name='Ссылка на форму')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='%(app_label)s_%(class)s_form_urls', to=settings.AUTH_USER_MODEL, verbose_name='Пользователь')),
-                ('week_id', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='%(app_label)s_%(class)s_form_urls', to='api.weekid', verbose_name='Номер недели')),
+                (
+                    'id',
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name='ID',
+                    ),
+                ),
+                (
+                    'url',
+                    models.URLField(
+                        null=True, unique=True, verbose_name='Ссылка на форму'
+                    ),
+                ),
+                (
+                    'user',
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='%(app_label)s_%(class)s_form_urls',
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name='Пользователь',
+                    ),
+                ),
+                (
+                    'week_id',
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='%(app_label)s_%(class)s_form_urls',
+                        to='api.weekid',
+                        verbose_name='Номер недели',
+                    ),
+                ),
             ],
             options={
                 'verbose_name': 'Ссылка на форму сдачи сочинений',
@@ -28,11 +58,49 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='EvaluationFormURL',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('url', models.URLField(null=True, unique=True, verbose_name='Ссылка на форму')),
-                ('evaluation_work', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='evaluation_form_urls', to='api.essayevaluation', verbose_name='Работа для проверки')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='%(app_label)s_%(class)s_form_urls', to=settings.AUTH_USER_MODEL, verbose_name='Пользователь')),
-                ('week_id', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='%(app_label)s_%(class)s_form_urls', to='api.weekid', verbose_name='Номер недели')),
+                (
+                    'id',
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name='ID',
+                    ),
+                ),
+                (
+                    'url',
+                    models.URLField(
+                        null=True, unique=True, verbose_name='Ссылка на форму'
+                    ),
+                ),
+                (
+                    'evaluation_work',
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='evaluation_form_urls',
+                        to='api.essayevaluation',
+                        verbose_name='Работа для проверки',
+                    ),
+                ),
+                (
+                    'user',
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='%(app_label)s_%(class)s_form_urls',
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name='Пользователь',
+                    ),
+                ),
+                (
+                    'week_id',
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='%(app_label)s_%(class)s_form_urls',
+                        to='api.weekid',
+                        verbose_name='Номер недели',
+                    ),
+                ),
             ],
             options={
                 'verbose_name': 'Ссылка на форму сдачи проверок',

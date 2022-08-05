@@ -10,6 +10,7 @@ from django.conf import settings
 
 class Configuration(models.Model):
     """Модель с единственной строкой"""
+
     class Meta:
         abstract = True
         verbose_name = 'Настройка'
@@ -39,14 +40,14 @@ class Stage(Configuration):
         'S1': StagesEnum.NO_TASK,
         'S2': StagesEnum.WORK_ACCEPTING,
         'S3': StagesEnum.EVALUATION_ACCEPTING,
-        'S4': StagesEnum.CLOSED_ACCEPT
+        'S4': StagesEnum.CLOSED_ACCEPT,
     }
 
     stage = models.CharField(
         max_length=2,
         choices=StagesEnum.choices,
         default=StagesEnum.NO_TASK,
-        verbose_name='Этап'
+        verbose_name='Этап',
     )
 
     @staticmethod
@@ -75,19 +76,21 @@ class WeekID(models.Model):
     study_year_from = models.PositiveIntegerField(
         validators=[MinValueValidator(1970), MaxValueValidator(2999)],
         default=int(settings.STUDY_YEAR.split('-')[0]),
-        verbose_name='Начало учебного года'
+        verbose_name='Начало учебного года',
     )
     study_year_to = models.PositiveIntegerField(
         validators=[MinValueValidator(1970), MaxValueValidator(2999)],
         default=int(settings.STUDY_YEAR.split('-')[1]),
-        verbose_name='Конец учебного года'
+        verbose_name='Конец учебного года',
     )
     week_number = models.PositiveIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(250)],
         default=0,
         verbose_name='Номер учебной недели',
     )
-    created_at = models.DateTimeField(default=timezone.now, verbose_name='Дата создания', editable=False)
+    created_at = models.DateTimeField(
+        default=timezone.now, verbose_name='Дата создания', editable=False
+    )
 
     def __str__(self):
         """
@@ -101,4 +104,4 @@ class WeekID(models.Model):
 
     @staticmethod
     def increment_week_number():
-        return WeekID.objects.create(week_number=WeekID.get_current().week_number+1)
+        return WeekID.objects.create(week_number=WeekID.get_current().week_number + 1)
