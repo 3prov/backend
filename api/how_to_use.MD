@@ -18,7 +18,7 @@
 
 - GET: /f/w/{encoded_part}/
   - POST: /api/v1/rus/essay/form-url/<str:encoded_part>/post/
-  - GET, PUT, PATCH: /api/v1/rus/essay/detail/{str:endoded_part}/edit/
+  - GET, PUT, PATCH: /api/v1/rus/essay/detail/<str:encoded_part>/edit/
 
 
 ## Смена этапа недели на этап приёма проверок (S2 -> S3)
@@ -36,7 +36,7 @@ TODO: при переходе на этап S3 необходимо провер
   - POST: /api/v1/rus/evaluation/form-url/<str:encoded_part>/post/
   - GET, PUT, PATCH: /api/v1/rus/evaluation/form-url/<str:encoded_part>/edit/
   - POST: /api/v1/rus/evaluation/sentence_review/form-url/<str:encoded_part>/post/
-  - GET, PUT, PATCH: /api/v1/rus/evaluation/sentence_review/form-url/<str:encoded_part>/edit/
+  - GET, PUT, PATCH: /api/v1/rus/evaluation/sentence_review/form-url/<str:encoded_part>/edit/<int:sentence_number>/
 #после проверки трёх этих работ участник становится волонтёром
 
 ### Волонтеры (не отправляли работы на текущей неделе)
@@ -46,7 +46,7 @@ TODO: при переходе на этап S3 необходимо провер
   - POST: /api/v1/rus/evaluation/form-url/<str:encoded_part>/post/
   - GET, PUT, PATCH: /api/v1/rus/evaluation/form-url/<str:encoded_part>/edit/
   - POST: /api/v1/rus/evaluation/sentence_review/form-url/<str:encoded_part>/post/
-  - GET, PUT, PATCH: /api/v1/rus/evaluation/sentence_review/form-url/<str:encoded_part>/edit/
+  - GET, PUT, PATCH: /api/v1/rus/evaluation/sentence_review/form-url/<str:encoded_part>/edit/<int:sentence_number>/
 
 
 #отображение всех работ через Бота

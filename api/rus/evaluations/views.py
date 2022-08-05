@@ -26,24 +26,25 @@ class EssaySentenceReviewFromFormURLCreate(generics.CreateAPIView):
         if not form_url:
             raise permissions.exceptions.ValidationError({'detail': 'Ссылка недействительна.'})
 
-        if not EssaySentenceReviewCreateSerializer(data=request.data).is_valid():
+        serialized = EssaySentenceReviewCreateSerializer(data=request.data)
+        if not serialized.is_valid():
             raise permissions.exceptions.ValidationError(detail='Ошибка сериализации модели проверки предложений.')
 
-        if 0 > request.data['sentence_number'] > form_url.evaluation_work.sentences_count:
+        if not (0 < serialized.data['sentence_number'] <= form_url.evaluation_work.sentences_count):
             raise permissions.exceptions.ValidationError(detail='Номер оцениваемого предложения не может быть больше '
                                                                 'количества предложений сочинения.')
 
         if EssaySentenceReview.objects.filter(
             evaluator=form_url.user,
             essay=form_url.evaluation_work,
-            sentence_number=request.data['sentence_number']
+            sentence_number=serialized.data['sentence_number']
         ).exists():
             raise permissions.exceptions.ValidationError({'detail': 'Проверка этого предложения уже отправлена.'})
 
         added_sentence_review = EssaySentenceReview.objects.create(
-            sentence_number=request.data['sentence_number'],
-            evaluator_comment=request.data['evaluator_comment'],
-            mistake_type=request.data['mistake_type'],
+            sentence_number=serialized.data['sentence_number'],
+            evaluator_comment=serialized.data['evaluator_comment'],
+            mistake_type=serialized.data['mistake_type'],
             essay=form_url.evaluation_work,
             evaluator=form_url.user
         )

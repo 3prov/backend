@@ -49,10 +49,11 @@ class IsWorkDoesNotAlreadyExists(permissions.BasePermission):
     message = "Сочинение на этой неделе уже существует."
 
     def has_permission(self, request, view) -> bool:
-        if not EssayCreateSerializer(data=request.data).is_valid():
+        serialized = EssayCreateSerializer(data=request.data)
+        if not serialized.is_valid():
             raise permissions.exceptions.ValidationError({'detail': 'Ошибка сериализации данных.'})
         current_text = Text.get_current()
-        already_sent_essay = Essay.objects.filter(author=request.data['author'], task=current_text)
+        already_sent_essay = Essay.objects.filter(author=serialized.data['author'], task=current_text)
         return not already_sent_essay.exists()
 
 
@@ -63,10 +64,11 @@ class IsEssayFormURLAlreadyExists(permissions.BasePermission):
     message = "Ссылка на форму уже выдана."
 
     def has_permission(self, request, view) -> bool:
-        if not EssayFormCreateSerializer(data=request.data).is_valid():
+        serialized = EssayFormCreateSerializer(data=request.data)
+        if not serialized.is_valid():
             raise permissions.exceptions.ValidationError({'detail': 'Ошибка сериализации данных.'})
         current_week_id = WeekID.get_current()
-        already_given_url = EssayFormURL.objects.filter(user=request.data['user'], week_id=current_week_id)
+        already_given_url = EssayFormURL.objects.filter(user_id=request.data['user'], week_id=current_week_id)
         return not already_given_url.exists()
 
 
