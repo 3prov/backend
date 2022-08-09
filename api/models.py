@@ -92,9 +92,9 @@ class FormURL(models.Model, metaclass=AbstractModelMeta):
         self, force_insert=False, force_update=False, using=None, update_fields=None
     ):
         from api.form_url.models import EvaluationFormURL
+
         _user_evaluation_form_already_count = EvaluationFormURL.objects.filter(
-            user=self.user,
-            week_id=WeekID.get_current()
+            user=self.user, week_id=WeekID.get_current()
         ).count()
         self.url = self._hash_string(
             settings.STRING_HASH_TEMPLATE.format(
@@ -133,7 +133,7 @@ class Task(models.Model, metaclass=AbstractModelMeta):
 
     @staticmethod
     @abc.abstractmethod
-    def get_current():
+    def get_current() -> Task:
         pass
 
 

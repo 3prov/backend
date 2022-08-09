@@ -51,5 +51,5 @@ urlpatterns = [
         'volunteer_create_next_and_get_form_urls/<uuid:user>/',
         EvaluationFormURLVolunteerCreate.as_view(),
         name='volunteer_create_next_and_get_form_urls_user',
-    )
+    ),
 ]

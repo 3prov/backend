@@ -16,7 +16,8 @@ from api.rus.evaluations.serializers import (
     EvaluationFormURLListViewSerializer,
     EvaluationFormURLWorkCreateSerializer,
     EssayCriteriaDetailSerializer,
-    EssayEvaluationDetailSerializer, EvaluationFormURLVolunteerCreateSerializer,
+    EssayEvaluationDetailSerializer,
+    EvaluationFormURLVolunteerCreateSerializer,
 )
 from api.rus.models import Essay
 from api.work_distribution.models import WorkDistributionToEvaluate
@@ -194,7 +195,9 @@ class WorkDistributionToEvaluateVolunteerListView(generics.ListAPIView):
         )
         if queryset.exists():
             return queryset
-        WorkDistributionToEvaluate.make_optionally_for_volunteer(volunteer)  # TODO: to celery
+        WorkDistributionToEvaluate.make_optionally_for_volunteer(
+            volunteer
+        )  # TODO: to celery
         return WorkDistributionToEvaluate.objects.filter(
             evaluator=volunteer, week_id=WeekID.get_current()
         )
@@ -217,13 +220,15 @@ class EvaluationFormURLVolunteerCreate(generics.CreateAPIView):
         # TODO: убрать ORM запросы из views
         current_week_id = WeekID.get_current()
         forms = EvaluationFormURL.objects.filter(
-            user=volunteer, week_id=current_week_id,
+            user=volunteer,
+            week_id=current_week_id,
         )
         # проверка если количество форм пользователя уже равняется числу сочинений
         # на текущей неделе
-        if forms.count() == Essay.objects.filter(
-            task__week_id=current_week_id
-        ).count() - 1:
+        if (
+            forms.count()
+            == Essay.objects.filter(task__week_id=current_week_id).count() - 1
+        ):
             return Response(
                 EvaluationFormURLListViewSerializer(forms, many=True).data,
                 status=status.HTTP_200_OK,
@@ -231,11 +236,15 @@ class EvaluationFormURLVolunteerCreate(generics.CreateAPIView):
 
         # проверка чтобы пользователь не смог проверить необязательные работы
         # до проверки обязательных
-        if EssayEvaluation.objects.filter(
-            evaluator=volunteer, work__task__week_id=current_week_id
-        ).count() < 3 and Essay.objects.filter(
-            author=volunteer, task__week_id=current_week_id
-        ).exists():
+        if (
+            EssayEvaluation.objects.filter(
+                evaluator=volunteer, work__task__week_id=current_week_id
+            ).count()
+            < 3
+            and Essay.objects.filter(
+                author=volunteer, task__week_id=current_week_id
+            ).exists()
+        ):
             raise permissions.exceptions.ValidationError(
                 detail='Необходимо вначале проверить обязательные работы.'
             )
@@ -254,9 +263,7 @@ class EvaluationFormURLVolunteerCreate(generics.CreateAPIView):
         picked_essay = random.choice(list(difference))
 
         EvaluationFormURL.objects.create(
-            user=volunteer,
-            evaluation_work=picked_essay,
-            week_id=current_week_id
+            user=volunteer, evaluation_work=picked_essay, week_id=current_week_id
         )
 
         return Response(
@@ -264,6 +271,7 @@ class EvaluationFormURLVolunteerCreate(generics.CreateAPIView):
                 EvaluationFormURL.objects.filter(
                     user=volunteer, week_id=current_week_id
                 ),
-                many=True).data,
+                many=True,
+            ).data,
             status=status.HTTP_200_OK,
         )

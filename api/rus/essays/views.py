@@ -68,7 +68,7 @@ class EssayFromFormURLCreate(generics.CreateAPIView):
                 {'detail': 'Ссылка недействительна.'}
             )
         added_essay = Essay.objects.create(
-            task=form_url.week_id, body=request.data['body'], author=form_url.user
+            task=form_url.week_id.task, body=request.data['body'], author=form_url.user
         )
         return Response(
             EssayFormURLCreateSerializer(added_essay).data,

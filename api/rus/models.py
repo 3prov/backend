@@ -3,6 +3,8 @@ import uuid
 
 from django.conf import settings
 from django.db import models, transaction
+
+from api.management.models import WeekID
 from api.models import Work, Task, User
 
 
@@ -16,7 +18,7 @@ class Text(Task):
     author_description = models.TextField(verbose_name='Описание автора текста')
 
     @staticmethod
-    def get_current():
+    def get_current() -> Text:
         return Text.objects.order_by('-created_at').first()
 
 

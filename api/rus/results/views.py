@@ -44,5 +44,7 @@ class WeekResultsFromFormURLListView(generics.ListAPIView):
                 {'detail': 'Ссылка недействительна.'}
             )
         queryset = self.get_queryset()
-        obj = queryset.filter(work__author=form_url.user, work__task__week_id=form_url.week_id)
+        obj = queryset.filter(
+            work__author=form_url.user, work__task__week_id=form_url.week_id
+        )
         return Response(EssayEvaluationDetailSerializer(obj, many=True).data)

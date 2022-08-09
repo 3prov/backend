@@ -18,5 +18,5 @@ urlpatterns = [
         'r/<str:encoded_part>/',
         WeekResultsFromFormURLListView.as_view(),
         name='week_results_list_by_encoded_part',
-    )
+    ),
 ]
