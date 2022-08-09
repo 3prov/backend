@@ -11,7 +11,7 @@
 
 
 ## Загрузка текста недели
-- POST: /api/v1/rus/text/assign/
+- POST: /api/v1/rus/text/assign/ # TODO: создать сборник текстов 50 штук (в начале уч. года загрузить). позволить пользователям загружать-предлагать свои тексты, в воскресенье проводить опрос-выбор текста недели. проверять тексты пользователей на наличие рекламы/спама
 - POST: /api/v1/rus/text/keys/add/
 
 
@@ -44,19 +44,22 @@ TODO: при переходе на этап S3 необходимо провер
   - GET, PUT, PATCH: /api/v1/rus/evaluation/form-url/<str:encoded_part>/edit/
   - POST: /api/v1/rus/evaluation/sentence_review/form-url/<str:encoded_part>/post/
   - GET, PUT, PATCH: /api/v1/rus/evaluation/sentence_review/form-url/<str:encoded_part>/edit/<int:sentence_number>/
-#после проверки трёх этих работ участник становится волонтёром
+> **Note**:
+> После проверки трёх этих работ участник становится волонтёром.
 
 ### Волонтеры (не отправляли работы на текущей неделе)
-- GET: /api/v1/rus/evaluation/volunteer_get_evaluation_list/<uuid:user>/
-- POST: /api/v1/rus/evaluation/get_link_to_form/
+- GET: /api/v1/rus/evaluation/volunteer_get_distribution/<uuid:user>/
+- POST: /api/v1/rus/evaluation/volunteer_create_next_and_get_form_urls/<uuid:user>/
 - GET: /f/e/<str:endoded_part>/
   - POST: /api/v1/rus/evaluation/form-url/<str:encoded_part>/post/
   - GET, PUT, PATCH: /api/v1/rus/evaluation/form-url/<str:encoded_part>/edit/
   - POST: /api/v1/rus/evaluation/sentence_review/form-url/<str:encoded_part>/post/
   - GET, PUT, PATCH: /api/v1/rus/evaluation/sentence_review/form-url/<str:encoded_part>/edit/<int:sentence_number>/
 
-### Результаты недели
+
+## Результаты недели
 - POST: /api/v1/rus/results/create_link_to_form/ # TODO: to celery auto create
+- GET: /f/r/<str:endoded_part>/
 
 
 #генерация EvaluationFormURL при запросе на проверку

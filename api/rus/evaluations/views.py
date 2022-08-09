@@ -1,3 +1,5 @@
+import random
+
 from django.db import transaction
 from rest_framework import generics, permissions, status
 from rest_framework.generics import get_object_or_404
@@ -12,10 +14,11 @@ from api.rus.evaluations.serializers import (
     EvaluationFormURLGetCurrentWeekListSerializer,
     EssaySentenceReviewCreateSerializer,
     EvaluationFormURLListViewSerializer,
-    EvaluationFormURLCreateSerializer,
+    EvaluationFormURLWorkCreateSerializer,
     EssayCriteriaDetailSerializer,
-    EssayEvaluationDetailSerializer,
+    EssayEvaluationDetailSerializer, EvaluationFormURLVolunteerCreateSerializer,
 )
+from api.rus.models import Essay
 from api.work_distribution.models import WorkDistributionToEvaluate
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -93,7 +96,6 @@ class EssaySentenceReviewFormURLView(generics.RetrieveUpdateAPIView):
 
 
 class EvaluationFormURLGetCurrentWeekList(generics.ListAPIView):
-
     permission_classes = [permissions.IsAdminUser]
     serializer_class = EvaluationFormURLGetCurrentWeekListSerializer
     filter_backends = [DjangoFilterBackend]
@@ -113,12 +115,9 @@ class EvaluationFormURLListView(generics.ListAPIView):
         )
 
 
-# class EvaluationFormURLGetUserLink(generics.ListAPIView):
-
-
-class EvaluationFormURLCreate(generics.CreateAPIView):
+class EvaluationFormURLWorkCreate(generics.CreateAPIView):
     queryset = EvaluationFormURL.objects.all()
-    serializer_class = EvaluationFormURLCreateSerializer
+    serializer_class = EvaluationFormURLWorkCreateSerializer
     permission_classes = [permissions.AllowAny, IsEvaluationAcceptingStage]
 
     @transaction.atomic()
@@ -154,7 +153,7 @@ class EvaluationFormURLCreate(generics.CreateAPIView):
         )
         # EssaySentenceReview.objects.filter(essay=form_url.evaluation_work, evaluator=form_url.user) <--- RETURN IN TOO
         return Response(
-            EvaluationFormURLCreateSerializer(added_evaluation).data,
+            EvaluationFormURLWorkCreateSerializer(added_evaluation).data,
             status=status.HTTP_201_CREATED,
         )  # TODO: change EvaluationFormURLCreateSerializer
 
@@ -182,21 +181,89 @@ class WorkDistributionToEvaluateVolunteerListView(generics.ListAPIView):
     permission_classes = [permissions.IsAdminUser]
 
     def get_queryset(self):
-        volunteer_uuid = self.kwargs['user']
+        _volunteer_uuid = self.kwargs['user']
         try:
-            volunteer = User.objects.get(id=volunteer_uuid)
+            volunteer = User.objects.get(id=_volunteer_uuid)
         except User.DoesNotExist:
             raise permissions.exceptions.ValidationError(
                 detail='Пользователь с таким UUID не найден.'
             )
 
-        if WorkDistributionToEvaluate.objects.filter(
+        queryset = WorkDistributionToEvaluate.objects.filter(
             evaluator=volunteer, week_id=WeekID.get_current()
-        ).exists():
-            raise permissions.exceptions.PermissionDenied(
-                detail='Распределение для пользователя уже произведено.'
-            )
-        WorkDistributionToEvaluate.make_optionally_for_volunteer(volunteer)
+        )
+        if queryset.exists():
+            return queryset
+        WorkDistributionToEvaluate.make_optionally_for_volunteer(volunteer)  # TODO: to celery
         return WorkDistributionToEvaluate.objects.filter(
             evaluator=volunteer, week_id=WeekID.get_current()
+        )
+
+
+class EvaluationFormURLVolunteerCreate(generics.CreateAPIView):
+    queryset = EvaluationFormURL.objects.all()
+    serializer_class = EvaluationFormURLVolunteerCreateSerializer
+    permission_classes = [permissions.IsAdminUser, IsEvaluationAcceptingStage]
+
+    def create(self, request, *args, **kwargs):
+        _volunteer_uuid = self.kwargs['user']
+        try:
+            volunteer = User.objects.get(id=_volunteer_uuid)
+        except User.DoesNotExist:
+            raise permissions.exceptions.ValidationError(
+                detail='Пользователь с таким UUID не найден.'
+            )
+
+        # TODO: убрать ORM запросы из views
+        current_week_id = WeekID.get_current()
+        forms = EvaluationFormURL.objects.filter(
+            user=volunteer, week_id=current_week_id,
+        )
+        # проверка если количество форм пользователя уже равняется числу сочинений
+        # на текущей неделе
+        if forms.count() == Essay.objects.filter(
+            task__week_id=current_week_id
+        ).count() - 1:
+            return Response(
+                EvaluationFormURLListViewSerializer(forms, many=True).data,
+                status=status.HTTP_200_OK,
+            )
+
+        # проверка чтобы пользователь не смог проверить необязательные работы
+        # до проверки обязательных
+        if EssayEvaluation.objects.filter(
+            evaluator=volunteer, work__task__week_id=current_week_id
+        ).count() < 3 and Essay.objects.filter(
+            author=volunteer, task__week_id=current_week_id
+        ).exists():
+            raise permissions.exceptions.ValidationError(
+                detail='Необходимо вначале проверить обязательные работы.'
+            )
+
+        work_distribution = WorkDistributionToEvaluate.objects.filter(
+            evaluator=volunteer, week_id=current_week_id
+        )
+        if not work_distribution.exists():
+            raise permissions.exceptions.ValidationError(
+                detail='Распределение для пользователя не производилось.'
+            )
+
+        work_distribution_essays = set(wd.work for wd in work_distribution)
+        form_evaluation_essays = set(f.evaluation_work for f in forms)
+        difference = work_distribution_essays.difference(form_evaluation_essays)
+        picked_essay = random.choice(list(difference))
+
+        EvaluationFormURL.objects.create(
+            user=volunteer,
+            evaluation_work=picked_essay,
+            week_id=current_week_id
+        )
+
+        return Response(
+            EvaluationFormURLListViewSerializer(
+                EvaluationFormURL.objects.filter(
+                    user=volunteer, week_id=current_week_id
+                ),
+                many=True).data,
+            status=status.HTTP_200_OK,
         )

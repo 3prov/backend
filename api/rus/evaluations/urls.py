@@ -4,10 +4,11 @@ from api.rus.evaluations.views import (
     EvaluationFormURLGetCurrentWeekList,
     EssaySentenceReviewFromFormURLCreate,
     EvaluationFormURLListView,
-    EvaluationFormURLCreate,
+    EvaluationFormURLWorkCreate,
     EvaluationFormURLView,
     WorkDistributionToEvaluateVolunteerListView,
     EssaySentenceReviewFormURLView,
+    EvaluationFormURLVolunteerCreate,
 )
 
 urlpatterns = [
@@ -33,7 +34,7 @@ urlpatterns = [
     ),
     path(
         'form-url/<str:encoded_part>/post/',
-        EvaluationFormURLCreate.as_view(),
+        EvaluationFormURLWorkCreate.as_view(),
         name='evaluation_from_url_post',
     ),  # Create
     path(
@@ -42,11 +43,13 @@ urlpatterns = [
         name='evaluation_from_url_edit',
     ),  # Read, Update
     path(
-        'volunteer_get_evaluation_list/<uuid:user>/',
+        'volunteer_get_distribution/<uuid:user>/',
         WorkDistributionToEvaluateVolunteerListView.as_view(),
-        name='volunteer_get_evaluation_list',
+        name='volunteer_get_distribution',
     ),
-    # path( # TODO: create EvaluationFormURL by evaluator.id and work.id from 'volunteer_get_evaluation_list'
-    #    ''
-    # )
+    path(
+        'volunteer_create_next_and_get_form_urls/<uuid:user>/',
+        EvaluationFormURLVolunteerCreate.as_view(),
+        name='volunteer_create_next_and_get_form_urls_user',
+    )
 ]

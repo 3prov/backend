@@ -47,7 +47,7 @@ class EssayCriteriaDetailSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class EvaluationFormURLCreateSerializer(serializers.ModelSerializer):
+class EvaluationFormURLWorkCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = EssayEvaluation
         fields = '__all__'
@@ -83,3 +83,13 @@ class EssayEvaluationDetailSerializer(serializers.ModelSerializer):
             evaluator=obj.evaluator, essay=obj.work
         )
         return EssaySentenceReviewSerializer(essay_sentences_review, many=True).data
+
+
+class EvaluationFormURLVolunteerCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EvaluationFormURL
+        fields = '__all__'
+
+    url = serializers.URLField(read_only=True)
+    week_id = serializers.URLField(read_only=True)
+    evaluation_work = EssayEvaluationDetailSerializer(read_only=True)

@@ -2,6 +2,9 @@ from __future__ import annotations
 import abc
 import uuid
 
+from random import randint
+
+from django.conf import settings
 from django.db import models, transaction
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
@@ -84,6 +87,24 @@ class FormURL(models.Model, metaclass=AbstractModelMeta):
     @abc.abstractmethod
     def get_from_url(url: str) -> FormURL | None:
         pass
+
+    def save(
+        self, force_insert=False, force_update=False, using=None, update_fields=None
+    ):
+        from api.form_url.models import EvaluationFormURL
+        _user_evaluation_form_already_count = EvaluationFormURL.objects.filter(
+            user=self.user,
+            week_id=WeekID.get_current()
+        ).count()
+        self.url = self._hash_string(
+            settings.STRING_HASH_TEMPLATE.format(
+                user_id=self.user.id,
+                week_id=WeekID.get_current().id,
+                hash_type=f'{type(self).__name__}{_user_evaluation_form_already_count}',
+                django_secret_key=settings.SECRET_KEY,
+            )
+        )
+        super().save(force_insert, force_update, using, update_fields)
 
 
 class Task(models.Model, metaclass=AbstractModelMeta):
