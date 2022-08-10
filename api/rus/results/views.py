@@ -17,16 +17,16 @@ from api.rus.results.serializers import (
 
 
 class WeekResultsListView(generics.ListAPIView):
-    queryset = EssayEvaluation.objects.all()
-    serializer_class = EssayEvaluationDetailSerializer
-    permission_classes = [permissions.IsAdminUser]
+    queryset = EssayEvaluation.objects.all().order_by(
+        '-work__task__week_id__week_number', '-work__task__week_id__study_year_from'
+    )
+    serializer_class = EssayEvaluationDetailSerializer  # TODO: change because AllowAny
+    permission_classes = [permissions.AllowAny]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = [
-        'work__task__week_id',  # TODO: `task__week_id` is id
-        'evaluator__username',
+        'work__task__id',
         'evaluator__id',
-        'work__author__username',
-        'work__author__id',  # TODO: проверить, если автор отправляет работы на разных неделях, то результат отображается для всех недель?
+        'work__author__id',
     ]
 
 

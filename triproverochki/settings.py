@@ -14,6 +14,9 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
+from corsheaders.defaults import default_headers
+
+
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -46,11 +49,13 @@ INSTALLED_APPS = [
     'django_filters',
     'drf_yasg',
     'django_hosts',
+    'corsheaders',
     'api',
 ]
 
 MIDDLEWARE = [
     'django_hosts.middleware.HostsRequestMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -144,6 +149,8 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
     ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 10,
 }
 
 AUTH_USER_MODEL = 'api.User'
@@ -204,3 +211,5 @@ RATINGS_CONFIGURATION = {
     'increase_essay_pass': 10,
     'increase_check_pass': 7,
 }
+
+CORS_ORIGIN_ALLOW_ALL = True
