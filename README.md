@@ -50,7 +50,7 @@ TODO: при переходе на этап S3 необходимо провер
 ### Волонтеры (не отправляли работы на текущей неделе)
 - GET: /api/v1/rus/evaluation/volunteer_get_distribution/<uuid:user>/
 - POST: /api/v1/rus/evaluation/volunteer_create_next_and_get_form_urls/<uuid:user>/
-- GET: /f/e/<str:endoded_part>/
+- GET: /f/e/<str:encoded_part>/
   - POST: /api/v1/rus/evaluation/form-url/<str:encoded_part>/post/
   - GET, PUT, PATCH: /api/v1/rus/evaluation/form-url/<str:encoded_part>/edit/
   - POST: /api/v1/rus/evaluation/sentence_review/form-url/<str:encoded_part>/post/
@@ -58,8 +58,11 @@ TODO: при переходе на этап S3 необходимо провер
 
 
 ## Результаты недели
-- POST: /api/v1/rus/results/create_link_to_form/ # TODO: to celery auto create
-- GET: /f/r/<str:endoded_part>/
+- POST: /api/v1/rus/results/get_link_to_form/<uuid:user>/ # TODO: to celery auto create
+- GET: /f/r/<str:encoded_part>/
+
+### Оценка проверок
+- POST: /api/v1/rus/results/rate_essay_evaluation/<str:encoded_part>/post/
 
 
 #генерация EvaluationFormURL при запросе на проверку

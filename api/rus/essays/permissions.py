@@ -77,10 +77,7 @@ class IsEssayFormURLAlreadyExists(permissions.BasePermission):
 
     def has_permission(self, request, view) -> bool:
         serialized = EssayFormCreateSerializer(data=request.data)
-        if not serialized.is_valid():
-            raise permissions.exceptions.ValidationError(
-                {'detail': 'Ошибка сериализации данных.'}
-            )
+        serialized.is_valid(raise_exception=True)
         current_week_id = WeekID.get_current()
         already_given_url = EssayFormURL.objects.filter(
             user_id=request.data['user'], week_id=current_week_id

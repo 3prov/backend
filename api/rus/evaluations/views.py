@@ -121,7 +121,7 @@ class EvaluationFormURLWorkCreate(generics.CreateAPIView):
     serializer_class = EvaluationFormURLWorkCreateSerializer
     permission_classes = [permissions.AllowAny, IsEvaluationAcceptingStage]
 
-    @transaction.atomic()
+    @transaction.atomic
     def create(self, request, *args, **kwargs):
         form_url = EvaluationFormURL.get_from_url(url=kwargs['encoded_part'])
         if not form_url:

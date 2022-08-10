@@ -5,6 +5,7 @@ import uuid
 from random import randint
 
 from django.conf import settings
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models, transaction
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
@@ -15,6 +16,8 @@ import hashlib
 
 class AbstractModelMeta(abc.ABCMeta, type(models.Model)):
     pass
+    # TODO: add
+    #  id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
 
 class User(AbstractUser, metaclass=AbstractModelMeta):
@@ -162,7 +165,7 @@ class Work(models.Model, metaclass=AbstractModelMeta):
     @abc.abstractmethod
     def save(
         self, force_insert=False, force_update=False, using=None, update_fields=None
-    ):
+    ):  # TODO: move to signals
         """
         Необходимо переопределить метод save для изменения рейтинга пользователя.
         """
@@ -201,13 +204,47 @@ class Evaluation(models.Model, metaclass=AbstractModelMeta):
     @abc.abstractmethod
     def save(
         self, force_insert=False, force_update=False, using=None, update_fields=None
-    ):
+    ):  # TODO: move to signals
         """
         Необходимо переопределить метод save для изменения рейтинга пользователя.
         """
         return super(Evaluation, self).save(
             force_insert, force_update, using, update_fields
         )
+
+
+class RateEvaluation(models.Model, metaclass=AbstractModelMeta):
+    class Meta:
+        abstract = True
+        verbose_name = 'Рейтинг проверки'
+        verbose_name_plural = 'Рейтинги проверки'
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    score = models.PositiveIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        verbose_name='Рейтинг',
+    )
+    rater = models.ForeignKey(
+        to=User,
+        on_delete=models.CASCADE,
+        verbose_name='Пользователь, который оценил проверку',
+        related_name='rate_evaluations',
+    )
+
+    @property
+    @abc.abstractmethod
+    def evaluation_criteria(self):
+        raise NotImplementedError('Необходимо создать связь с моделью Evaluation.')
+
+    @transaction.atomic
+    def save(
+        self, force_insert=False, force_update=False, using=None, update_fields=None
+    ):  # TODO: move to signals
+        User.increase_rating(
+            self.evaluation_criteria.evaluation.evaluator,
+            self.score,  # TODO: change `self.score` to function that depends on evaluator's rating
+        )
+        return super().save(force_insert, force_update, using, update_fields)
 
 
 class Criteria(models.Model, metaclass=AbstractModelMeta):

@@ -8,7 +8,7 @@ from django.core.validators import (
 )
 from django.utils.translation import gettext_lazy as _
 
-from api.models import Evaluation, Criteria, User
+from api.models import Evaluation, Criteria, User, RateEvaluation
 from django.db import models, transaction
 
 from api.rus.models import Essay
@@ -70,10 +70,23 @@ for section in settings.ESSAY_EVALUATION_TABLE.keys():
         )
 
 
+class RateEssayEvaluation(RateEvaluation):
+    class Meta:
+        verbose_name = 'Рейтинг проверки сочинений'
+        verbose_name_plural = 'Рейтинги проверок сочинений'
+
+    evaluation_criteria = models.ForeignKey(
+        to=EssayCriteria,
+        on_delete=models.CASCADE,
+        verbose_name='Проверка',
+        related_name='rates',
+    )
+
+
 class EssaySentenceReview(models.Model):
     class Meta:
         verbose_name = 'Предложение сочинения'
-        verbose_name_plural = 'Предложения сочинения'
+        verbose_name_plural = 'Предложения сочинений'
 
     class MistakesEnum(models.TextChoices):
         K7 = 'K07', _('Орфографическая (К7)')

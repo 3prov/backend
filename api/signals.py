@@ -54,6 +54,21 @@ def post_save_stage(sender, instance, created, **kwargs):
             print('No need for distribution.')  # TODO: to logger
 
 
+@receiver(signals.post_save, sender=Stage)
+def post_save_stage(sender, instance, created, **kwargs):
+    """
+    Отслеживает, если этап становится 'S4', то создаёт ссылки на формы просмотра
+    проверок.
+    """
+    if instance.stage == Stage.StagesEnum.CLOSED_ACCEPT:
+        current_week_id = WeekID.get_current()
+        for essay in Essay.objects.filter(task__week_id=current_week_id).only('author'):
+            ResultsFormURL.objects.create(  # TODO: to celery
+                user=essay.author,
+                week_id=current_week_id,
+            )
+
+
 @receiver(signals.post_save, sender=WorkDistributionToEvaluate)
 def post_save_work_distribution_to_evaluate(sender, instance, created, **kwargs):
     """

@@ -2,7 +2,12 @@ from django.contrib import admin
 
 from .form_url.models import EssayFormURL, EvaluationFormURL, ResultsFormURL
 from .models import User
-from .rus.evaluations.models import EssayEvaluation, EssayCriteria, EssaySentenceReview
+from .rus.evaluations.models import (
+    EssayEvaluation,
+    EssayCriteria,
+    EssaySentenceReview,
+    RateEssayEvaluation,
+)
 from .rus.models import Text, Essay, TextKey
 from .management.models import Stage, WeekID
 from .work_distribution.models import WorkDistributionToEvaluate
@@ -78,3 +83,9 @@ class EssaySentenceReviewAdmin(admin.ModelAdmin):
 class ResultsFormURLAdmin(admin.ModelAdmin):
     list_display = ['user', 'week_id']
     readonly_fields = ['url']
+
+
+@admin.register(RateEssayEvaluation)
+class RateEssayEvaluationAdmin(admin.ModelAdmin):
+    list_display = ['rater', 'evaluation_criteria', 'score']
+    list_filter = ['rater']

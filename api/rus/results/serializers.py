@@ -1,10 +1,13 @@
 from rest_framework import serializers
 
 from api.form_url.models import ResultsFormURL
+from api.rus.evaluations.models import RateEssayEvaluation
+from api.rus.evaluations.serializers import EssayEvaluationDetailSerializer
 from api.rus.texts.serializers import WeekIDSerializer
+from api.serializers import UserDetailSerializer
 
 
-class WeekResultsFormCreateSerializer(serializers.ModelSerializer):
+class WeekResultsFormSerializer(serializers.ModelSerializer):
     class Meta:
         model = ResultsFormURL
         fields = '__all__'
@@ -16,6 +19,10 @@ class WeekResultsFormCreateSerializer(serializers.ModelSerializer):
     def get_url(obj):
         return obj.url
 
-    @staticmethod
-    def get_week_id(obj):
-        return obj.week_id
+
+class RateEssayEvaluationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RateEssayEvaluation
+        fields = '__all__'
+
+    rater = UserDetailSerializer(read_only=True)
