@@ -12,7 +12,7 @@ class WeekIDSerializer(serializers.ModelSerializer):
 class TextListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Text
-        fields = ['week_id', 'author']
+        fields = ['id', 'week_id', 'author']
 
     week_id = WeekIDSerializer()
 

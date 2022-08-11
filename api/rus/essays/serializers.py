@@ -10,7 +10,6 @@ from ...serializers import UserDetailSerializer
 from ..texts.serializers import (
     TextDetailSerializer,
     WeekIDSerializer,
-    TextSerializer,
     TextWithKeysSerializer,
 )
 
