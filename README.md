@@ -4,7 +4,7 @@
 - redoc/
 - swagger/
 
-/api_docs_frontend.md
+[api_docs_frontend.md](/api_docs_frontend.md)
 
 
 ## Создание пользователя
