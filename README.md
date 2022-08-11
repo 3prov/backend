@@ -4,7 +4,8 @@
 - redoc/
 - swagger/
 
-[api_docs_frontend.md](/api_docs_frontend.md)
+- [Frontend](/README_frontend.md)
+- [Bot](/README_bot.md)
 
 
 ## Создание пользователя
