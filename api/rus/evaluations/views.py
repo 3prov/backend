@@ -12,12 +12,12 @@ from api.rus.evaluations.models import EssayEvaluation, EssaySentenceReview
 from api.rus.evaluations.permissions import IsEvaluationAcceptingStage
 from api.rus.evaluations.serializers import (
     EvaluationFormURLGetCurrentWeekListSerializer,
-    EssaySentenceReviewCreateSerializer,
     EvaluationFormURLListViewSerializer,
     EvaluationFormURLWorkCreateSerializer,
     EssayCriteriaDetailSerializer,
-    EssayEvaluationDetailSerializer,
+    EssayEvaluationSerializer,
     EvaluationFormURLVolunteerCreateSerializer,
+    EssaySentenceReviewSerializer,
 )
 from api.rus.models import Essay
 from api.work_distribution.models import WorkDistributionToEvaluate
@@ -27,7 +27,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 class EssaySentenceReviewFromFormURLCreate(generics.CreateAPIView):
     queryset = EssaySentenceReview.objects.all()
-    serializer_class = EssaySentenceReviewCreateSerializer
+    serializer_class = EssaySentenceReviewSerializer
     permission_classes = [permissions.AllowAny, IsEvaluationAcceptingStage]
 
     def create(self, request, *args, **kwargs):
@@ -37,12 +37,8 @@ class EssaySentenceReviewFromFormURLCreate(generics.CreateAPIView):
                 {'detail': 'Ссылка недействительна.'}
             )
 
-        serialized = EssaySentenceReviewCreateSerializer(data=request.data)
-        if not serialized.is_valid():
-            raise permissions.exceptions.ValidationError(
-                detail='Ошибка сериализации модели проверки предложений.'
-            )
-
+        serialized = self.get_serializer(data=request.data)
+        serialized.is_valid(raise_exception=True)
         if not (
             0
             < serialized.data['sentence_number']
@@ -70,7 +66,7 @@ class EssaySentenceReviewFromFormURLCreate(generics.CreateAPIView):
             evaluator=form_url.user,
         )
         return Response(
-            EssaySentenceReviewCreateSerializer(added_sentence_review).data,
+            self.get_serializer(added_sentence_review).data,
             status=status.HTTP_201_CREATED,
         )
 
@@ -78,7 +74,7 @@ class EssaySentenceReviewFromFormURLCreate(generics.CreateAPIView):
 class EssaySentenceReviewFormURLView(generics.RetrieveUpdateAPIView):
     queryset = EssaySentenceReview.objects.all()
     permission_classes = [permissions.AllowAny, IsEvaluationAcceptingStage]
-    serializer_class = EssaySentenceReviewCreateSerializer
+    serializer_class = EssaySentenceReviewSerializer
 
     def get_object(self):
         form_url = EvaluationFormURL.get_from_url(url=self.kwargs['encoded_part'])
@@ -118,7 +114,7 @@ class EvaluationFormURLListView(generics.ListAPIView):
 
 class EvaluationFormURLWorkCreate(generics.CreateAPIView):
     queryset = EvaluationFormURL.objects.all()
-    serializer_class = EvaluationFormURLWorkCreateSerializer
+    serializer_class = EssayEvaluationSerializer
     permission_classes = [permissions.AllowAny, IsEvaluationAcceptingStage]
 
     @transaction.atomic
@@ -142,10 +138,7 @@ class EvaluationFormURLWorkCreate(generics.CreateAPIView):
             )
 
         criteria = EssayCriteriaDetailSerializer(data=request.data['criteria'])
-        if not criteria.is_valid():
-            raise permissions.exceptions.ValidationError(
-                detail='Ошибка сериализации модели Критериев.'
-            )
+        criteria.is_valid(raise_exception=True)
         criteria_instance = criteria.save()
         added_evaluation = EssayEvaluation.objects.create(
             work=form_url.evaluation_work,
@@ -154,7 +147,7 @@ class EvaluationFormURLWorkCreate(generics.CreateAPIView):
         )
         # EssaySentenceReview.objects.filter(essay=form_url.evaluation_work, evaluator=form_url.user) <--- RETURN IN TOO
         return Response(
-            EvaluationFormURLWorkCreateSerializer(added_evaluation).data,
+            self.get_serializer(added_evaluation).data,
             status=status.HTTP_201_CREATED,
         )  # TODO: change EvaluationFormURLCreateSerializer
 
@@ -162,7 +155,7 @@ class EvaluationFormURLWorkCreate(generics.CreateAPIView):
 class EvaluationFormURLView(generics.RetrieveUpdateAPIView):
     queryset = EssayEvaluation.objects.all()
     permission_classes = [permissions.AllowAny, IsEvaluationAcceptingStage]
-    serializer_class = EssayEvaluationDetailSerializer
+    serializer_class = EssayEvaluationSerializer
 
     def get_object(self):
         form_url = EvaluationFormURL.get_from_url(url=self.kwargs['encoded_part'])

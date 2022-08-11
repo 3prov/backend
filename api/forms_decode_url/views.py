@@ -6,9 +6,11 @@ from rest_framework.views import APIView
 from api.form_url.models import EssayFormURL, EvaluationFormURL
 from api.management.models import WeekID
 from api.rus.essays.permissions import IsWorkAcceptingStage
+from api.rus.essays.serializers import EssaySerializer
 from api.rus.evaluations.models import EssayEvaluation
-from api.rus.evaluations.serializers import EssayEvaluationDetailSerializer
-from api.rus.models import Essay
+from api.rus.evaluations.serializers import EssayEvaluationSerializer
+from api.rus.models import Essay, Text
+from api.rus.texts.serializers import TextSerializer
 
 
 class EssayDecodeURLView(APIView):
@@ -23,8 +25,9 @@ class EssayDecodeURLView(APIView):
                 'to_PATCH': False,
             },
             'work': {
-                'essay_body': False,
+                'essay': False,
             },
+            'task': False,
         }
 
         form_url = EssayFormURL.get_from_url(kwargs['encoded_part'])
@@ -33,14 +36,13 @@ class EssayDecodeURLView(APIView):
                 {'detail': 'Ссылка недействительна.'}
             )
 
+        data_to_response['task'] = TextSerializer(Text.get_current()).data
         try:
             essay = Essay.objects.get(
                 author=form_url.user, task__week_id=WeekID.get_current()
             )
             data_to_response['work_already_sent'] = True
-            data_to_response['work'][
-                'essay_body'
-            ] = essay.body  # TODO: change serializer
+            data_to_response['work']['essay'] = EssaySerializer(essay).data
             data_to_response['urls']['to_PATCH'] = reverse(
                 'essay_from_url_edit', args=[form_url.url]
             )
@@ -63,9 +65,8 @@ class EvaluationDecodeURLView(APIView):
                 'to_POST': False,
                 'to_PATCH': False,
             },
-            'evaluation': {
-                'body': False,
-            },
+            'evaluation': False,
+            'task': False,
         }
 
         form_url = EvaluationFormURL.get_from_url(kwargs['encoded_part'])
@@ -74,14 +75,13 @@ class EvaluationDecodeURLView(APIView):
                 {'detail': 'Ссылка недействительна.'}
             )
 
+        data_to_response['task'] = TextSerializer(Text.get_current()).data
         try:
             evaluation = EssayEvaluation.objects.get(
                 evaluator=form_url.user, work=form_url.evaluation_work
             )
             data_to_response['evaluation_already_sent'] = True
-            data_to_response['evaluation']['body'] = EssayEvaluationDetailSerializer(
-                evaluation
-            ).data
+            data_to_response['evaluation'] = EssayEvaluationSerializer(evaluation).data
             data_to_response['urls']['to_PATCH'] = reverse(
                 'evaluation_from_url_edit', args=[form_url.url]
             )  # TODO: change serializer

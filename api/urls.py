@@ -42,4 +42,5 @@ urlpatterns = [
     path('users/<uuid:pk>', views.UserDetailView.as_view()),
     path('management/', include('api.management.urls')),
     path('health_check/', views.health_check_view, name='health_check'),
+    path('encoded-form-urls/', include('api.forms_decode_url.urls')),
 ]

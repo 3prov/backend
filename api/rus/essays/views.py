@@ -2,12 +2,12 @@ from rest_framework import generics, permissions, status
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from ..models import Essay, Text
+from ..models import Essay
 from .serializers import (
     EssayCreateSerializer,
     EssayListSerializer,
     EssayDetailSerializer,
-    EssayFormCreateSerializer,
+    EssayFormSerializer,
     EssayFormURLCreateSerializer,
 )
 from .permissions import (
@@ -42,7 +42,7 @@ class EssayListView(generics.ListAPIView):
 
 
 class EssayFormURLUserCreate(generics.CreateAPIView):
-    serializer_class = EssayFormCreateSerializer
+    serializer_class = EssayFormSerializer
     permission_classes = [permissions.IsAuthenticated, IsEssayFormURLAlreadyExists]
 
 
@@ -77,7 +77,7 @@ class EssayFromFormURLCreate(generics.CreateAPIView):
 
 
 class EssayFormURLUserListView(generics.ListAPIView):
-    serializer_class = EssayFormCreateSerializer
+    serializer_class = EssayFormSerializer
     permission_classes = [permissions.IsAdminUser]
 
     def get_queryset(self):
@@ -89,7 +89,7 @@ class EssayFormURLUserListView(generics.ListAPIView):
 class EssayFromFormURLDetailView(generics.RetrieveUpdateAPIView):
     queryset = Essay.objects.all()
     permission_classes = [permissions.AllowAny, IsWorkAcceptingStage]
-    serializer_class = EssayDetailSerializer
+    serializer_class = EssayFormURLCreateSerializer
 
     def get_object(self):
         form_url = EssayFormURL.get_from_url(url=self.kwargs['encoded_part'])

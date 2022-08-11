@@ -9,7 +9,9 @@ from api.rus.evaluations.models import (
     RateEssayEvaluation,
     EssayCriteria,
 )
-from api.rus.evaluations.serializers import EssayEvaluationDetailSerializer
+from api.rus.essays.serializers import EssayListSerializer
+from api.rus.evaluations.serializers import EssayEvaluationSerializer
+from api.rus.models import Essay
 from api.rus.results.serializers import (
     WeekResultsFormSerializer,
     RateEssayEvaluationSerializer,
@@ -17,16 +19,15 @@ from api.rus.results.serializers import (
 
 
 class WeekResultsListView(generics.ListAPIView):
-    queryset = EssayEvaluation.objects.all().order_by(
-        '-work__task__week_id__week_number', '-work__task__week_id__study_year_from'
+    queryset = Essay.objects.all().order_by(
+        '-task__week_id__week_number', '-task__week_id__study_year_from'
     )
-    serializer_class = EssayEvaluationDetailSerializer  # TODO: change because AllowAny
+    serializer_class = EssayListSerializer
     permission_classes = [permissions.AllowAny]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = [
-        'work__task__id',
-        'evaluator__id',
-        'work__author__id',
+        'task__week_id__week_number',
+        'task__week_id__study_year_from',
     ]
 
 
@@ -44,7 +45,7 @@ class WeekResultsFormURLUserListView(generics.ListAPIView):
 class WeekResultsFromFormURLListView(generics.ListAPIView):
     queryset = EssayEvaluation.objects.all()
     permission_classes = [permissions.AllowAny]
-    serializer_class = EssayEvaluationDetailSerializer
+    serializer_class = EssayEvaluationSerializer
 
     def list(self, request, *args, **kwargs):
         form_url = ResultsFormURL.get_from_url(url=self.kwargs['encoded_part'])
@@ -56,7 +57,7 @@ class WeekResultsFromFormURLListView(generics.ListAPIView):
         obj = queryset.filter(
             work__author=form_url.user, work__task__week_id=form_url.week_id
         )
-        return Response(EssayEvaluationDetailSerializer(obj, many=True).data)
+        return Response(self.get_serializer(obj, many=True).data)
 
 
 class RateEssayEvaluationFromFormURLCreate(generics.CreateAPIView):

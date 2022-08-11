@@ -1,13 +1,11 @@
-from rest_framework import serializers, exceptions
+from rest_framework import serializers
 
 from api.form_url.models import EvaluationFormURL
-from api.rus.essays.serializers import EssayDetailSerializer
 from api.rus.evaluations.models import (
     EssayEvaluation,
     EssaySentenceReview,
     EssayCriteria,
 )
-from api.serializers import UserDetailSerializer
 from api.work_distribution.models import WorkDistributionToEvaluate
 
 
@@ -26,19 +24,22 @@ class EssaySentenceReviewSerializer(serializers.ModelSerializer):
         fields = ['sentence_number', 'evaluator_comment', 'mistake_type']
 
 
-class EssaySentenceReviewCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = EssaySentenceReview
-        fields = '__all__'
-
-    essay = EssayDetailSerializer(read_only=True)
-    evaluator = UserDetailSerializer(read_only=True)
-
-
 class EvaluationFormURLListViewSerializer(serializers.ModelSerializer):
     class Meta:
         model = EvaluationFormURL
         fields = '__all__'
+
+
+class EssayCriteriaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EssayCriteria
+        fields = '__all__'
+
+
+class EssayCriteriaListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EssayCriteria
+        fields = ['score']
 
 
 class EssayCriteriaDetailSerializer(serializers.ModelSerializer):
@@ -50,25 +51,19 @@ class EssayCriteriaDetailSerializer(serializers.ModelSerializer):
 class EvaluationFormURLWorkCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = EssayEvaluation
-        fields = '__all__'
+        fields = ['criteria', 'created_at']
 
-    criteria = EssayCriteriaDetailSerializer()
-
+    criteria = EssayCriteriaSerializer()
     created_at = serializers.DateTimeField(read_only=True)
-    work = EssayDetailSerializer(read_only=True)
-    evaluator = UserDetailSerializer(read_only=True)
 
 
-class EssayEvaluationDetailSerializer(serializers.ModelSerializer):
+class EssayEvaluationSerializer(serializers.ModelSerializer):
     class Meta:
         model = EssayEvaluation
-        fields = '__all__'
+        fields = ['criteria', 'created_at', 'sentences_review']
 
-    id = serializers.UUIDField(read_only=True)
-    work = EssayDetailSerializer(read_only=True)
     created_at = serializers.DateTimeField(read_only=True)
-    evaluator = UserDetailSerializer(read_only=True)
-    criteria = EssayCriteriaDetailSerializer()
+    criteria = EssayCriteriaSerializer()
     sentences_review = serializers.SerializerMethodField(read_only=True)
 
     def update(self, instance, validated_data):
@@ -85,6 +80,18 @@ class EssayEvaluationDetailSerializer(serializers.ModelSerializer):
         return EssaySentenceReviewSerializer(essay_sentences_review, many=True).data
 
 
+class EssayEvaluationListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EssayEvaluation
+        fields = ['criteria_score']
+
+    criteria_score = serializers.SerializerMethodField()
+
+    @staticmethod
+    def get_criteria_score(obj):
+        return obj.criteria.score
+
+
 class EvaluationFormURLVolunteerCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = EvaluationFormURL
@@ -92,4 +99,4 @@ class EvaluationFormURLVolunteerCreateSerializer(serializers.ModelSerializer):
 
     url = serializers.URLField(read_only=True)
     week_id = serializers.URLField(read_only=True)
-    evaluation_work = EssayEvaluationDetailSerializer(read_only=True)
+    evaluation_work = EssayEvaluationSerializer(read_only=True)

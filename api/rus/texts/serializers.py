@@ -18,7 +18,9 @@ class TextKeySerializer(serializers.ModelSerializer):
 class TextListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Text
-        fields = ['id', 'teacher', 'author', 'created_at']
+        fields = ['week_id', 'author']
+
+    week_id = WeekIDSerializer()
 
 
 class TextDetailSerializer(serializers.ModelSerializer):
@@ -34,6 +36,14 @@ class TextDetailSerializer(serializers.ModelSerializer):
         text_keys = TextKey.objects.filter(text=obj)
         serializer = TextKeySerializer(text_keys, many=True)
         return serializer.data
+
+
+class TextSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Text
+        fields = ['week_id', 'body', 'author', 'author_description']
+
+    week_id = WeekIDSerializer(read_only=True)
 
 
 class TextCreateSerializer(serializers.ModelSerializer):

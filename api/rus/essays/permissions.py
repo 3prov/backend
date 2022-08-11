@@ -5,7 +5,7 @@ from ...form_url.models import EssayFormURL
 from ...management.models import Stage, WeekID
 from .serializers import (
     EssayCreateSerializer,
-    EssayFormCreateSerializer,
+    EssayFormSerializer,
     EssayFormURLCreateSerializer,
 )
 from ...models import User
@@ -57,10 +57,7 @@ class IsWorkDoesNotAlreadyExists(permissions.BasePermission):
 
     def has_permission(self, request, view) -> bool:
         serialized = EssayCreateSerializer(data=request.data)
-        if not serialized.is_valid():
-            raise permissions.exceptions.ValidationError(
-                {'detail': 'Ошибка сериализации данных.'}
-            )
+        serialized.is_valid(raise_exception=True)
         current_text = Text.get_current()
         already_sent_essay = Essay.objects.filter(
             author=serialized.data['author'], task=current_text
@@ -76,7 +73,7 @@ class IsEssayFormURLAlreadyExists(permissions.BasePermission):
     message = "Ссылка на форму уже выдана."
 
     def has_permission(self, request, view) -> bool:
-        serialized = EssayFormCreateSerializer(data=request.data)
+        serialized = EssayFormSerializer(data=request.data)
         serialized.is_valid(raise_exception=True)
         current_week_id = WeekID.get_current()
         already_given_url = EssayFormURL.objects.filter(
@@ -94,10 +91,8 @@ class IsWorkDoesNotAlreadyExistsFromFormURL(permissions.BasePermission):
     message = "Сочинение на этой неделе уже существует."
 
     def has_permission(self, request, view) -> bool:
-        if not EssayFormURLCreateSerializer(data=request.data).is_valid():
-            raise permissions.exceptions.ValidationError(
-                {'detail': 'Ошибка сериализации данных.'}
-            )
+        serializer = EssayFormURLCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         current_text = Text.get_current()
         form_url = EssayFormURL.get_from_url(view.kwargs['encoded_part'])
         if not form_url:

@@ -81,6 +81,7 @@ class HungarianCPPAlgorithm:
 
         result: list[ResultPair] = []
 
+        print(f"распределение #0")  # TODO: to logger
         matrix = self._create_first_matrix(ratings)
         distribution = self._make_distribution_and_append_result(
             participants, matrix, result

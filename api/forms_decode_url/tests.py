@@ -72,7 +72,7 @@ class ManagementTest(APITestCase):
         to_patch_url = response.json()['urls']['to_PATCH']
         self.assertEqual(to_post_url, False)
         self.assertNotEqual(to_patch_url, False)
-        self.assertEqual(response.json()['work']['essay_body'], data['body'])
+        self.assertEqual(response.json()['work']['essay']['body'], data['body'])
 
         data = {'body': 'теперь измененное содержимое!'}
         response = self.client.patch(to_patch_url, data, format='json')
@@ -87,7 +87,7 @@ class ManagementTest(APITestCase):
         to_patch_url = response.json()['urls']['to_PATCH']
         self.assertEqual(to_post_url, False)
         self.assertNotEqual(to_patch_url, False)
-        self.assertEqual(response.json()['work']['essay_body'], data['body'])
+        self.assertEqual(response.json()['work']['essay']['body'], data['body'])
 
     def send_essay_from_user(self, user: User):
         encoded_url = self.get_link_to_essay_form(user)
@@ -122,7 +122,7 @@ class ManagementTest(APITestCase):
         self.assertEqual(response.json()['evaluation_already_sent'], False)
         self.assertIsInstance(url_to_post, str)
         self.assertEqual(response.json()['urls']['to_PATCH'], False)
-        self.assertIsInstance(response.json()['evaluation'], dict)
+        self.assertEqual(response.json()['evaluation'], False)
 
         data = {
             "criteria": {

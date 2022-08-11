@@ -1,4 +1,9 @@
 from rest_framework import serializers
+
+from ..evaluations.serializers import (
+    EssayEvaluationSerializer,
+    EssayEvaluationListSerializer,
+)
 from ..models import Essay, Text
 from ...form_url.models import EssayFormURL
 from ...serializers import UserDetailSerializer
@@ -8,9 +13,10 @@ from ..texts.serializers import TextDetailSerializer, WeekIDSerializer
 class EssayListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Essay
-        fields = ['id', 'week_id', 'author', 'body']
+        fields = ['week_id', 'body', 'evaluations']
 
-    week_id = serializers.SerializerMethodField()
+    week_id = serializers.SerializerMethodField(read_only=True)
+    evaluations = EssayEvaluationListSerializer(read_only=True, many=True)
 
     @staticmethod
     def get_week_id(obj):
@@ -27,6 +33,12 @@ class EssayDetailSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(read_only=True)
 
 
+class EssaySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Essay
+        fields = ['body', 'created_at']
+
+
 class EssayCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Essay
@@ -40,7 +52,7 @@ class EssayCreateSerializer(serializers.ModelSerializer):
         return Essay.objects.create(task=current_text, **validated_data)
 
 
-class EssayFormCreateSerializer(serializers.ModelSerializer):
+class EssayFormSerializer(serializers.ModelSerializer):
     class Meta:
         model = EssayFormURL
         fields = '__all__'
@@ -60,8 +72,6 @@ class EssayFormCreateSerializer(serializers.ModelSerializer):
 class EssayFormURLCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Essay
-        fields = '__all__'
+        fields = ['created_at', 'body']
 
     created_at = serializers.DateTimeField(read_only=True)
-    task = TextDetailSerializer(read_only=True)
-    author = UserDetailSerializer(read_only=True)

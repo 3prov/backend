@@ -64,14 +64,14 @@ class TextsTest(APITestCase):
 
     def test_anon_user_texts_list_all(self):
         response = self.client.get(reverse('texts_list_all'))
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_common_user_texts_list_all(self):
         self.client.credentials(
             HTTP_AUTHORIZATION=f'Token {self.common_user.auth_token}'
         )
         response = self.client.get(reverse('texts_list_all'))
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_admin_user_texts_list_all(self):
         self.client.credentials(
@@ -79,7 +79,7 @@ class TextsTest(APITestCase):
         )
         response = self.client.get(reverse('texts_list_all'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.json()), 0)
+        self.assertEqual(response.json()['count'], 0)
 
     def test_admin_user_texts_list_all_with_texts(self):
         data = {
@@ -97,7 +97,7 @@ class TextsTest(APITestCase):
 
         response = self.client.get(reverse('texts_list_all'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.json()), 1)
+        self.assertEqual(response.json()['count'], 1)
 
         response = self.client.post(reverse('text_assign'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -105,7 +105,7 @@ class TextsTest(APITestCase):
 
         response = self.client.get(reverse('texts_list_all'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.json()), 2)
+        self.assertEqual(response.json()['count'], 2)
 
     def test_admin_user_add_text_keys_empty(self):
         data = {"range_of_problems": "", "authors_position": "", "text": None}
