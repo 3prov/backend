@@ -4,6 +4,8 @@
 - redoc/
 - swagger/
 
+/api_docs_frontend.md
+
 
 ## Создание пользователя
 - POST: authtoken/users/ # TODO: убрать `password`
@@ -15,7 +17,7 @@
 - POST: rus/text/keys/add/
 
 
-## Смена этапа недели на этап приёма работ (S1 -` S2)
+## Смена этапа недели на этап приёма работ (S1 -> S2)
 - GET: management/switch_stage_to_next/ # TODO: to celery
 
 
@@ -28,9 +30,9 @@
   - GET, PUT, PATCH: rus/essay/detail/`str:encoded_part`/edit/
 
 
-## Смена этапа недели на этап приёма проверок (S2 -` S3)
-` **Warning**:
-` Возможно при наличии хотя бы 4 работ
+## Смена этапа недели на этап приёма проверок (S2 -> S3)
+> **Warning**:
+> Возможно при наличии хотя бы 4 работ
 
 TODO: при переходе на этап S3 необходимо проверить все работы на правильность
 - GET: management/switch_stage_to_next/ # TODO: to celery
@@ -44,8 +46,8 @@ TODO: при переходе на этап S3 необходимо провер
   - GET, PUT, PATCH: rus/evaluation/form-url/`str:encoded_part`/edit/
   - POST: rus/evaluation/sentence_review/form-url/`str:encoded_part`/post/
   - GET, PUT, PATCH: rus/evaluation/sentence_review/form-url/`str:encoded_part`/edit/`int:sentence_number`/
-` **Note**:
-` После проверки трёх этих работ участник становится волонтёром.
+> **Note**:
+> После проверки трёх этих работ участник становится волонтёром.
 
 ### Волонтеры (не отправляли работы на текущей неделе)
 - GET: rus/evaluation/volunteer_get_distribution/`uuid:user`/
