@@ -9,8 +9,8 @@ from api.rus.essays.permissions import IsWorkAcceptingStage
 from api.rus.essays.serializers import EssaySerializer
 from api.rus.evaluations.models import EssayEvaluation
 from api.rus.evaluations.serializers import EssayEvaluationSerializer
-from api.rus.models import Essay, Text
-from api.rus.texts.serializers import TextSerializer
+from api.rus.models import Essay, Text, TextKey
+from api.rus.texts.serializers import TextSerializer, TextKeySerializer
 
 
 class EssayDecodeURLView(APIView):
@@ -67,6 +67,7 @@ class EvaluationDecodeURLView(APIView):
             },
             'evaluation': False,
             'task': False,
+            'task_keys': False,
         }
 
         form_url = EvaluationFormURL.get_from_url(kwargs['encoded_part'])
@@ -75,7 +76,11 @@ class EvaluationDecodeURLView(APIView):
                 {'detail': 'Ссылка недействительна.'}
             )
 
-        data_to_response['task'] = TextSerializer(Text.get_current()).data
+        _current_text = Text.get_current()
+        data_to_response['task'] = TextSerializer(_current_text).data
+        data_to_response['task_keys'] = TextKeySerializer(
+            TextKey.objects.filter(text=_current_text), many=True
+        ).data
         try:
             evaluation = EssayEvaluation.objects.get(
                 evaluator=form_url.user, work=form_url.evaluation_work

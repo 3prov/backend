@@ -9,12 +9,6 @@ class WeekIDSerializer(serializers.ModelSerializer):
         exclude = ['id', 'created_at']
 
 
-class TextKeySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TextKey
-        fields = '__all__'
-
-
 class TextListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Text
@@ -44,6 +38,33 @@ class TextSerializer(serializers.ModelSerializer):
         fields = ['week_id', 'body', 'author', 'author_description']
 
     week_id = WeekIDSerializer(read_only=True)
+
+
+class TextKeyCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TextKey
+        fields = '__all__'
+
+
+class TextKeySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TextKey
+        fields = ['range_of_problems', 'authors_position']
+
+
+class TextWithKeysSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Text
+        fields = ['week_id', 'body', 'author', 'author_description', 'keys']
+
+    week_id = WeekIDSerializer(read_only=True)
+    keys = serializers.SerializerMethodField(read_only=True)
+
+    @staticmethod
+    def get_keys(obj):
+        text_keys = TextKey.objects.filter(text=obj)
+        serializer = TextKeySerializer(text_keys, many=True)
+        return serializer.data
 
 
 class TextCreateSerializer(serializers.ModelSerializer):

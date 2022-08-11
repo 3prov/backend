@@ -23,7 +23,11 @@ class EssayCriteria(Criteria):
 
     @property
     def score(self) -> int:
-        return 0  # TODO: sum it
+        score = 0
+        for section in settings.ESSAY_EVALUATION_TABLE.keys():
+            for criteria in settings.ESSAY_EVALUATION_TABLE[section].keys():
+                score += self._meta.get_field(criteria).value_from_object(self)
+        return score
 
 
 class EssayEvaluation(Evaluation):
@@ -75,11 +79,11 @@ class RateEssayEvaluation(RateEvaluation):
         verbose_name = 'Рейтинг проверки сочинений'
         verbose_name_plural = 'Рейтинги проверок сочинений'
 
-    evaluation_criteria = models.ForeignKey(
+    evaluation_criteria = models.OneToOneField(
         to=EssayCriteria,
         on_delete=models.CASCADE,
         verbose_name='Проверка',
-        related_name='rates',
+        related_name='rate',
     )
 
 

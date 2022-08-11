@@ -4,6 +4,7 @@ from api.rus.results.views import (
     WeekResultsListView,
     WeekResultsFormURLUserListView,
     RateEssayEvaluationFromFormURLCreate,
+    RateGetByEssayCriteriaView,
 )
 
 urlpatterns = [
@@ -17,5 +18,10 @@ urlpatterns = [
         'rate_essay_evaluation/<str:encoded_part>/post/',
         RateEssayEvaluationFromFormURLCreate.as_view(),
         name='rate_essay_evaluation',
+    ),
+    path(
+        'get_rate_by_evaluation_criteria/<uuid:evaluation_criteria>/',
+        RateGetByEssayCriteriaView.as_view(),
+        name='get_rate_by_essay_criteria',
     ),
 ]

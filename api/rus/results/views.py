@@ -15,6 +15,7 @@ from api.rus.models import Essay
 from api.rus.results.serializers import (
     WeekResultsFormSerializer,
     RateEssayEvaluationSerializer,
+    RateEssayEvaluationAnonSerializer,
 )
 
 
@@ -92,3 +93,18 @@ class RateEssayEvaluationFromFormURLCreate(generics.CreateAPIView):
             score=serializer.data['score'],
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class RateGetByEssayCriteriaView(generics.RetrieveAPIView):
+    permission_classes = [permissions.AllowAny]
+    serializer_class = RateEssayEvaluationAnonSerializer
+
+    def get_object(self):
+        obj = EssayCriteria.objects.only('rate').get(
+            id=self.kwargs['evaluation_criteria']
+        )
+        if not hasattr(obj, 'rate'):
+            raise permissions.exceptions.ValidationError(
+                detail='Автор сочинения ещё не оценил проверку.'
+            )
+        return obj.rate

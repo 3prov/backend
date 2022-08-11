@@ -6,12 +6,11 @@ from ..models import Essay
 from .serializers import (
     EssayCreateSerializer,
     EssayListSerializer,
-    EssayDetailSerializer,
     EssayFormSerializer,
     EssayFormURLCreateSerializer,
+    EssayWithEvaluationsSerializer,
 )
 from .permissions import (
-    OwnUserPermission,
     IsWorkAcceptingStage,
     IsWorkDoesNotAlreadyExists,
     IsEssayFormURLAlreadyExists,
@@ -46,10 +45,10 @@ class EssayFormURLUserCreate(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated, IsEssayFormURLAlreadyExists]
 
 
-class EssayDetailView(generics.RetrieveUpdateAPIView):
+class EssayWithEvaluationsTextKeysView(generics.RetrieveAPIView):
     queryset = Essay.objects.all()
-    serializer_class = EssayDetailSerializer
-    permission_classes = [permissions.AllowAny, IsWorkAcceptingStage]
+    serializer_class = EssayWithEvaluationsSerializer
+    permission_classes = [permissions.AllowAny]
 
 
 class EssayFromFormURLCreate(generics.CreateAPIView):

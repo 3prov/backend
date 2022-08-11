@@ -119,47 +119,6 @@ class EssaysTest(APITestCase):
         response = self.pass_essay(self.common_user)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    def test_essay_patch(self):
-        self.switch_stage(self.common_user)
-        response = self.pass_essay(self.common_user)
-
-        data = {'id': response.json()['id'], 'body': 'new body'}
-
-        self.client.credentials(
-            HTTP_AUTHORIZATION=f'Token {self.common_user.auth_token}'
-        )
-        response = self.client.patch(
-            reverse('essay_detail', args=[data['id']]), data, format='json'
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json()['id'], data['id'])
-        self.assertEqual(response.json()['body'], data['body'])
-
-    def test_essay_patch_wrong_stage(self):
-        self.switch_stage(self.common_user)
-        response = self.pass_essay(self.common_user)
-        response = self.pass_essay(self.common_user_2)
-        response = self.pass_essay(self.common_user_3)
-        response = self.pass_essay(self.common_user_4)
-
-        self.switch_stage(self.common_user)
-
-        data = {'id': response.json()['id'], 'body': 'new body'}
-
-        self.client.credentials(
-            HTTP_AUTHORIZATION=f'Token {self.common_user.auth_token}'
-        )
-        response = self.client.patch(
-            reverse('essay_detail', args=[data['id']]), data, format='json'
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(
-            response.json()['detail'],
-            "Ошибка текущего этапа. Для отправки сочинения необходим 'S2' этап.",
-        )
-
     def test_get_link_to_form(self):
         self.switch_stage(self.common_user)
         data = {'user': self.common_user.id}

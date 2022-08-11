@@ -25,3 +25,9 @@ class RateEssayEvaluationSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     rater = UserDetailSerializer(read_only=True)
+
+
+class RateEssayEvaluationAnonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RateEssayEvaluation
+        exclude = ['id', 'rater']

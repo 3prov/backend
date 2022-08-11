@@ -7,13 +7,18 @@ from ..evaluations.serializers import (
 from ..models import Essay, Text
 from ...form_url.models import EssayFormURL
 from ...serializers import UserDetailSerializer
-from ..texts.serializers import TextDetailSerializer, WeekIDSerializer
+from ..texts.serializers import (
+    TextDetailSerializer,
+    WeekIDSerializer,
+    TextSerializer,
+    TextWithKeysSerializer,
+)
 
 
 class EssayListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Essay
-        fields = ['week_id', 'body', 'evaluations']
+        fields = ['id', 'week_id', 'body', 'evaluations']
 
     week_id = serializers.SerializerMethodField(read_only=True)
     evaluations = EssayEvaluationListSerializer(read_only=True, many=True)
@@ -37,6 +42,15 @@ class EssaySerializer(serializers.ModelSerializer):
     class Meta:
         model = Essay
         fields = ['body', 'created_at']
+
+
+class EssayWithEvaluationsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Essay
+        fields = ['body', 'created_at', 'task', 'evaluations']
+
+    task = TextWithKeysSerializer(read_only=True)
+    evaluations = EssayEvaluationSerializer(read_only=True, many=True)
 
 
 class EssayCreateSerializer(serializers.ModelSerializer):

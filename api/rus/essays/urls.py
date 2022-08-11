@@ -2,18 +2,18 @@ from django.urls import path
 
 from .views import (
     EssayCreate,
-    EssayDetailView,
     EssayListView,
     EssayFormURLUserCreate,
     EssayFromFormURLCreate,
     EssayFormURLUserListView,
     EssayFromFormURLDetailView,
+    EssayWithEvaluationsTextKeysView,
 )
 
 urlpatterns = [
     path('pass/', EssayCreate.as_view(), name='essay_pass'),  # ?
     path('list_all/', EssayListView.as_view(), name='essays_list_all'),
-    path('detail/<uuid:pk>/', EssayDetailView.as_view(), name='essay_detail'),  # ?
+    path('<uuid:pk>/', EssayWithEvaluationsTextKeysView.as_view(), name='essay_detail'),
     path(
         'create_link_to_form/',
         EssayFormURLUserCreate.as_view(),
