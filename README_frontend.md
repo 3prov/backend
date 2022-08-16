@@ -75,7 +75,7 @@
 ```
 
 ## Отправка проверки
-### /encoded-form-urls/evaluation/`str:encoded_part`/
+### encoded-form-urls/evaluation/`str:encoded_part`/
 #### GET
 Возвращает данные о тексте неделе, список ключей к тексту, статусе отправки проверки, ссылки на отправку и изменение проверки, список комментариев к предложениям.
 ```json
@@ -129,7 +129,7 @@
 }
 ```
 
-### /api/v1/rus/evaluation/form-url/`str:encoded_part`/post/
+### api/v1/rus/evaluation/form-url/`str:encoded_part`/post/
 #### POST
 Отправляет проверку по критериям.
 - Запрос:
@@ -181,7 +181,7 @@
 }
 ```
 
-### /api/v1/rus/evaluation/form-url/`str:encoded_part`/edit/
+### api/v1/rus/evaluation/form-url/`str:encoded_part`/edit/
 #### PUT, PATCH
 Изменяет проверку по критериям.
 - Запрос:
@@ -539,5 +539,21 @@
 {
   "score": 4,
   "evaluation_criteria": "590eca87-1bf5-4428-900a-0b53756af765"
+}
+```
+
+## Получение времени конца этапа и времени сервера
+### management/get_current_stage_end_time/
+#### GET
+Возвращает время конца текущего этапа, время сервера и текущий этап.
+> **Note**:
+> Формат времени представлен в формате ISO 8601.
+```json
+{
+  "current_stage": "S4",
+  "time": {
+    "server_current": "2022-08-17T02:06:18.243818",
+    "stage_end": "2022-08-18T00:00:00"
+  }
 }
 ```

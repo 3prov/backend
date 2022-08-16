@@ -2,6 +2,8 @@ from django.http import JsonResponse
 from rest_framework.views import APIView
 from .models import Stage
 from rest_framework import permissions
+
+from .utils import ManagementUtils
 from ..rus.models import Essay, Text
 
 
@@ -46,5 +48,22 @@ class StatisticsAddView(APIView):
                         task=Text.get_current()
                     ).count(),
                 }
+            }
+        )
+
+
+class CurrentStageEndTime(APIView):
+
+    permission_classes = [permissions.AllowAny]
+
+    @staticmethod
+    def get(request):
+        return JsonResponse(
+            {
+                'current_stage': Stage.get_stage(),
+                'time': {
+                    'server_current': ManagementUtils.get_current_time().isoformat(),
+                    'stage_end': Stage.get_current_stage_end_time().isoformat(),
+                },
             }
         )

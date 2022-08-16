@@ -1,8 +1,12 @@
+from datetime import datetime
+import freezegun
+
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase, APIClient, APIRequestFactory
 
 from . import init_stage
+from .utils import ManagementUtils
 from ..models import User
 
 
@@ -126,3 +130,57 @@ class ManagementTest(APITestCase):
         response = self.client.get(reverse('statistics'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()['rus']['essays_passed'], 1)
+
+    @freezegun.freeze_time('2022-08-15 01:00')
+    def test_get_current_time(self):
+        self.assertEqual(
+            ManagementUtils.get_current_time(),
+            datetime.fromisoformat('2022-08-15 01:00'),
+        )
+
+    def get_current_stage_end_time_set_time(self, frozen_time: str, needed_time: str):
+        with freezegun.freeze_time(frozen_time):
+            response = self.client.get(reverse('get_current_stage_end_time'))
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(
+                datetime.fromisoformat(response.json()['time']['server_current']),
+                datetime.fromisoformat(frozen_time),
+            )
+            self.assertEqual(
+                datetime.fromisoformat(response.json()['time']['stage_end']),
+                datetime.fromisoformat(needed_time),
+            )
+
+    def test_get_current_stage_end_time(self):
+        self.get_current_stage_end_time_set_time('2022-08-15 00:01', '2022-08-18 00:00')
+        self.get_current_stage_end_time_set_time('2022-08-15 02:00', '2022-08-18 00:00')
+        self.get_current_stage_end_time_set_time('2022-08-16 02:00', '2022-08-18 00:00')
+        self.get_current_stage_end_time_set_time('2022-08-17 02:00', '2022-08-18 00:00')
+        self.get_current_stage_end_time_set_time(
+            '2022-08-17 23:59:59', '2022-08-18 00:00'
+        )
+
+        self.get_current_stage_end_time_set_time(
+            '2022-08-18 00:00:01', '2022-08-21 00:00'
+        )
+        self.get_current_stage_end_time_set_time(
+            '2022-08-19 00:00:01', '2022-08-21 00:00'
+        )
+        self.get_current_stage_end_time_set_time(
+            '2022-08-20 00:00:01', '2022-08-21 00:00'
+        )
+        self.get_current_stage_end_time_set_time(
+            '2022-08-20 10:00:01', '2022-08-21 00:00'
+        )
+        self.get_current_stage_end_time_set_time(
+            '2022-08-20 10:00:01', '2022-08-21 00:00'
+        )
+
+        self.get_current_stage_end_time_set_time(
+            '2022-08-21 00:00:01', '2022-08-22 00:00'
+        )
+        self.get_current_stage_end_time_set_time('2022-08-21 00:04', '2022-08-22 00:00')
+        self.get_current_stage_end_time_set_time('2022-08-21 15:04', '2022-08-22 00:00')
+        self.get_current_stage_end_time_set_time(
+            '2022-08-21 23:59:59', '2022-08-22 00:00'
+        )

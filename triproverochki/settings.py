@@ -169,6 +169,8 @@ DJOSER = {
 ROOT_HOSTCONF = 'triproverochki.hosts'
 DEFAULT_HOST = 'triproverochki'
 
+CORS_ORIGIN_ALLOW_ALL = True
+
 
 STUDY_YEAR = os.getenv('STUDY_YEAR')
 
@@ -211,5 +213,3 @@ RATINGS_CONFIGURATION = {
     'increase_essay_pass': 10,
     'increase_check_pass': 7,
 }
-
-CORS_ORIGIN_ALLOW_ALL = True
