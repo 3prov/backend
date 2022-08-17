@@ -30,12 +30,7 @@ class EssayDecodeURLView(APIView):
             'task': False,
         }
 
-        form_url = EssayFormURL.get_from_url(kwargs['encoded_part'])
-        if not form_url:
-            raise permissions.exceptions.ValidationError(
-                {'detail': 'Ссылка недействительна.'}
-            )
-
+        form_url = EssayFormURL.get_from_url_or_404(kwargs['encoded_part'])
         data_to_response['task'] = TextSerializer(Text.get_current()).data
         try:
             essay = Essay.objects.get(
@@ -70,12 +65,7 @@ class EvaluationDecodeURLView(APIView):
             'task_keys': False,
         }
 
-        form_url = EvaluationFormURL.get_from_url(kwargs['encoded_part'])
-        if not form_url:
-            raise permissions.exceptions.ValidationError(
-                {'detail': 'Ссылка недействительна.'}
-            )
-
+        form_url = EvaluationFormURL.get_from_url_or_404(kwargs['encoded_part'])
         _current_text = Text.get_current()
         data_to_response['task'] = TextSerializer(_current_text).data
         data_to_response['task_keys'] = TextKeySerializer(

@@ -13,7 +13,6 @@ from api.rus.evaluations.permissions import IsEvaluationAcceptingStage
 from api.rus.evaluations.serializers import (
     EvaluationFormURLGetCurrentWeekListSerializer,
     EvaluationFormURLListViewSerializer,
-    EvaluationFormURLWorkCreateSerializer,
     EssayCriteriaDetailSerializer,
     EssayEvaluationSerializer,
     EvaluationFormURLVolunteerCreateSerializer,
@@ -31,12 +30,7 @@ class EssaySentenceReviewFromFormURLCreate(generics.CreateAPIView):
     permission_classes = [permissions.AllowAny, IsEvaluationAcceptingStage]
 
     def create(self, request, *args, **kwargs):
-        form_url = EvaluationFormURL.get_from_url(url=kwargs['encoded_part'])
-        if not form_url:
-            raise permissions.exceptions.ValidationError(
-                {'detail': 'Ссылка недействительна.'}
-            )
-
+        form_url = EvaluationFormURL.get_from_url_or_404(url=kwargs['encoded_part'])
         serialized = self.get_serializer(data=request.data)
         serialized.is_valid(raise_exception=True)
         if not (
@@ -77,11 +71,9 @@ class EssaySentenceReviewFormURLView(generics.RetrieveUpdateAPIView):
     serializer_class = EssaySentenceReviewSerializer
 
     def get_object(self):
-        form_url = EvaluationFormURL.get_from_url(url=self.kwargs['encoded_part'])
-        if not form_url:
-            raise permissions.exceptions.ValidationError(
-                {'detail': 'Ссылка недействительна.'}
-            )
+        form_url = EvaluationFormURL.get_from_url_or_404(
+            url=self.kwargs['encoded_part']
+        )
         queryset = self.get_queryset()
         obj = get_object_or_404(
             queryset,
@@ -119,12 +111,7 @@ class EvaluationFormURLWorkCreate(generics.CreateAPIView):
 
     @transaction.atomic
     def create(self, request, *args, **kwargs):
-        form_url = EvaluationFormURL.get_from_url(url=kwargs['encoded_part'])
-        if not form_url:
-            raise permissions.exceptions.ValidationError(
-                {'detail': 'Ссылка недействительна.'}
-            )
-
+        form_url = EvaluationFormURL.get_from_url_or_404(url=kwargs['encoded_part'])
         if EssayEvaluation.objects.filter(
             evaluator=form_url.user, work=form_url.evaluation_work
         ).exists():
@@ -158,11 +145,9 @@ class EvaluationFormURLView(generics.RetrieveUpdateAPIView):
     serializer_class = EssayEvaluationSerializer
 
     def get_object(self):
-        form_url = EvaluationFormURL.get_from_url(url=self.kwargs['encoded_part'])
-        if not form_url:
-            raise permissions.exceptions.ValidationError(
-                {'detail': 'Ссылка недействительна.'}
-            )
+        form_url = EvaluationFormURL.get_from_url_or_404(
+            url=self.kwargs['encoded_part']
+        )
         queryset = self.get_queryset()
         obj = get_object_or_404(
             queryset, evaluator=form_url.user, work=form_url.evaluation_work

@@ -3,8 +3,8 @@ import uuid
 
 from django.conf import settings
 from django.db import models, transaction
+from django.db.models import QuerySet
 
-from api.management.models import WeekID
 from api.models import Work, Task, User
 
 
@@ -50,6 +50,10 @@ class Essay(Work):
         if splintered[-1] == '':
             return len(splintered) - 1
         return len(splintered)
+
+    @classmethod
+    def filter_by_current_task(cls) -> QuerySet:
+        return cls.objects.filter(task=Text.get_current())
 
 
 class TextKey(models.Model):

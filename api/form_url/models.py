@@ -1,4 +1,7 @@
 from __future__ import annotations
+
+from rest_framework import permissions
+
 from api.models import FormURL
 from api.rus.models import Essay
 
@@ -10,12 +13,14 @@ class EssayFormURL(FormURL):
         verbose_name = 'Ссылка на форму сдачи сочинений'
         verbose_name_plural = 'Ссылки на формы сдачи сочинений'
 
-    @staticmethod
-    def get_from_url(url: str) -> EssayFormURL | None:
+    @classmethod
+    def get_from_url_or_404(cls, url: str) -> EssayFormURL | None:
         try:
-            return EssayFormURL.objects.get(url=url)
-        except EssayFormURL.DoesNotExist:
-            return None
+            return cls.objects.get(url=url)
+        except cls.DoesNotExist:
+            raise permissions.exceptions.ValidationError(
+                {'detail': 'Ссылка недействительна.'}
+            )
 
 
 class EvaluationFormURL(FormURL):
@@ -30,12 +35,14 @@ class EvaluationFormURL(FormURL):
         verbose_name='Работа для проверки',
     )
 
-    @staticmethod
-    def get_from_url(url: str) -> EvaluationFormURL | None:
+    @classmethod
+    def get_from_url_or_404(cls, url: str) -> EvaluationFormURL | None:
         try:
-            return EvaluationFormURL.objects.get(url=url)
-        except EvaluationFormURL.DoesNotExist:
-            return None
+            return cls.objects.get(url=url)
+        except cls.DoesNotExist:
+            raise permissions.exceptions.ValidationError(
+                {'detail': 'Ссылка недействительна.'}
+            )
 
 
 class ResultsFormURL(FormURL):
@@ -43,9 +50,11 @@ class ResultsFormURL(FormURL):
         verbose_name = 'Ссылка на форму просмотра результата'
         verbose_name_plural = 'Ссылки на формы просмотра результатов'
 
-    @staticmethod
-    def get_from_url(url: str) -> ResultsFormURL | None:
+    @classmethod
+    def get_from_url_or_404(cls, url: str) -> ResultsFormURL | None:
         try:
-            return ResultsFormURL.objects.get(url=url)
-        except ResultsFormURL.DoesNotExist:
-            return None
+            return cls.objects.get(url=url)
+        except cls.DoesNotExist:
+            raise permissions.exceptions.ValidationError(
+                {'detail': 'Ссылка недействительна.'}
+            )

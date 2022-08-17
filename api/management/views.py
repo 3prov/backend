@@ -4,7 +4,7 @@ from .models import Stage
 from rest_framework import permissions
 
 from .utils import ManagementUtils
-from ..rus.models import Essay, Text
+from ..rus.models import Essay
 
 
 class StageAddView(APIView):
@@ -44,9 +44,7 @@ class StatisticsAddView(APIView):
         return JsonResponse(
             {
                 'rus': {
-                    'essays_passed': Essay.objects.filter(
-                        task=Text.get_current()
-                    ).count(),
+                    'essays_passed': Essay.filter_by_current_task().count(),
                 }
             }
         )

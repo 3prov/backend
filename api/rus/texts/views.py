@@ -40,11 +40,7 @@ class TextByFormURLView(generics.RetrieveAPIView):
     permission_classes = [permissions.AllowAny]
 
     def get_object(self):
-        form_url = ResultsFormURL.get_from_url(url=self.kwargs['encoded_part'])
-        if not form_url:
-            raise permissions.exceptions.ValidationError(
-                detail='Ссылка недействительна.'
-            )
+        form_url = ResultsFormURL.get_from_url_or_404(url=self.kwargs['encoded_part'])
         return form_url.week_id.task
 
 

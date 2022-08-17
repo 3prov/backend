@@ -1,17 +1,17 @@
 from __future__ import annotations
 import abc
 import uuid
-
-from random import randint
+import hashlib
 
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models, transaction
 from django.contrib.auth.models import AbstractUser
+from django.db.models import QuerySet
 from django.utils import timezone
-from .management.models import Stage, WeekID
 from rest_framework.authtoken.models import Token
-import hashlib
+
+from .management.models import Stage, WeekID
 
 
 class AbstractModelMeta(abc.ABCMeta, type(models.Model)):
@@ -86,9 +86,9 @@ class FormURL(models.Model, metaclass=AbstractModelMeta):
     def _hash_string(string: str) -> str:
         return str(hashlib.sha1(bytes(string, "UTF-8")).hexdigest())[:16]
 
-    @staticmethod
+    @classmethod
     @abc.abstractmethod
-    def get_from_url(url: str) -> FormURL | None:
+    def get_from_url_or_404(cls, url: str) -> FormURL | None:
         pass
 
     def save(
@@ -170,6 +170,11 @@ class Work(models.Model, metaclass=AbstractModelMeta):
         Необходимо переопределить метод save для изменения рейтинга пользователя.
         """
         return super(Work, self).save(force_insert, force_update, using, update_fields)
+
+    @classmethod
+    @abc.abstractmethod
+    def filter_by_current_task(cls) -> QuerySet:
+        pass
 
 
 class Evaluation(models.Model, metaclass=AbstractModelMeta):

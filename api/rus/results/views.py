@@ -49,11 +49,7 @@ class WeekResultsFromFormURLListView(generics.ListAPIView):
     serializer_class = EssayEvaluationSerializer
 
     def list(self, request, *args, **kwargs):
-        form_url = ResultsFormURL.get_from_url(url=self.kwargs['encoded_part'])
-        if not form_url:
-            raise permissions.exceptions.ValidationError(
-                {'detail': 'Ссылка недействительна.'}
-            )
+        form_url = ResultsFormURL.get_from_url_or_404(url=self.kwargs['encoded_part'])
         queryset = self.get_queryset()
         obj = queryset.filter(
             work__author=form_url.user, work__task__week_id=form_url.week_id
@@ -66,11 +62,7 @@ class RateEssayEvaluationFromFormURLCreate(generics.CreateAPIView):
     serializer_class = RateEssayEvaluationSerializer
 
     def create(self, request, *args, **kwargs):
-        form_url = ResultsFormURL.get_from_url(url=self.kwargs['encoded_part'])
-        if not form_url:
-            raise permissions.exceptions.ValidationError(
-                detail='Ссылка недействительна.'
-            )
+        form_url = ResultsFormURL.get_from_url_or_404(url=self.kwargs['encoded_part'])
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         evaluation_criteria = EssayCriteria.objects.get(

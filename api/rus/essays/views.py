@@ -61,18 +61,14 @@ class EssayFromFormURLCreate(generics.CreateAPIView):
     ]
 
     def create(self, request, *args, **kwargs):
-        form_url = EssayFormURL.get_from_url(url=kwargs['encoded_part'])
-        if not form_url:
-            raise permissions.exceptions.ValidationError(
-                {'detail': 'Ссылка недействительна.'}
-            )
+        form_url = EssayFormURL.get_from_url_or_404(url=kwargs['encoded_part'])
         added_essay = Essay.objects.create(
             task=form_url.week_id.task, body=request.data['body'], author=form_url.user
         )
         return Response(
-            EssayFormURLCreateSerializer(added_essay).data,
+            self.get_serializer(added_essay).data,
             status=status.HTTP_201_CREATED,
-        )  # TODO: change EssayFormURLCreateSerializer
+        )
 
 
 class EssayFormURLUserListView(generics.ListAPIView):
@@ -91,13 +87,8 @@ class EssayFromFormURLDetailView(generics.RetrieveUpdateAPIView):
     serializer_class = EssayFormURLCreateSerializer
 
     def get_object(self):
-        form_url = EssayFormURL.get_from_url(url=self.kwargs['encoded_part'])
-        if not form_url:
-            raise permissions.exceptions.ValidationError(
-                {'detail': 'Ссылка недействительна.'}
-            )
+        form_url = EssayFormURL.get_from_url_or_404(url=self.kwargs['encoded_part'])
         queryset = self.get_queryset()
-        obj = get_object_or_404(
+        return get_object_or_404(
             queryset, author=form_url.user, task__week_id=form_url.week_id
         )
-        return obj
