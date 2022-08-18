@@ -3,7 +3,12 @@ import freezegun
 
 from rest_framework import status
 from rest_framework.reverse import reverse
-from rest_framework.test import APITestCase, APIClient, APIRequestFactory
+from rest_framework.test import (
+    APITestCase,
+    APIClient,
+    APIRequestFactory,
+    override_settings,
+)
 
 from . import init_stage
 from .utils import ManagementUtils
@@ -48,6 +53,7 @@ class ManagementTest(APITestCase):
         response = self.client.get(reverse('switch_stage_to_next'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def test_admin_user_switch_stage_to_next_looped(self):
         admin_user = User.objects.create_superuser(username='test_admin')
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {admin_user.auth_token}')
@@ -62,6 +68,7 @@ class ManagementTest(APITestCase):
         response = self.client.get(reverse('switch_stage_to_next'))
         self.assertEqual(response.json()['current_stage'], 'S2')
 
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def test_admin_user_switch_stage_to_next_many_times(self):
         admin_user = User.objects.create_superuser(username='test_admin')
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {admin_user.auth_token}')

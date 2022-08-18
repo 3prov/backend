@@ -1,6 +1,11 @@
 from rest_framework import status
 from rest_framework.reverse import reverse
-from rest_framework.test import APITestCase, APIClient, APIRequestFactory
+from rest_framework.test import (
+    APITestCase,
+    APIClient,
+    APIRequestFactory,
+    override_settings,
+)
 
 from ..models import Text, Essay
 from api.models import User
@@ -93,6 +98,7 @@ class EssaysTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(Essay.objects.all().count(), 1)
 
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def test_common_pass_essay_wrong_stage_after(self):
         self.switch_stage(self.common_user)
         self.switch_stage(self.common_user)
@@ -202,6 +208,7 @@ class EssaysTest(APITestCase):
             response.json()['detail'], 'Сочинение на этой неделе уже существует.'
         )
 
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def test_pass_essay_by_form_url_link_common_user_wrong_stage(self):
         data = {'user': self.common_user.id}
         response = self.client.post(

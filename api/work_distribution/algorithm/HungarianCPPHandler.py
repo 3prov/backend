@@ -88,7 +88,7 @@ class HungarianCPPAlgorithm:
         )
         for i in range(1, len(participants) - 1):
             print(f"распределение: {i}/{len(participants) - 2}")  # TODO: to logger
-            # print(f'{matrix=}')  # TODO: to logger?
+            # print(f'{matrix=}')  # TODO: to logger (debug)
             matrix = self._create_matrix_with_pair_blocks(
                 ratings, distribution.pairs, matrix
             )

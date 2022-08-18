@@ -6,7 +6,7 @@ from django.db.utils import IntegrityError
 from api.form_url.models import EssayFormURL, EvaluationFormURL, ResultsFormURL
 from api.rus.models import Text, Essay
 from api.management.models import WeekID, Stage
-from api.tasks import DistributionTasks
+from api.tasks import DistributionTasks, FormURLTasks
 from api.work_distribution.models import WorkDistributionToEvaluate
 
 
@@ -49,7 +49,8 @@ def post_save_stage(sender, instance, created, **kwargs):
     """
     if instance.stage == Stage.StagesEnum.EVALUATION_ACCEPTING:
         if Essay.objects.filter(task__week_id=WeekID.get_current()).count() > 0:
-            DistributionTasks.make_necessary_for_week_participants.delay()
+            with transaction.atomic():
+                DistributionTasks.make_necessary_for_week_participants.delay()
         else:
             print('No need for distribution.')  # TODO: to logger
 
@@ -61,12 +62,8 @@ def post_save_stage(sender, instance, created, **kwargs):
     проверок.
     """
     if instance.stage == Stage.StagesEnum.CLOSED_ACCEPT:
-        current_week_id = WeekID.get_current()
-        for essay in Essay.objects.filter(task__week_id=current_week_id).only('author'):
-            ResultsFormURL.objects.create(  # TODO: to celery
-                user=essay.author,
-                week_id=current_week_id,
-            )
+        with transaction.atomic():
+            FormURLTasks.create_result_form_urls_for_essay_authors.delay()
 
 
 @receiver(signals.post_save, sender=WorkDistributionToEvaluate)
