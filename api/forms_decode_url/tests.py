@@ -1,8 +1,11 @@
-from random import randint
-
 from rest_framework import status
 from rest_framework.reverse import reverse
-from rest_framework.test import APITestCase, APIClient, APIRequestFactory
+from rest_framework.test import (
+    APITestCase,
+    APIClient,
+    APIRequestFactory,
+    override_settings,
+)
 
 from ..form_url.models import EvaluationFormURL
 from ..management import init_stage
@@ -100,6 +103,7 @@ class ManagementTest(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def test_simulate_evaluation_pass(self):
         self.assign_text(self.common_user)
         self.switch_stage(self.common_user)
@@ -111,6 +115,7 @@ class ManagementTest(APITestCase):
         self.send_essay_from_user(common_user4)
         common_user5 = User.objects.create_user(username='common_user5')
         self.send_essay_from_user(common_user5)
+
         self.switch_stage(self.common_user)
         self.assertEqual(EvaluationFormURL.objects.all().count(), 3 * 4)
 

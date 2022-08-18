@@ -6,6 +6,7 @@ from django.db.utils import IntegrityError
 from api.form_url.models import EssayFormURL, EvaluationFormURL, ResultsFormURL
 from api.rus.models import Text, Essay
 from api.management.models import WeekID, Stage
+from api.tasks import DistributionTasks
 from api.work_distribution.models import WorkDistributionToEvaluate
 
 
@@ -48,8 +49,7 @@ def post_save_stage(sender, instance, created, **kwargs):
     """
     if instance.stage == Stage.StagesEnum.EVALUATION_ACCEPTING:
         if Essay.objects.filter(task__week_id=WeekID.get_current()).count() > 0:
-            print('Starting distribution...')  # TODO: to logger
-            WorkDistributionToEvaluate.make_necessary_for_week_participants()
+            DistributionTasks.make_necessary_for_week_participants.delay()
         else:
             print('No need for distribution.')  # TODO: to logger
 
