@@ -173,9 +173,7 @@ class WorkDistributionToEvaluateVolunteerListView(generics.ListAPIView):
         )
         if queryset.exists():
             return queryset
-        WorkDistributionToEvaluate.make_optionally_for_volunteer(
-            volunteer
-        )
+        WorkDistributionToEvaluate.make_optionally_for_volunteer(volunteer)
         return WorkDistributionToEvaluate.objects.filter(
             evaluator=volunteer, week_id=WeekID.get_current()
         )
