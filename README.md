@@ -23,7 +23,7 @@
 
 
 ## Смена этапа недели на этап приёма работ (S1 -> S2)
-- GET: management/switch_stage_to_next/ # TODO: to celery
+- GET: management/switch_stage_to_next/ # TODO: to celery beat
 
 
 ## Отправка работы
@@ -40,7 +40,7 @@
 > Возможно при наличии хотя бы 4 работ
 
 TODO: при переходе на этап S3 необходимо проверить все работы на правильность
-- GET: management/switch_stage_to_next/ # TODO: to celery
+- GET: management/switch_stage_to_next/
 
 
 ## Отправка проверок
@@ -65,7 +65,7 @@ TODO: при переходе на этап S3 необходимо провер
 
 
 ## Результаты недели
-- POST: rus/results/get_link_to_form/`uuid:user`/ # TODO: to celery auto create
+- POST: rus/results/get_link_to_form/`uuid:user`/ # TODO: to celery beat
 - GET: encoded-form-urls/results/`str:encoded_part`/
 
 ### Получение текста недели по ссылке на результаты

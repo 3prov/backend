@@ -175,7 +175,7 @@ class WorkDistributionToEvaluateVolunteerListView(generics.ListAPIView):
             return queryset
         WorkDistributionToEvaluate.make_optionally_for_volunteer(
             volunteer
-        )  # TODO: to celery
+        )
         return WorkDistributionToEvaluate.objects.filter(
             evaluator=volunteer, week_id=WeekID.get_current()
         )

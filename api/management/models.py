@@ -69,6 +69,11 @@ class Stage(Configuration):
         return Stage.get_stage()
 
     @staticmethod
+    def switch_stage(stage: StagesEnum) -> StagesEnum:
+        Stage(stage=stage).save()
+        return Stage.get_stage()
+
+    @staticmethod
     def get_current_stage_end_time() -> datetime:
         weekdays = ManagementUtils.Weekdays
         match ManagementUtils.get_current_week():
