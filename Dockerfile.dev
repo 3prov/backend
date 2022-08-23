@@ -12,6 +12,10 @@ ENV PYTHONUNBUFFERED 1
 # set work directory
 WORKDIR /usr/src/app
 
+# install gcc
+RUN apk update \
+    && apk add gcc
+
 # pip
 RUN --mount=type=cache,target=/root/.cache pip install --upgrade pip
 
