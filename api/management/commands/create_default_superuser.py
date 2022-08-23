@@ -16,7 +16,4 @@ class Command(BaseCommand):
                     self.style.SUCCESS('Superuser `admin` created successfully!')
                 )
         except utils.OperationalError as e:
-            self.stdout.write(
-                self.style.ERROR('Exception: %s' % e)
-            )
-
+            self.stdout.write(self.style.ERROR('Exception: %s' % e))
