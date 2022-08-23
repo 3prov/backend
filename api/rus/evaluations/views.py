@@ -6,7 +6,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
 from api.form_url.models import EvaluationFormURL
-from api.management.models import WeekID
+from api.control.models import WeekID
 from api.models import User
 from api.rus.evaluations.models import EssayEvaluation, EssaySentenceReview
 from api.rus.evaluations.permissions import IsEvaluationAcceptingStage

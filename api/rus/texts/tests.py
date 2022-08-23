@@ -1,15 +1,15 @@
+from django.core.management import call_command
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase, APIClient, APIRequestFactory
 
 from ..models import Text, TextKey
 from api.models import User
-from ...management import init_stage
 
 
 class TextsTest(APITestCase):
     def setUp(self) -> None:
-        init_stage()
+        call_command('init_stage')
         self.factory = APIRequestFactory()
         self.client = APIClient()
 

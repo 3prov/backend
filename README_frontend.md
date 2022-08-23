@@ -543,7 +543,7 @@
 ```
 
 ## Получение времени конца этапа и времени сервера
-### management/get_current_stage_end_time/
+### control/get_current_stage_end_time/
 #### GET
 Возвращает время конца текущего этапа, время сервера и текущий этап.
 > **Note**:

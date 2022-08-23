@@ -1,6 +1,6 @@
 from rest_framework import permissions
 
-from api.management.models import Stage
+from api.control.models import Stage
 
 
 class IsEvaluationAcceptingStage(permissions.BasePermission):

@@ -96,3 +96,6 @@ db.sqlite3-journal
 
 # Celery beat
 celerybeat-schedule
+
+# Configuration .env
+.env.db

@@ -1,6 +1,7 @@
 from datetime import datetime
 import freezegun
 
+from django.core.management import call_command
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import (
@@ -10,14 +11,13 @@ from rest_framework.test import (
     override_settings,
 )
 
-from . import init_stage
-from .utils import ManagementUtils
+from .utils import ControlUtils
 from ..models import User
 
 
-class ManagementTest(APITestCase):
+class ControlTest(APITestCase):
     def setUp(self) -> None:
-        init_stage()
+        call_command('init_stage')
         self.factory = APIRequestFactory()
         self.client = APIClient()
 
@@ -141,7 +141,7 @@ class ManagementTest(APITestCase):
     @freezegun.freeze_time('2022-08-15 01:00')
     def test_get_current_time(self):
         self.assertEqual(
-            ManagementUtils.get_current_time(),
+            ControlUtils.get_current_time(),
             datetime.fromisoformat('2022-08-15 01:00'),
         )
 

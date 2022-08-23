@@ -1,5 +1,5 @@
 from api.form_url.models import ResultsFormURL
-from api.management.models import WeekID
+from api.control.models import WeekID
 from api.rus.models import Essay
 from api.work_distribution.models import WorkDistributionToEvaluate
 from triproverochki.celery import app

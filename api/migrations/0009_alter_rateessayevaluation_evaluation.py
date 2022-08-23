@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0010_alter_essaysentencereview_options_and_more'),
+        ('api', '0008_alter_essaysentencereview_options_and_more'),
     ]
 
     operations = [

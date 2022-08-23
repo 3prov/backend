@@ -17,7 +17,7 @@ from .permissions import (
     IsWorkDoesNotAlreadyExistsFromFormURL,
 )
 from ...form_url.models import EssayFormURL
-from ...management.models import WeekID
+from ...control.models import WeekID
 
 
 class EssayCreate(generics.CreateAPIView):

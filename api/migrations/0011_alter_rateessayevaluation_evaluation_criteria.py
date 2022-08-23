@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0012_rename_evaluation_rateessayevaluation_evaluation_criteria'),
+        ('api', '0010_rename_evaluation_rateessayevaluation_evaluation_criteria'),
     ]
 
     operations = [

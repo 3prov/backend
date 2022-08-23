@@ -5,7 +5,7 @@ from django.db.utils import IntegrityError
 
 from api.form_url.models import EssayFormURL, EvaluationFormURL, ResultsFormURL
 from api.rus.models import Text, Essay
-from api.management.models import WeekID, Stage
+from api.control.models import WeekID, Stage
 from api.tasks import DistributionTasks, FormURLTasks
 from api.work_distribution.models import WorkDistributionToEvaluate
 

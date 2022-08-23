@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api.form_url.models import EssayFormURL, EvaluationFormURL
-from api.management.models import WeekID
+from api.control.models import WeekID
 from api.rus.essays.permissions import IsWorkAcceptingStage
 from api.rus.essays.serializers import EssaySerializer
 from api.rus.evaluations.models import EssayEvaluation

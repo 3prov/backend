@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0011_alter_rateessayevaluation_evaluation'),
+        ('api', '0009_alter_rateessayevaluation_evaluation'),
     ]
 
     operations = [

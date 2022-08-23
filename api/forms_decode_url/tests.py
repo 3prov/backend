@@ -1,3 +1,4 @@
+from django.core.management import call_command
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import (
@@ -7,15 +8,14 @@ from rest_framework.test import (
     override_settings,
 )
 
-from ..form_url.models import EvaluationFormURL
-from ..management import init_stage
-from ..models import User
-from ..rus.evaluations.models import EssayEvaluation, EssaySentenceReview
+from api.form_url.models import EvaluationFormURL
+from api.models import User
+from api.rus.evaluations.models import EssayEvaluation, EssaySentenceReview
 
 
-class ManagementTest(APITestCase):
+class ControlTest(APITestCase):
     def setUp(self) -> None:
-        init_stage()
+        call_command('init_stage')
         self.factory = APIRequestFactory()
         self.client = APIClient()
         self.admin_user = User.objects.create_superuser(username='admin_user')

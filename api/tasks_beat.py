@@ -1,4 +1,4 @@
-from api.management.models import Stage
+from api.control.models import Stage
 from api.rus.models import Essay
 from api.tasks import CeleryTasks
 from api.work_distribution.exceptions import UsersCountLessThenFour

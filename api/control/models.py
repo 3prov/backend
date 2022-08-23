@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.conf import settings
 
-from .utils import ManagementUtils
+from .utils import ControlUtils
 
 
 class Configuration(models.Model):
@@ -75,14 +75,14 @@ class Stage(Configuration):
 
     @staticmethod
     def get_current_stage_end_time() -> datetime:
-        weekdays = ManagementUtils.Weekdays
-        match ManagementUtils.get_current_week():
+        weekdays = ControlUtils.Weekdays
+        match ControlUtils.get_current_week():
             case weekdays.Sunday:
-                return ManagementUtils.get_next_weekday_time(weekdays.Monday)
+                return ControlUtils.get_next_weekday_time(weekdays.Monday)
             case weekdays.Monday | weekdays.Tuesday | weekdays.Wednesday:
-                return ManagementUtils.get_next_weekday_time(weekdays.Thursday)
+                return ControlUtils.get_next_weekday_time(weekdays.Thursday)
             case weekdays.Thursday | weekdays.Friday | weekdays.Saturday:
-                return ManagementUtils.get_next_weekday_time(weekdays.Sunday)
+                return ControlUtils.get_next_weekday_time(weekdays.Sunday)
 
 
 class WeekID(models.Model):

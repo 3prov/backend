@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, date
 import enum
 
 
-class ManagementUtils:
+class ControlUtils:
     class Weekdays(enum.Enum):
         Monday = 1
         Tuesday = 2
@@ -24,13 +24,13 @@ class ManagementUtils:
     @staticmethod
     def get_current_week() -> Weekdays:
         _weekdays = {
-            1: ManagementUtils.Weekdays.Monday,
-            2: ManagementUtils.Weekdays.Tuesday,
-            3: ManagementUtils.Weekdays.Wednesday,
-            4: ManagementUtils.Weekdays.Thursday,
-            5: ManagementUtils.Weekdays.Friday,
-            6: ManagementUtils.Weekdays.Saturday,
-            7: ManagementUtils.Weekdays.Sunday,
+            1: ControlUtils.Weekdays.Monday,
+            2: ControlUtils.Weekdays.Tuesday,
+            3: ControlUtils.Weekdays.Wednesday,
+            4: ControlUtils.Weekdays.Thursday,
+            5: ControlUtils.Weekdays.Friday,
+            6: ControlUtils.Weekdays.Saturday,
+            7: ControlUtils.Weekdays.Sunday,
         }
         return _weekdays[datetime.now().isoweekday()]
 
@@ -41,7 +41,7 @@ class ManagementUtils:
         the current date. For example, the date of next Monday.
         """
 
-        week_start = ManagementUtils._get_current_week_start_time()
+        week_start = ControlUtils._get_current_week_start_time()
         days = (weekday.value - week_start.isoweekday() + 7) % 7
         days = 7 if days == 0 else days
         return week_start + timedelta(days=days)

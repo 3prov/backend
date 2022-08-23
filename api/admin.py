@@ -9,7 +9,7 @@ from .rus.evaluations.models import (
     RateEssayEvaluation,
 )
 from .rus.models import Text, Essay, TextKey
-from .management.models import Stage, WeekID
+from .control.models import Stage, WeekID
 from .work_distribution.models import WorkDistributionToEvaluate
 
 

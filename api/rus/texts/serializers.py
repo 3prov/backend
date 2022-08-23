@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from ..models import Text, TextKey
-from ...management.models import WeekID
+from ...control.models import WeekID
 
 
 class WeekIDSerializer(serializers.ModelSerializer):

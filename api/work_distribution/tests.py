@@ -1,20 +1,20 @@
 import random
 
+from django.core.management import call_command
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase, APIClient, APIRequestFactory
 
 from .exceptions import UsersCountLessThenFour, WorkDistributionAlreadyExists
 from .models import WorkDistributionToEvaluate
-from ..management import init_stage
-from ..management.models import WeekID
+from ..control.models import WeekID
 from ..models import User
 from ..rus.models import Essay
 
 
 class WorkDistributionTest(APITestCase):
     def setUp(self) -> None:
-        init_stage()
+        call_command('init_stage')
         self.factory = APIRequestFactory()
         self.client = APIClient()
 

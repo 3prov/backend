@@ -8,7 +8,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0008_alter_essaycriteria_id'),
+        ('api', '0006_alter_essaycriteria_k1_alter_essaycriteria_k10_and_more'),
     ]
 
     operations = [

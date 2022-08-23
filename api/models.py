@@ -11,7 +11,7 @@ from django.db.models import QuerySet
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
-from .management.models import Stage, WeekID
+from api.control.models import WeekID
 
 
 class AbstractModelMeta(abc.ABCMeta, type(models.Model)):
@@ -26,8 +26,8 @@ class User(AbstractUser, metaclass=AbstractModelMeta):
         verbose_name_plural = 'Пользователи'
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    vkontakte_id = models.PositiveIntegerField(null=True, blank=True)
-    telegram_id = models.PositiveIntegerField(null=True, blank=True)
+    vkontakte_id = models.PositiveBigIntegerField(null=True, blank=True)
+    telegram_id = models.PositiveBigIntegerField(null=True, blank=True)
     rating = models.PositiveIntegerField(
         default=50,
         verbose_name='Рейтинг',

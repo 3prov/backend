@@ -10,7 +10,7 @@ import uuid
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0009_resultsformurl'),
+        ('api', '0007_resultsformurl'),
     ]
 
     operations = [

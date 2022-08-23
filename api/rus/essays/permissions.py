@@ -2,7 +2,7 @@ from rest_framework import exceptions, permissions
 
 from ..models import Essay, Text
 from ...form_url.models import EssayFormURL
-from ...management.models import Stage, WeekID
+from ...control.models import Stage, WeekID
 from .serializers import (
     EssayCreateSerializer,
     EssayFormSerializer,
