@@ -18,7 +18,7 @@ jobs:
         run: |
           cp .env.example .env
       - name: Build and test development mode
-      - uses: docker-practice/actions-setup-docker@master
+        uses: docker-practice/actions-setup-docker@master
         run: |
           set -x
           make build_dev
@@ -37,7 +37,7 @@ jobs:
           cp .env.db.example .env.db
 
       - name: Build and test production mode
-      - uses: docker-practice/actions-setup-docker@master
+        uses: docker-practice/actions-setup-docker@master
         run: |
           set -x
           make build_prod
