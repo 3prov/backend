@@ -20,7 +20,7 @@ jobs:
           cp .env.example .env
       - name: Build and test development mode
       - uses: docker-practice/actions-setup-docker@master
-      - run: |
+        run: |
           set -x
           make build_dev
           make up_dev
@@ -40,7 +40,7 @@ jobs:
 
       - name: Build and test production mode
       - uses: docker-practice/actions-setup-docker@master
-      - run: |
+        run: |
           set -x
           make build_prod
           make up_prod
