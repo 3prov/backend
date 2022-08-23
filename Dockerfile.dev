@@ -14,7 +14,7 @@ WORKDIR /usr/src/app
 
 # install gcc
 RUN apk update \
-    && apk add gcc
+    && apk add gcc python3-dev musl-dev libffi-dev
 
 # pip
 RUN --mount=type=cache,target=/root/.cache pip install --upgrade pip

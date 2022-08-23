@@ -24,7 +24,7 @@ connect_to_backend_prod:
 	$(DOCKER_COMPOSE) --file=$(DOCKER_COMPOSE_PROD_FILE) exec backend sh
 
 test_prod:
-	$(DOCKER_COMPOSE) --file=$(DOCKER_COMPOSE_PROD_FILE) exec backend sh -c "coverage run --omit=*/tests* manage.py test --no-input && coverage report"
+	$(DOCKER_COMPOSE) --file=$(DOCKER_COMPOSE_PROD_FILE) exec -T backend sh -c "coverage run --omit=*/tests* manage.py test --no-input && coverage report"
 
 # DEVELOPMENT
 dev: build_dev up_dev
@@ -42,7 +42,7 @@ connect_to_backend_dev:
 	$(DOCKER_COMPOSE) --file=$(DOCKER_COMPOSE_DEV_FILE) exec backend sh
 
 test_dev:
-	$(DOCKER_COMPOSE) --file=$(DOCKER_COMPOSE_DEV_FILE) exec backend sh -c "coverage run --omit=*/tests* manage.py test --no-input && coverage report"
+	$(DOCKER_COMPOSE) --file=$(DOCKER_COMPOSE_DEV_FILE) exec -T backend sh -c "coverage run --omit=*/tests* manage.py test --no-input && coverage report"
 
 # DELETES ALL CONTAINERS AND IMAGES
 clean_dev:
