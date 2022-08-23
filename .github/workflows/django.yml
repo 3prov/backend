@@ -8,7 +8,6 @@ on:
 
 jobs:
   build_test_dev:
-    name: Build and test development mode
     runs-on: ubuntu-latest
 
     steps:
@@ -27,7 +26,6 @@ jobs:
           make test_dev
 
   build_test_prod:
-    name: Build and test production mode
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
