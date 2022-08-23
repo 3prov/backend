@@ -269,7 +269,6 @@
 - Ответ:
 ```json
 {
-  "sentence_number": 1,
   "evaluator_comment": "Пропустил 5 запятых!!!!!!",
   "mistake_type": "K08"
 }

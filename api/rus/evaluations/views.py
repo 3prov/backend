@@ -17,6 +17,7 @@ from api.rus.evaluations.serializers import (
     EssayEvaluationSerializer,
     EvaluationFormURLVolunteerCreateSerializer,
     EssaySentenceReviewSerializer,
+    EssaySentenceReviewWithoutSentenceNumberSerializer,
 )
 from api.rus.models import Essay
 from api.work_distribution.models import WorkDistributionToEvaluate
@@ -68,7 +69,7 @@ class EssaySentenceReviewFromFormURLCreate(generics.CreateAPIView):
 class EssaySentenceReviewFormURLView(generics.RetrieveUpdateAPIView):
     queryset = EssaySentenceReview.objects.all()
     permission_classes = [permissions.AllowAny, IsEvaluationAcceptingStage]
-    serializer_class = EssaySentenceReviewSerializer
+    serializer_class = EssaySentenceReviewWithoutSentenceNumberSerializer
 
     def get_object(self):
         form_url = EvaluationFormURL.get_from_url_or_404(

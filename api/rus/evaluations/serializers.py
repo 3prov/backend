@@ -24,6 +24,12 @@ class EssaySentenceReviewSerializer(serializers.ModelSerializer):
         fields = ['sentence_number', 'evaluator_comment', 'mistake_type']
 
 
+class EssaySentenceReviewWithoutSentenceNumberSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EssaySentenceReview
+        fields = ['evaluator_comment', 'mistake_type']
+
+
 class EvaluationFormURLListViewSerializer(serializers.ModelSerializer):
     class Meta:
         model = EvaluationFormURL
