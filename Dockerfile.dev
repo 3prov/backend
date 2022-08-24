@@ -33,14 +33,8 @@ FROM python:3.10-alpine
 
 RUN apk update && apk add libpq libstdc++
 
-# create directory for the app user
+# create directory
 RUN mkdir -p /home/app
-
-# create the app user
-RUN addgroup -S app && adduser -S app -G app
-
-# change to the app user
-USER app
 
 # create the appropriate directories
 ENV HOME=/home/app
@@ -49,7 +43,7 @@ RUN mkdir -p $APP_HOME/static
 WORKDIR $APP_HOME
 
 # copy project
-COPY --chown=app:app . $APP_HOME
+COPY . $APP_HOME
 RUN find . -name "*.sh" | xargs chmod +x
 
 # install dependencies

@@ -31,6 +31,8 @@ __pycache__/
 
 # C extensions
 *.so
+!mcximings_HungarianAlgorithm.cpython-310-x86_64-linux-gnu.so
+
 
 # Distribution / packaging
 .Python
