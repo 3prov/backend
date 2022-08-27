@@ -1,4 +1,3 @@
-from django.urls import reverse
 from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -19,15 +18,9 @@ class EssayDecodeURLView(APIView):
 
     def get(self, request, *args, **kwargs):
         data_to_response = {
-            'work_already_sent': False,
-            'urls': {
-                'to_POST': False,
-                'to_PATCH': False,
-            },
-            'work': {
-                'essay': False,
-            },
-            'task': False,
+            'essay_already_sent': False,
+            'essay': None,
+            'task': None,
         }
 
         form_url = EssayFormURL.get_from_url_or_404(kwargs['encoded_part'])
@@ -36,15 +29,10 @@ class EssayDecodeURLView(APIView):
             essay = Essay.objects.get(
                 author=form_url.user, task__week_id=WeekID.get_current()
             )
-            data_to_response['work_already_sent'] = True
-            data_to_response['work']['essay'] = EssaySerializer(essay).data
-            data_to_response['urls']['to_PATCH'] = reverse(
-                'essay_from_url_edit', args=[form_url.url]
-            )
+            data_to_response['essay_already_sent'] = True
+            data_to_response['essay'] = EssaySerializer(essay).data
         except Essay.DoesNotExist:
-            data_to_response['urls']['to_POST'] = reverse(
-                'essay_from_url_post', args=[form_url.url]
-            )
+            pass
 
         return Response(data_to_response)
 
@@ -56,17 +44,15 @@ class EvaluationDecodeURLView(APIView):
     def get(self, request, *args, **kwargs):
         data_to_response = {
             'evaluation_already_sent': False,
-            'urls': {
-                'to_POST': False,
-                'to_PATCH': False,
-            },
-            'evaluation': False,
-            'task': False,
-            'task_keys': False,
+            'evaluation': None,
+            'essay': None,
+            'task': None,
+            'task_keys': None,
         }
 
         form_url = EvaluationFormURL.get_from_url_or_404(kwargs['encoded_part'])
         _current_text = Text.get_current()
+        data_to_response['essay'] = EssaySerializer(form_url.evaluation_work).data
         data_to_response['task'] = TextSerializer(_current_text).data
         data_to_response['task_keys'] = TextKeySerializer(
             TextKey.objects.filter(text=_current_text), many=True
@@ -77,12 +63,7 @@ class EvaluationDecodeURLView(APIView):
             )
             data_to_response['evaluation_already_sent'] = True
             data_to_response['evaluation'] = EssayEvaluationSerializer(evaluation).data
-            data_to_response['urls']['to_PATCH'] = reverse(
-                'evaluation_from_url_edit', args=[form_url.url]
-            )  # TODO: change serializer
         except EssayEvaluation.DoesNotExist:
-            data_to_response['urls']['to_POST'] = reverse(
-                'evaluation_from_url_post', args=[form_url.url]
-            )
+            pass
 
         return Response(data_to_response)

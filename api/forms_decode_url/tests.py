@@ -57,40 +57,33 @@ class ControlTest(APITestCase):
             reverse('form_essay_by_encoded_part', args=[encoded_url])
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json()['work_already_sent'], False)
-        to_post_url = response.json()['urls']['to_POST']
-        to_patch_url = response.json()['urls']['to_PATCH']
-        self.assertNotEqual(to_post_url, False)
-        self.assertEqual(to_patch_url, False)
+        self.assertEqual(response.json()['essay_already_sent'], False)
+        self.assertIsNone(response.json()['essay'])
         data = {'body': 'тест.'}
-        response = self.client.post(to_post_url, data, format='json')
+        response = self.client.post(
+            reverse('essay_from_url_post', args=[encoded_url]), data, format='json'
+        )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         response = self.client.get(
             reverse('form_essay_by_encoded_part', args=[encoded_url])
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json()['work_already_sent'], True)
-        to_post_url = response.json()['urls']['to_POST']
-        to_patch_url = response.json()['urls']['to_PATCH']
-        self.assertEqual(to_post_url, False)
-        self.assertNotEqual(to_patch_url, False)
-        self.assertEqual(response.json()['work']['essay']['body'], data['body'])
+        self.assertEqual(response.json()['essay_already_sent'], True)
+        self.assertEqual(response.json()['essay']['body'], data['body'])
 
         data = {'body': 'теперь измененное содержимое!'}
-        response = self.client.patch(to_patch_url, data, format='json')
+        response = self.client.patch(
+            reverse('essay_from_url_edit', args=[encoded_url]), data, format='json'
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         response = self.client.get(
             reverse('form_essay_by_encoded_part', args=[encoded_url])
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json()['work_already_sent'], True)
-        to_post_url = response.json()['urls']['to_POST']
-        to_patch_url = response.json()['urls']['to_PATCH']
-        self.assertEqual(to_post_url, False)
-        self.assertNotEqual(to_patch_url, False)
-        self.assertEqual(response.json()['work']['essay']['body'], data['body'])
+        self.assertEqual(response.json()['essay_already_sent'], True)
+        self.assertEqual(response.json()['essay']['body'], data['body'])
 
     def send_essay_from_user(self, user: User):
         encoded_url = self.get_link_to_essay_form(user)
@@ -99,7 +92,7 @@ class ControlTest(APITestCase):
         )
         data = {'body': f'сочинение от {user.username}.'}
         response = self.client.post(
-            response.json()['urls']['to_POST'], data, format='json'
+            reverse('essay_from_url_post', args=[encoded_url]), data, format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -123,11 +116,9 @@ class ControlTest(APITestCase):
         response = self.client.get(
             reverse('form_evaluation_by_encoded_part', args=[form_eval.url])
         )
-        url_to_post = response.json()['urls']['to_POST']
+        self.assertIsNotNone(response.json()['essay']['body'])
         self.assertEqual(response.json()['evaluation_already_sent'], False)
-        self.assertIsInstance(url_to_post, str)
-        self.assertEqual(response.json()['urls']['to_PATCH'], False)
-        self.assertEqual(response.json()['evaluation'], False)
+        self.assertIsNone(response.json()['evaluation'])
 
         data = {
             "criteria": {
@@ -146,7 +137,11 @@ class ControlTest(APITestCase):
             }
         }
         self.assertEqual(EssayEvaluation.objects.all().count(), 0)
-        response = self.client.post(url_to_post, data, format='json')
+        response = self.client.post(
+            reverse('evaluation_from_url_post', args=[form_eval.url]),
+            data,
+            format='json',
+        )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(EssayEvaluation.objects.all().count(), 1)
         id_before_change = response.json()['criteria']['id']
@@ -155,20 +150,26 @@ class ControlTest(APITestCase):
                 response.json()['criteria'][f'k{i}'], data['criteria'][f'k{i}']
             )
 
-        response = self.client.post(url_to_post, data, format='json')
+        response = self.client.post(
+            reverse('evaluation_from_url_post', args=[form_eval.url]),
+            data,
+            format='json',
+        )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(EssayEvaluation.objects.all().count(), 1)
 
-        response = self.client.post(url_to_post, data, format='json')
+        response = self.client.post(
+            reverse('evaluation_from_url_post', args=[form_eval.url]),
+            data,
+            format='json',
+        )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         response = self.client.get(
             reverse('form_evaluation_by_encoded_part', args=[form_eval.url])
         )
-        url_to_patch = response.json()['urls']['to_PATCH']
+        self.assertIsNotNone(response.json()['essay']['body'])
         self.assertEqual(response.json()['evaluation_already_sent'], True)
-        self.assertEqual(response.json()['urls']['to_POST'], False)
-        self.assertIsInstance(url_to_patch, str)
         self.assertIsInstance(response.json()['evaluation'], dict)
         data = {
             "criteria": {
@@ -186,10 +187,16 @@ class ControlTest(APITestCase):
                 "k12": 0,
             }
         }
-        response = self.client.patch(url_to_patch, data, format='json')
+        response = self.client.patch(
+            reverse('evaluation_from_url_edit', args=[form_eval.url]),
+            data,
+            format='json',
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(EssayEvaluation.objects.all().count(), 1)
-        response = self.client.get(url_to_patch, format='json')
+        response = self.client.get(
+            reverse('evaluation_from_url_edit', args=[form_eval.url]), format='json'
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(EssayEvaluation.objects.all().count(), 1)
         for i in range(1, 13):
@@ -198,7 +205,11 @@ class ControlTest(APITestCase):
             )
         self.assertEqual(id_before_change, response.json()['criteria']['id'])
         data['criteria']['k3'] = 10
-        response = self.client.patch(url_to_patch, data, format='json')
+        response = self.client.patch(
+            reverse('evaluation_from_url_edit', args=[form_eval.url]),
+            data,
+            format='json',
+        )
         self.assertEqual(response.status_code, 400)
 
         data = {
@@ -218,7 +229,6 @@ class ControlTest(APITestCase):
         self.assertEqual(
             response.json()['evaluator_comment'], data['evaluator_comment']
         )
-
         response = self.client.post(
             reverse(
                 'evaluation_essay_sentence_review_form_url_post', args=[form_eval.url]
