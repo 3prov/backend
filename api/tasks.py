@@ -21,14 +21,8 @@ class DistributionTasks(CeleryTasks):
 
 class FormURLTasks(CeleryTasks):
     @staticmethod
-    @app.task(bind=True)
-    def create_result_form_urls_for_essay_authors(self):
+    @app.task
+    def create_result_form_urls_for_essay_authors():
         current_week_id = WeekID.get_current()
-        form_urls_count = Essay.objects.filter(task__week_id=current_week_id).count()
-        i = 1
         for essay in Essay.objects.filter(task__week_id=current_week_id).only('author'):
             ResultsFormURL.objects.create(user=essay.author, week_id=current_week_id)
-            self.update_state(
-                state='PROGRESS', meta={'current': i, 'total': form_urls_count}
-            )
-            i += 1

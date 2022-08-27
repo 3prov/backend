@@ -12,7 +12,7 @@ DOCKER_BUILDKIT_FLAG=1
 prod: build_prod up_prod test_prod logs_prod
 
 build_prod:
-	DOCKER_BUILDKIT=$(DOCKER_BUILDKIT_FLAG) $(DOCKER_COMPOSE) --file=$(DOCKER_COMPOSE_PROD_FILE) build -t llirrikk/
+	DOCKER_BUILDKIT=$(DOCKER_BUILDKIT_FLAG) $(DOCKER_COMPOSE) --file=$(DOCKER_COMPOSE_PROD_FILE) build
 
 up_prod:
 	$(DOCKER_COMPOSE) --file=$(DOCKER_COMPOSE_PROD_FILE) up -d
