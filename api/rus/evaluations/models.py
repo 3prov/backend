@@ -67,7 +67,7 @@ for section in settings.ESSAY_EVALUATION_TABLE.keys():
             value=models.PositiveIntegerField(
                 validators=[
                     MinValueValidator(0),
-                    MaxValueValidator(criteria[1]['max_ball']),
+                    MaxValueValidator(criteria[1]['max_score']),
                 ],
                 verbose_name=criteria[1]['name'],
             ),
