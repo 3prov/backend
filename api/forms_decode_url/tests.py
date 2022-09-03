@@ -10,7 +10,7 @@ from rest_framework.test import (
 
 from api.form_url.models import EvaluationFormURL
 from api.models import User
-from api.rus.evaluations.models import EssayEvaluation, EssaySentenceReview
+from api.rus.evaluations.models import EssayEvaluation, EssaySelectionReview
 
 
 class ControlTest(APITestCase):
@@ -213,14 +213,15 @@ class ControlTest(APITestCase):
         self.assertEqual(response.status_code, 400)
 
         data = {
-            "sentence_number": 1,
-            "evaluator_comment": "комментарий к первому предложению.",
-            "mistake_type": 'K10',
+            "start_selection_char_index": 5,
+            "selection_length": 15,
+            "evaluator_comment": "Мой комментарий, длина которого 15!!!!",
+            "mistake_type": "K09",
         }
-        self.assertEqual(EssaySentenceReview.objects.all().count(), 0)
+        self.assertEqual(EssaySelectionReview.objects.all().count(), 0)
         response = self.client.post(
             reverse(
-                'evaluation_essay_sentence_review_form_url_post', args=[form_eval.url]
+                'evaluation_essay_selection_review_form_url_post', args=[form_eval.url]
             ),
             data,
             format='json',
@@ -231,88 +232,141 @@ class ControlTest(APITestCase):
         )
         response = self.client.post(
             reverse(
-                'evaluation_essay_sentence_review_form_url_post', args=[form_eval.url]
+                'evaluation_essay_selection_review_form_url_post', args=[form_eval.url]
             ),
             data,
             format='json',
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(EssaySentenceReview.objects.all().count(), 1)
+        self.assertEqual(EssaySelectionReview.objects.all().count(), 1)
         data['mistake_type'] = 'K11'
         response = self.client.post(
             reverse(
-                'evaluation_essay_sentence_review_form_url_post', args=[form_eval.url]
+                'evaluation_essay_selection_review_form_url_post', args=[form_eval.url]
             ),
             data,
             format='json',
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(EssaySentenceReview.objects.all().count(), 1)
+        self.assertEqual(EssaySelectionReview.objects.all().count(), 1)
 
-        data['evaluator_comment'] = 'комментарий к первому предложению (изменённый).'
+        data['evaluator_comment'] = 'комментарий к фрагменту (изменённый).'
         response = self.client.post(
             reverse(
-                'evaluation_essay_sentence_review_form_url_post', args=[form_eval.url]
+                'evaluation_essay_selection_review_form_url_post', args=[form_eval.url]
             ),
             data,
             format='json',
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
-            response.json()['detail'], 'Проверка этого предложения уже отправлена.'
+            response.json()['detail'], 'Проверка этого фрагмента уже отправлена.'
         )
-        self.assertEqual(EssaySentenceReview.objects.all().count(), 1)
+        self.assertEqual(EssaySelectionReview.objects.all().count(), 1)
 
-        data['sentence_number'] = 2
+        data['start_selection_char_index'] = 2
         response = self.client.post(
             reverse(
-                'evaluation_essay_sentence_review_form_url_post', args=[form_eval.url]
+                'evaluation_essay_selection_review_form_url_post', args=[form_eval.url]
+            ),
+            data,
+            format='json',
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        data['start_selection_char_index'] = 0
+        response = self.client.post(
+            reverse(
+                'evaluation_essay_selection_review_form_url_post', args=[form_eval.url]
+            ),
+            data,
+            format='json',
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        data['start_selection_char_index'] = -1
+        response = self.client.post(
+            reverse(
+                'evaluation_essay_selection_review_form_url_post', args=[form_eval.url]
             ),
             data,
             format='json',
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        data['sentence_number'] = 0
+        data['start_selection_char_index'] = 26
         response = self.client.post(
             reverse(
-                'evaluation_essay_sentence_review_form_url_post', args=[form_eval.url]
+                'evaluation_essay_selection_review_form_url_post', args=[form_eval.url]
             ),
             data,
             format='json',
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        data['sentence_number'] = -1
-        response = self.client.post(
-            reverse(
-                'evaluation_essay_sentence_review_form_url_post', args=[form_eval.url]
-            ),
-            data,
-            format='json',
-        )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        data['sentence_number'] = "1"
-        response = self.client.post(
-            reverse(
-                'evaluation_essay_sentence_review_form_url_post', args=[form_eval.url]
-            ),
-            data,
-            format='json',
-        )
+        self.assertEqual(EssaySelectionReview.objects.all().count(), 3)
 
+        data['start_selection_char_index'] = 24
+        data['selection_length'] = 1
+        response = self.client.post(
+            reverse(
+                'evaluation_essay_selection_review_form_url_post', args=[form_eval.url]
+            ),
+            data,
+            format='json',
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(EssaySelectionReview.objects.all().count(), 4)
+
+        data['start_selection_char_index'] = 24
+        data['selection_length'] = 2
+        response = self.client.post(
+            reverse(
+                'evaluation_essay_selection_review_form_url_post', args=[form_eval.url]
+            ),
+            data,
+            format='json',
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(EssaySelectionReview.objects.all().count(), 5)
+
+        data['start_selection_char_index'] = 24
+        data['selection_length'] = 3
+        response = self.client.post(
+            reverse(
+                'evaluation_essay_selection_review_form_url_post', args=[form_eval.url]
+            ),
+            data,
+            format='json',
+        )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(EssaySentenceReview.objects.all().count(), 1)
+        self.assertEqual(EssaySelectionReview.objects.all().count(), 5)
 
         data['evaluator_comment'] = 'изменённый'
         response = self.client.put(
             reverse(
-                'evaluation_essay_sentence_review_form_url_edit',
-                kwargs={'encoded_part': form_eval.url, 'sentence_number': 1},
+                'evaluation_essay_selection_review_form_url_edit',
+                kwargs={
+                    'encoded_part': form_eval.url,
+                    'start_selection_char_index': 24,
+                    'selection_length': 3,
+                },
+            ),
+            data,
+            format='json',
+        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        response = self.client.put(
+            reverse(
+                'evaluation_essay_selection_review_form_url_edit',
+                kwargs={
+                    'encoded_part': form_eval.url,
+                    'start_selection_char_index': 24,
+                    'selection_length': 2,
+                },
             ),
             data,
             format='json',
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(EssaySentenceReview.objects.all().count(), 1)
+        self.assertEqual(EssaySelectionReview.objects.all().count(), 5)
         self.assertEqual(
             response.json()['evaluator_comment'], data['evaluator_comment']
         )

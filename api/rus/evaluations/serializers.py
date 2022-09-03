@@ -3,7 +3,7 @@ from rest_framework import serializers
 from api.form_url.models import EvaluationFormURL
 from api.rus.evaluations.models import (
     EssayEvaluation,
-    EssaySentenceReview,
+    EssaySelectionReview,
     EssayCriteria,
 )
 from api.work_distribution.models import WorkDistributionToEvaluate
@@ -18,15 +18,20 @@ class EvaluationFormURLGetCurrentWeekListSerializer(serializers.ModelSerializer)
     # evaluator = UserDetailSerializer(read_only=True)
 
 
-class EssaySentenceReviewSerializer(serializers.ModelSerializer):
+class EssaySelectionReviewSerializer(serializers.ModelSerializer):
     class Meta:
-        model = EssaySentenceReview
-        fields = ['sentence_number', 'evaluator_comment', 'mistake_type']
+        model = EssaySelectionReview
+        fields = [
+            'start_selection_char_index',
+            'selection_length',
+            'evaluator_comment',
+            'mistake_type',
+        ]
 
 
-class EssaySentenceReviewWithoutSentenceNumberSerializer(serializers.ModelSerializer):
+class EssaySelectionReviewWithoutSelectionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = EssaySentenceReview
+        model = EssaySelectionReview
         fields = ['evaluator_comment', 'mistake_type']
 
 
@@ -66,11 +71,11 @@ class EvaluationFormURLWorkCreateSerializer(serializers.ModelSerializer):
 class EssayEvaluationSerializer(serializers.ModelSerializer):
     class Meta:
         model = EssayEvaluation
-        fields = ['criteria', 'created_at', 'sentences_review']
+        fields = ['criteria', 'created_at', 'selections_review']
 
     created_at = serializers.DateTimeField(read_only=True)
     criteria = EssayCriteriaSerializer()
-    sentences_review = serializers.SerializerMethodField(read_only=True)
+    selections_review = serializers.SerializerMethodField(read_only=True)
 
     def update(self, instance, validated_data):
         EssayCriteria.objects.filter(evaluation=instance).update(
@@ -79,11 +84,11 @@ class EssayEvaluationSerializer(serializers.ModelSerializer):
         return instance
 
     @staticmethod
-    def get_sentences_review(obj):
-        essay_sentences_review = EssaySentenceReview.objects.filter(
+    def get_selections_review(obj):
+        essay_selections_review = EssaySelectionReview.objects.filter(
             evaluator=obj.evaluator, essay=obj.work
         )
-        return EssaySentenceReviewSerializer(essay_sentences_review, many=True).data
+        return EssaySelectionReviewSerializer(essay_selections_review, many=True).data
 
 
 class EssayEvaluationListSerializer(serializers.ModelSerializer):

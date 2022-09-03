@@ -2,12 +2,12 @@ from django.urls import path
 
 from api.rus.evaluations.views import (
     EvaluationFormURLGetCurrentWeekList,
-    EssaySentenceReviewFromFormURLCreate,
+    EssaySelectionReviewFromFormURLCreate,
     EvaluationFormURLListView,
     EvaluationFormURLWorkCreate,
     EvaluationFormURLView,
     WorkDistributionToEvaluateVolunteerListView,
-    EssaySentenceReviewFormURLView,
+    EssaySelectionReviewFormURLView,
     EvaluationFormURLVolunteerCreate,
 )
 
@@ -18,14 +18,14 @@ urlpatterns = [
         name='get_current_week_distribution',
     ),
     path(
-        'sentence_review/form-url/<str:encoded_part>/post/',
-        EssaySentenceReviewFromFormURLCreate.as_view(),
-        name='evaluation_essay_sentence_review_form_url_post',
+        'selection_review/form-url/<str:encoded_part>/post/',
+        EssaySelectionReviewFromFormURLCreate.as_view(),
+        name='evaluation_essay_selection_review_form_url_post',
     ),  # Create
     path(
-        'sentence_review/form-url/<str:encoded_part>/edit/<int:sentence_number>/',
-        EssaySentenceReviewFormURLView.as_view(),
-        name='evaluation_essay_sentence_review_form_url_edit',
+        'selection_review/form-url/<str:encoded_part>/edit/<int:start_selection_char_index>/<int:selection_length>/',
+        EssaySelectionReviewFormURLView.as_view(),
+        name='evaluation_essay_selection_review_form_url_edit',
     ),  # Read, Update
     path(
         'get_form_urls/<uuid:user>/',

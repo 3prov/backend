@@ -5,7 +5,7 @@ from .models import User
 from .rus.evaluations.models import (
     EssayEvaluation,
     EssayCriteria,
-    EssaySentenceReview,
+    EssaySelectionReview,
     RateEssayEvaluation,
 )
 from .rus.models import Text, Essay, TextKey
@@ -74,8 +74,8 @@ class WorkDistributionToEvaluateAdmin(admin.ModelAdmin):
     list_display = ['id']
 
 
-@admin.register(EssaySentenceReview)
-class EssaySentenceReviewAdmin(admin.ModelAdmin):
+@admin.register(EssaySelectionReview)
+class EssaySelectionReviewAdmin(admin.ModelAdmin):
     list_display = ['id']
 
 

@@ -87,10 +87,10 @@ class RateEssayEvaluation(RateEvaluation):
     )
 
 
-class EssaySentenceReview(models.Model):
+class EssaySelectionReview(models.Model):
     class Meta:
-        verbose_name = 'Предложение сочинения'
-        verbose_name_plural = 'Предложения сочинений'
+        verbose_name = 'Фрагмент сочинения'
+        verbose_name_plural = 'Фрагменты сочинений'
 
     class MistakesEnum(models.TextChoices):
         K7 = 'K07', _('Орфографическая (К7)')
@@ -108,12 +108,22 @@ class EssaySentenceReview(models.Model):
         to=User, on_delete=models.CASCADE, verbose_name='Проверяющий'
     )
 
-    sentence_number = models.PositiveIntegerField(
-        verbose_name='Номер предложения сочинения',
+    start_selection_char_index = models.PositiveIntegerField(
+        verbose_name='Индекс начального символа выделения',
         validators=[
-            MinValueValidator(1, 'Номер предложения должен быть положительным числом.')
+            MinValueValidator(
+                0,
+                'Индекс начального символа выделения не может быть отрицательным числом.',
+            )
         ],
     )
+    selection_length = models.PositiveIntegerField(
+        verbose_name='Длина выделения в символах',
+        validators=[
+            MinValueValidator(1, 'Длина выделения должна быть положительным числом.')
+        ],
+    )
+
     evaluator_comment = models.CharField(
         max_length=1000,
         validators=[

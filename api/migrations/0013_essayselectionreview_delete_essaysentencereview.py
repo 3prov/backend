@@ -17,13 +17,81 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='EssaySelectionReview',
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('start_selection_char_index', models.PositiveIntegerField(validators=[django.core.validators.MinValueValidator(0, 'Индекс начального символа выделения не может быть отрицательным числом.')], verbose_name='Индекс начального символа выделения')),
-                ('selection_length', models.PositiveIntegerField(validators=[django.core.validators.MinValueValidator(1, 'Длина выделения должна быть положительным числом.')], verbose_name='Длина выделения в символах')),
-                ('evaluator_comment', models.CharField(max_length=1000, validators=[django.core.validators.MaxLengthValidator(1000, 'Комментарий не может быть длиннее 1000 символов.')], verbose_name='Комментарий проверяющего')),
-                ('mistake_type', models.CharField(choices=[('K07', 'Орфографическая (К7)'), ('K08', 'Пунктуационная (К8)'), ('K09', 'Грамматическая (К9)'), ('K10', 'Речевая (К10)'), ('K11', 'Этическая (К11)'), ('K12', 'Фактическая (К12)')], max_length=3, verbose_name='Тип ошибки')),
-                ('essay', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='api.essay', verbose_name='Сочинение')),
-                ('evaluator', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL, verbose_name='Проверяющий')),
+                (
+                    'id',
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                (
+                    'start_selection_char_index',
+                    models.PositiveIntegerField(
+                        validators=[
+                            django.core.validators.MinValueValidator(
+                                0,
+                                'Индекс начального символа выделения не может быть отрицательным числом.',
+                            )
+                        ],
+                        verbose_name='Индекс начального символа выделения',
+                    ),
+                ),
+                (
+                    'selection_length',
+                    models.PositiveIntegerField(
+                        validators=[
+                            django.core.validators.MinValueValidator(
+                                1, 'Длина выделения должна быть положительным числом.'
+                            )
+                        ],
+                        verbose_name='Длина выделения в символах',
+                    ),
+                ),
+                (
+                    'evaluator_comment',
+                    models.CharField(
+                        max_length=1000,
+                        validators=[
+                            django.core.validators.MaxLengthValidator(
+                                1000, 'Комментарий не может быть длиннее 1000 символов.'
+                            )
+                        ],
+                        verbose_name='Комментарий проверяющего',
+                    ),
+                ),
+                (
+                    'mistake_type',
+                    models.CharField(
+                        choices=[
+                            ('K07', 'Орфографическая (К7)'),
+                            ('K08', 'Пунктуационная (К8)'),
+                            ('K09', 'Грамматическая (К9)'),
+                            ('K10', 'Речевая (К10)'),
+                            ('K11', 'Этическая (К11)'),
+                            ('K12', 'Фактическая (К12)'),
+                        ],
+                        max_length=3,
+                        verbose_name='Тип ошибки',
+                    ),
+                ),
+                (
+                    'essay',
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to='api.essay',
+                        verbose_name='Сочинение',
+                    ),
+                ),
+                (
+                    'evaluator',
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name='Проверяющий',
+                    ),
+                ),
             ],
             options={
                 'verbose_name': 'Фрагмент сочинения',

@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from api.form_url.models import EvaluationFormURL
 from api.control.models import WeekID
 from api.models import User
-from api.rus.evaluations.models import EssayEvaluation, EssaySentenceReview
+from api.rus.evaluations.models import EssayEvaluation, EssaySelectionReview
 from api.rus.evaluations.permissions import IsEvaluationAcceptingStage
 from api.rus.evaluations.serializers import (
     EvaluationFormURLGetCurrentWeekListSerializer,
@@ -16,8 +16,8 @@ from api.rus.evaluations.serializers import (
     EssayCriteriaDetailSerializer,
     EssayEvaluationSerializer,
     EvaluationFormURLVolunteerCreateSerializer,
-    EssaySentenceReviewSerializer,
-    EssaySentenceReviewWithoutSentenceNumberSerializer,
+    EssaySelectionReviewSerializer,
+    EssaySelectionReviewWithoutSelectionSerializer,
 )
 from api.rus.models import Essay
 from api.work_distribution.models import WorkDistributionToEvaluate
@@ -25,9 +25,9 @@ from api.work_distribution.models import WorkDistributionToEvaluate
 from django_filters.rest_framework import DjangoFilterBackend
 
 
-class EssaySentenceReviewFromFormURLCreate(generics.CreateAPIView):
-    queryset = EssaySentenceReview.objects.all()
-    serializer_class = EssaySentenceReviewSerializer
+class EssaySelectionReviewFromFormURLCreate(generics.CreateAPIView):
+    queryset = EssaySelectionReview.objects.all()
+    serializer_class = EssaySelectionReviewSerializer
     permission_classes = [permissions.AllowAny, IsEvaluationAcceptingStage]
 
     def create(self, request, *args, **kwargs):
@@ -36,40 +36,50 @@ class EssaySentenceReviewFromFormURLCreate(generics.CreateAPIView):
         serialized.is_valid(raise_exception=True)
         if not (
             0
-            < serialized.data['sentence_number']
-            <= form_url.evaluation_work.sentences_count
+            <= serialized.data['start_selection_char_index']
+            < form_url.evaluation_work.chars_count
         ):
             raise permissions.exceptions.ValidationError(
-                detail='Номер оцениваемого предложения не может быть больше '
-                'количества предложений сочинения.'
+                detail='Индекс начального символа выделения не может быть отрицательным числом.'
+            )
+        if not (
+            0
+            <= serialized.data['start_selection_char_index']
+            + serialized.data['selection_length']
+            <= form_url.evaluation_work.chars_count
+        ):
+            raise permissions.exceptions.ValidationError(
+                detail='Индекс конца выделения должен быть больше 0 и не больше длины текста сочинения.'
             )
 
-        if EssaySentenceReview.objects.filter(
+        if EssaySelectionReview.objects.filter(
             evaluator=form_url.user,
             essay=form_url.evaluation_work,
-            sentence_number=serialized.data['sentence_number'],
+            start_selection_char_index=serialized.data['start_selection_char_index'],
+            selection_length=serialized.data['selection_length'],
         ).exists():
             raise permissions.exceptions.ValidationError(
-                {'detail': 'Проверка этого предложения уже отправлена.'}
+                {'detail': 'Проверка этого фрагмента уже отправлена.'}
             )
 
-        added_sentence_review = EssaySentenceReview.objects.create(
-            sentence_number=serialized.data['sentence_number'],
+        added_selection_review = EssaySelectionReview.objects.create(
+            start_selection_char_index=serialized.data['start_selection_char_index'],
+            selection_length=serialized.data['selection_length'],
             evaluator_comment=serialized.data['evaluator_comment'],
             mistake_type=serialized.data['mistake_type'],
             essay=form_url.evaluation_work,
             evaluator=form_url.user,
         )
         return Response(
-            self.get_serializer(added_sentence_review).data,
+            self.get_serializer(added_selection_review).data,
             status=status.HTTP_201_CREATED,
         )
 
 
-class EssaySentenceReviewFormURLView(generics.RetrieveUpdateAPIView):
-    queryset = EssaySentenceReview.objects.all()
+class EssaySelectionReviewFormURLView(generics.RetrieveUpdateAPIView):
+    queryset = EssaySelectionReview.objects.all()
     permission_classes = [permissions.AllowAny, IsEvaluationAcceptingStage]
-    serializer_class = EssaySentenceReviewWithoutSentenceNumberSerializer
+    serializer_class = EssaySelectionReviewWithoutSelectionSerializer
 
     def get_object(self):
         form_url = EvaluationFormURL.get_from_url_or_404(
@@ -80,7 +90,8 @@ class EssaySentenceReviewFormURLView(generics.RetrieveUpdateAPIView):
             queryset,
             evaluator=form_url.user,
             essay=form_url.evaluation_work,
-            sentence_number=self.kwargs['sentence_number'],
+            start_selection_char_index=self.kwargs['start_selection_char_index'],
+            selection_length=self.kwargs['selection_length'],
         )
         return obj
 

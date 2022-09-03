@@ -45,11 +45,8 @@ class Essay(Work):
         return super(Essay, self).save(force_insert, force_update, using, update_fields)
 
     @property
-    def sentences_count(self) -> int:
-        splintered: list[str] = self.body.split('.')
-        if splintered[-1] == '':
-            return len(splintered) - 1
-        return len(splintered)
+    def chars_count(self) -> int:
+        return len(self.body)
 
     @classmethod
     def filter_by_current_task(cls) -> QuerySet:

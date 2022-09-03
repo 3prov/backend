@@ -83,8 +83,8 @@ TODO: при переходе на этап S3 необходимо провер
 - GET: encoded-form-urls/evaluation/`str:encoded_part`/
   - POST: rus/evaluation/form-url/`str:encoded_part`/post/
   - GET, PUT, PATCH: rus/evaluation/form-url/`str:encoded_part`/edit/
-  - POST: rus/evaluation/sentence_review/form-url/`str:encoded_part`/post/
-  - GET, PUT, PATCH: rus/evaluation/sentence_review/form-url/`str:encoded_part`/edit/`int:sentence_number`/
+  - POST: rus/evaluation/selection_review/form-url/`str:encoded_part`/post/
+  - GET, PUT, PATCH: rus/evaluation/selection_review/form-url/`str:encoded_part`/edit/`int:start_selection_char_index`/`int:selection_length`/
 > **Note**:
 > После проверки трёх этих работ участник становится волонтёром.
 
@@ -94,8 +94,8 @@ TODO: при переходе на этап S3 необходимо провер
 - GET: encoded-form-urls/evaluation/`str:encoded_part`/
   - POST: rus/evaluation/form-url/`str:encoded_part`/post/
   - GET, PUT, PATCH: rus/evaluation/form-url/`str:encoded_part`/edit/
-  - POST: rus/evaluation/sentence_review/form-url/`str:encoded_part`/post/
-  - GET, PUT, PATCH: rus/evaluation/sentence_review/form-url/`str:encoded_part`/edit/`int:sentence_number`/
+  - POST: rus/evaluation/selection_review/form-url/`str:encoded_part`/post/
+  - GET, PUT, PATCH: rus/evaluation/selection_review/form-url/`str:encoded_part`/edit/`int:start_selection_char_index`/`int:selection_length`/
 
 
 ### Результаты недели
