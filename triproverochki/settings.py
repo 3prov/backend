@@ -180,7 +180,9 @@ DJOSER = {
 ROOT_HOSTCONF = 'triproverochki.hosts'
 DEFAULT_HOST = 'triproverochki'
 
-CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_HEADERS = default_headers + (
+    'Access-Control-Allow-Origin',
+)
 
 
 STUDY_YEAR = os.getenv('STUDY_YEAR')
