@@ -4,7 +4,6 @@ from ..models import Essay, Text
 from ...form_url.models import EssayFormURL
 from ...control.models import Stage, WeekID
 from .serializers import (
-    EssayCreateSerializer,
     EssayFormSerializer,
     EssayFormURLCreateSerializer,
 )
@@ -46,23 +45,6 @@ class IsWorkAcceptingStage(permissions.BasePermission):
         if Stage.get_stage() != Stage.StagesEnum.WORK_ACCEPTING:
             raise exceptions.PermissionDenied(detail=self.message)
         return True
-
-
-class IsWorkDoesNotAlreadyExists(permissions.BasePermission):
-    """
-    Проверяет, чтобы пользователь мог отправить не более одной работы за одну волну (неделю).
-    """
-
-    message = "Сочинение на этой неделе уже существует."
-
-    def has_permission(self, request, view) -> bool:
-        serialized = EssayCreateSerializer(data=request.data)
-        serialized.is_valid(raise_exception=True)
-        current_text = Text.get_current()
-        already_sent_essay = Essay.objects.filter(
-            author=serialized.data['author'], task=current_text
-        )
-        return not already_sent_essay.exists()
 
 
 class IsEssayFormURLAlreadyExists(permissions.BasePermission):

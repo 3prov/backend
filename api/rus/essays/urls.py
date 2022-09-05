@@ -1,7 +1,6 @@
 from django.urls import path
 
 from .views import (
-    EssayCreate,
     EssayListView,
     EssayFormURLUserCreate,
     EssayFromFormURLCreate,
@@ -11,7 +10,6 @@ from .views import (
 )
 
 urlpatterns = [
-    path('pass/', EssayCreate.as_view(), name='essay_pass'),  # ?
     path('list_all/', EssayListView.as_view(), name='essays_list_all'),
     path('<uuid:pk>/', EssayWithEvaluationsTextKeysView.as_view(), name='essay_detail'),
     path(

@@ -52,19 +52,6 @@ class EssayWithEvaluationsSerializer(serializers.ModelSerializer):
     evaluations = EssayEvaluationSerializer(read_only=True, many=True)
 
 
-class EssayCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Essay
-        fields = '__all__'
-
-    created_at = serializers.DateTimeField(read_only=True)
-    task = TextDetailSerializer(read_only=True)
-
-    def create(self, validated_data):
-        current_text = Text.get_current()
-        return Essay.objects.create(task=current_text, **validated_data)
-
-
 class EssayFormSerializer(serializers.ModelSerializer):
     class Meta:
         model = EssayFormURL

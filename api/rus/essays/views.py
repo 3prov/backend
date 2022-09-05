@@ -4,7 +4,6 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from ..models import Essay
 from .serializers import (
-    EssayCreateSerializer,
     EssayListSerializer,
     EssayFormSerializer,
     EssayFormURLCreateSerializer,
@@ -12,21 +11,11 @@ from .serializers import (
 )
 from .permissions import (
     IsWorkAcceptingStage,
-    IsWorkDoesNotAlreadyExists,
     IsEssayFormURLAlreadyExists,
     IsWorkDoesNotAlreadyExistsFromFormURL,
 )
 from ...form_url.models import EssayFormURL
 from ...control.models import WeekID
-
-
-class EssayCreate(generics.CreateAPIView):
-    serializer_class = EssayCreateSerializer
-    permission_classes = [
-        permissions.IsAuthenticated,
-        IsWorkAcceptingStage,
-        IsWorkDoesNotAlreadyExists,
-    ]
 
 
 class EssayListView(generics.ListAPIView):

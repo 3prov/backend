@@ -9,7 +9,7 @@ from .exceptions import UsersCountLessThenFour, WorkDistributionAlreadyExists
 from .models import WorkDistributionToEvaluate
 from ..control.models import WeekID
 from ..models import User
-from ..rus.models import Essay
+from ..rus.models import Essay, Text
 
 
 class WorkDistributionTest(APITestCase):
@@ -53,14 +53,12 @@ class WorkDistributionTest(APITestCase):
     def create_common_user_and_send_essay(self, username: str):
 
         user = User.objects.create_user(username)
-        data = {
-            "body": "vrhnuivwq9ov3vn 8 9 234n834f7834v83vyo3n4i8348ov3y4vgony8giv o34viuo4qvi"
-            + user.username,
-            "author": user.id,
-        }
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {user.auth_token}')
-        response = self.client.post(reverse('essay_pass'), data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        Essay.objects.create(
+            task=Text.get_current(),
+            body="vrhnuivwq9ov3vn 8" + user.username,
+            author=user,
+        )
 
     def test_1_essay(self):
         self.create_common_user_and_send_essay('common_user_1')

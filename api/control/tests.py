@@ -13,6 +13,7 @@ from rest_framework.test import (
 
 from .utils import ControlUtils
 from ..models import User
+from ..rus.models import Essay, Text
 
 
 class ControlTest(APITestCase):
@@ -117,11 +118,11 @@ class ControlTest(APITestCase):
         self.assertEqual(response.json()['current_stage'], 'S2')
 
     def pass_essay(self, admin_user):
-        data = {
-            "body": "vrhnuivwq9ov3vn 8 9 234n834f7834v83vyo3n4i8348ov3y4vgony8giv o34viuo4qvi",
-            "author": admin_user.id,
-        }
-        response = self.client.post(reverse('essay_pass'), data, format='json')
+        Essay.objects.get_or_create(
+            task=Text.get_current(),
+            body="vrhnuivwq9ov3vn 8 9 234n834f7834v83vyo3n4i8348ov3y4vgony8giv o34viu",
+            author=admin_user,
+        )
 
     def test_admin_user_statistics_with_essays(self):
         admin_user = User.objects.create_superuser(username='admin_user')

@@ -9,7 +9,7 @@ from rest_framework.test import (
 )
 
 from ..models import Text, Essay
-from api.models import User
+from api.models import User, Task
 from ...form_url.models import EssayFormURL
 
 
@@ -45,28 +45,16 @@ class EssaysTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Text.objects.all().count(), 1)
 
-    def test_anon_pass_essay(self):
-        data = {
-            'body': 'f09muf8ni8y83yof8y3f83fm3uf3m9f3pf93nfp93f93nf83pf3npf 3pf3f3ou389o3  33pf3f3',
-            'author': self.common_user.id,
-        }
-        response = self.client.post(reverse('essay_pass'), data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    def create_link_to_essay_form(self, user):
+        data = {'user': user.id}
+        return self.client.post(
+            reverse('create_link_to_essay_form'), data, format='json'
+        )
 
-    def pass_essay(self, user):
-        data = {
-            'body': 'f09muf8ni8y83yof8y3f83fm3uf3m9f3pf93nfp93f93nf83pf3npf 3pf3f3ou389o3  33pf3f3',
-            'author': user.id,
-        }
-        self.client.credentials(HTTP_AUTHORIZATION=f'Token {user.auth_token}')
-        return self.client.post(reverse('essay_pass'), data, format='json')
-
-    def test_common_pass_essay_wrong_stage_before(self):
-        response = self.pass_essay(self.common_user)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(
-            response.json()['detail'],
-            "Ошибка текущего этапа. Для отправки сочинения необходим 'S2' этап.",
+    def pass_essay(self, user, form_url_url: str):
+        data = {'body': f'essay from {user.username}!'}
+        return self.client.post(
+            reverse('essay_from_url_post', args=[form_url_url]), data, format='json'
         )
 
     def switch_stage(self, user_to_return):
@@ -79,50 +67,49 @@ class EssaysTest(APITestCase):
     def test_common_pass_essay_good_state(self):
         self.assertEqual(Essay.objects.all().count(), 0)
         self.switch_stage(self.common_user)
-        response = self.pass_essay(self.common_user)
+        response = self.create_link_to_essay_form(self.common_user)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertIsNotNone(response.json()['id'])
-        self.assertIsNotNone(response.json()['task'])
-        self.assertIsNotNone(response.json()['body'])
-        self.assertEqual(Essay.objects.all().count(), 1)
-
-    def test_common_pass_essay_good_state_more_than_one_pass(self):
-        self.switch_stage(self.common_user)
-        response = self.pass_essay(self.common_user)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        response = self.pass_essay(self.common_user)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        response = self.pass_essay(self.common_user)
-        self.assertEqual(Essay.objects.all().count(), 1)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(EssayFormURL.objects.all().count(), 1)
+        response_p1 = self.pass_essay(self.common_user, response.json()['url'])
+        self.assertEqual(response_p1.status_code, status.HTTP_201_CREATED)
+        response_p2 = self.pass_essay(self.common_user, response.json()['url'])
+        self.assertEqual(response_p2.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(Essay.objects.all().count(), 1)
 
     @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def test_common_pass_essay_wrong_stage_after(self):
         self.switch_stage(self.common_user)
         self.switch_stage(self.common_user)
-        response = self.pass_essay(self.common_user)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(
-            response.json()['detail'],
-            "Ошибка текущего этапа. Для отправки сочинения необходим 'S2' этап.",
-        )
-        self.switch_stage(self.common_user)
-        response = self.pass_essay(self.common_user)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(
-            response.json()['detail'],
-            "Ошибка текущего этапа. Для отправки сочинения необходим 'S2' этап.",
-        )
-        self.switch_stage(self.common_user)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(
-            response.json()['detail'],
-            "Ошибка текущего этапа. Для отправки сочинения необходим 'S2' этап.",
-        )
-        self.switch_stage(self.common_user)
-        response = self.pass_essay(self.common_user)
+        response = self.create_link_to_essay_form(self.common_user)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response_p1 = self.pass_essay(self.common_user, response.json()['url'])
+        self.assertEqual(response_p1.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(Essay.objects.all().count(), 0)
+        self.assertEqual(
+            response_p1.json()['detail'],
+            "Ошибка текущего этапа. Для отправки сочинения необходим 'S2' этап.",
+        )
+        self.switch_stage(self.common_user)
+        response_p1 = self.pass_essay(self.common_user, response.json()['url'])
+        self.assertEqual(response_p1.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(Essay.objects.all().count(), 0)
+        self.assertEqual(response_p1.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(
+            response_p1.json()['detail'],
+            "Ошибка текущего этапа. Для отправки сочинения необходим 'S2' этап.",
+        )
+        self.switch_stage(self.common_user)
+        response_p1 = self.pass_essay(self.common_user, response.json()['url'])
+        self.assertEqual(response_p1.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(Essay.objects.all().count(), 0)
+        self.assertEqual(
+            response_p1.json()['detail'],
+            "Ошибка текущего этапа. Для отправки сочинения необходим 'S2' этап.",
+        )
+        self.switch_stage(self.common_user)
+        response_p1 = self.pass_essay(self.common_user, response.json()['url'])
+        self.assertEqual(response_p1.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Essay.objects.all().count(), 1)
 
     @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def test_get_link_to_form(self):
