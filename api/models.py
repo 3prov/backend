@@ -56,6 +56,14 @@ class User(AbstractUser, metaclass=AbstractModelMeta):
             self.rating -= value
         self.save()
 
+    @property
+    def is_week_participant(self) -> bool:
+        from api.rus.models import Essay
+
+        return Essay.objects.filter(
+            author=self, task__week_id=WeekID.get_current()
+        ).exists()
+
 
 class FormURL(models.Model, metaclass=AbstractModelMeta):
     class Meta:
