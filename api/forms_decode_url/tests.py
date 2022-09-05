@@ -87,9 +87,6 @@ class ControlTest(APITestCase):
 
     def send_essay_from_user(self, user: User):
         encoded_url = self.get_link_to_essay_form(user)
-        response = self.client.get(
-            reverse('form_essay_by_encoded_part', args=[encoded_url])
-        )
         data = {'body': f'сочинение от {user.username}.'}
         response = self.client.post(
             reverse('essay_from_url_post', args=[encoded_url]), data, format='json'

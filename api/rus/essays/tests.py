@@ -11,7 +11,7 @@ from rest_framework.test import (
 )
 
 from ..models import Text, Essay
-from api.models import User, Task
+from api.models import User
 from ...form_url.models import EssayFormURL
 
 
