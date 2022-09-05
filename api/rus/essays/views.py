@@ -15,6 +15,7 @@ from .permissions import (
 )
 from ...form_url.models import EssayFormURL
 from ...control.models import WeekID
+from ...models import User
 
 
 class EssayListView(generics.ListAPIView):
@@ -33,6 +34,9 @@ class EssayFormURLUserGetOrCreate(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
+        serialized = self.get_serializer(data=request.data)
+        serialized.is_valid(raise_exception=True)
+
         form_url, is_created = EssayFormURL.objects.get_or_create(
             week_id=WeekID.get_current(),
             user_id=request.data['user'],

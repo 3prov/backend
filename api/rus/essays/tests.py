@@ -66,6 +66,18 @@ class EssaysTest(APITestCase):
         self.client.get(reverse('switch_stage_to_next'))
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {user_to_return.auth_token}')
 
+    def test_get_or_create_essay_form_link_wrong_uuid(self):
+        data = {'user': 'b1064f74-6db4-44a5-89b5-187790df9b5s'}
+        response = self.client.post(
+            reverse('get_or_create_essay_form_link'), data, format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        data = {'user': '123'}
+        response = self.client.post(
+            reverse('get_or_create_essay_form_link'), data, format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_common_pass_essay_good_state(self):
         self.assertEqual(Essay.objects.all().count(), 0)
         self.switch_stage(self.common_user)
