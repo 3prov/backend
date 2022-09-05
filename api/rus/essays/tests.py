@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from django.core.management import call_command
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -45,10 +47,10 @@ class EssaysTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Text.objects.all().count(), 1)
 
-    def create_link_to_essay_form(self, user):
+    def get_or_create_essay_form_link(self, user):
         data = {'user': user.id}
         return self.client.post(
-            reverse('create_link_to_essay_form'), data, format='json'
+            reverse('get_or_create_essay_form_link'), data, format='json'
         )
 
     def pass_essay(self, user, form_url_url: str):
@@ -67,7 +69,7 @@ class EssaysTest(APITestCase):
     def test_common_pass_essay_good_state(self):
         self.assertEqual(Essay.objects.all().count(), 0)
         self.switch_stage(self.common_user)
-        response = self.create_link_to_essay_form(self.common_user)
+        response = self.get_or_create_essay_form_link(self.common_user)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(EssayFormURL.objects.all().count(), 1)
         response_p1 = self.pass_essay(self.common_user, response.json()['url'])
@@ -80,7 +82,7 @@ class EssaysTest(APITestCase):
     def test_common_pass_essay_wrong_stage_after(self):
         self.switch_stage(self.common_user)
         self.switch_stage(self.common_user)
-        response = self.create_link_to_essay_form(self.common_user)
+        response = self.get_or_create_essay_form_link(self.common_user)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         response_p1 = self.pass_essay(self.common_user, response.json()['url'])
         self.assertEqual(response_p1.status_code, status.HTTP_403_FORBIDDEN)
@@ -120,7 +122,7 @@ class EssaysTest(APITestCase):
             HTTP_AUTHORIZATION=f'Token {self.common_user.auth_token}'
         )
         response = self.client.post(
-            reverse('create_link_to_essay_form'), data, format='json'
+            reverse('get_or_create_essay_form_link'), data, format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertIsNotNone(response.json()['url'])
@@ -136,15 +138,15 @@ class EssaysTest(APITestCase):
             HTTP_AUTHORIZATION=f'Token {self.common_user.auth_token}'
         )
         response = self.client.post(
-            reverse('create_link_to_essay_form'), data, format='json'
+            reverse('get_or_create_essay_form_link'), data, format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         response = self.client.post(
-            reverse('create_link_to_essay_form'), data, format='json'
+            reverse('get_or_create_essay_form_link'), data, format='json'
         )
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(EssayFormURL.objects.all().count(), 1)
-        self.assertEqual(response.json()['detail'], 'Ссылка на форму уже выдана.')
+        self.assertEqual(UUID(response.json()['user']), data['user'])
 
     def test_pass_essay_by_form_url_link_common_user(self):
         self.switch_stage(self.common_user)
@@ -153,7 +155,7 @@ class EssaysTest(APITestCase):
             HTTP_AUTHORIZATION=f'Token {self.common_user.auth_token}'
         )
         response = self.client.post(
-            reverse('create_link_to_essay_form'), data, format='json'
+            reverse('get_or_create_essay_form_link'), data, format='json'
         )
         form_url_url = response.json()['url']
         data = {'body': 'essay from common user!'}
@@ -176,7 +178,7 @@ class EssaysTest(APITestCase):
         self.switch_stage(self.common_user)
         data = {'user': self.common_user.id}
         response = self.client.post(
-            reverse('create_link_to_essay_form'), data, format='json'
+            reverse('get_or_create_essay_form_link'), data, format='json'
         )
         form_url_url = response.json()['url']
         data = {'body': 'essay from common user!'}
@@ -199,7 +201,7 @@ class EssaysTest(APITestCase):
     def test_pass_essay_by_form_url_link_common_user_wrong_stage(self):
         data = {'user': self.common_user.id}
         response = self.client.post(
-            reverse('create_link_to_essay_form'), data, format='json'
+            reverse('get_or_create_essay_form_link'), data, format='json'
         )
         form_url_url = response.json()['url']
         data = {'body': 'essay from common user!'}

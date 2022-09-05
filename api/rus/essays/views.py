@@ -11,7 +11,6 @@ from .serializers import (
 )
 from .permissions import (
     IsWorkAcceptingStage,
-    IsEssayFormURLAlreadyExists,
     IsWorkDoesNotAlreadyExistsFromFormURL,
 )
 from ...form_url.models import EssayFormURL
@@ -29,9 +28,19 @@ class EssayListView(generics.ListAPIView):
     ]  # TODO: `task__week_id` is id
 
 
-class EssayFormURLUserCreate(generics.CreateAPIView):
+class EssayFormURLUserGetOrCreate(generics.CreateAPIView):
     serializer_class = EssayFormSerializer
-    permission_classes = [permissions.IsAuthenticated, IsEssayFormURLAlreadyExists]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        form_url, is_created = EssayFormURL.objects.get_or_create(
+            week_id=WeekID.get_current(),
+            user_id=request.data['user'],
+        )
+        return Response(
+            self.get_serializer(form_url).data,
+            status=status.HTTP_201_CREATED if is_created else status.HTTP_200_OK,
+        )
 
 
 class EssayWithEvaluationsTextKeysView(generics.RetrieveAPIView):
@@ -57,16 +66,6 @@ class EssayFromFormURLCreate(generics.CreateAPIView):
         return Response(
             self.get_serializer(added_essay).data,
             status=status.HTTP_201_CREATED,
-        )
-
-
-class EssayFormURLUserListView(generics.ListAPIView):
-    serializer_class = EssayFormSerializer
-    permission_classes = [permissions.IsAdminUser]
-
-    def get_queryset(self):
-        return EssayFormURL.objects.filter(
-            user=self.kwargs['user'], week_id=WeekID.get_current()
         )
 
 

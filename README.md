@@ -61,8 +61,7 @@ make fclean_dev
 
 
 ### Отправка работы
-- POST: rus/essay/create_link_to_form/
-- GET: rus/essay/get_user_form_links/`uuid:user`/
+- POST: rus/essay/get_or_create_form_link/
 
 - GET: encoded-form-urls/work/`str:encoded_part`/
   - POST: rus/essay/form-url/`str:encoded_part`/post/

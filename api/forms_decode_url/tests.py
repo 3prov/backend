@@ -44,7 +44,7 @@ class ControlTest(APITestCase):
     def get_link_to_essay_form(self, user: User) -> str:
         data = {'user': user.id}
         response = self.client.post(
-            reverse('create_link_to_essay_form'), data, format='json'
+            reverse('get_or_create_essay_form_link'), data, format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()['url']
