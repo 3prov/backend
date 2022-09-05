@@ -4,7 +4,6 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from ..models import Essay
 from .serializers import (
-    EssayCreateSerializer,
     EssayListSerializer,
     EssayFormSerializer,
     EssayFormURLCreateSerializer,
@@ -12,21 +11,11 @@ from .serializers import (
 )
 from .permissions import (
     IsWorkAcceptingStage,
-    IsWorkDoesNotAlreadyExists,
-    IsEssayFormURLAlreadyExists,
     IsWorkDoesNotAlreadyExistsFromFormURL,
 )
 from ...form_url.models import EssayFormURL
 from ...control.models import WeekID
-
-
-class EssayCreate(generics.CreateAPIView):
-    serializer_class = EssayCreateSerializer
-    permission_classes = [
-        permissions.IsAuthenticated,
-        IsWorkAcceptingStage,
-        IsWorkDoesNotAlreadyExists,
-    ]
+from ...models import User
 
 
 class EssayListView(generics.ListAPIView):
@@ -40,9 +29,22 @@ class EssayListView(generics.ListAPIView):
     ]  # TODO: `task__week_id` is id
 
 
-class EssayFormURLUserCreate(generics.CreateAPIView):
+class EssayFormURLUserGetOrCreate(generics.CreateAPIView):
     serializer_class = EssayFormSerializer
-    permission_classes = [permissions.IsAuthenticated, IsEssayFormURLAlreadyExists]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        serialized = self.get_serializer(data=request.data)
+        serialized.is_valid(raise_exception=True)
+
+        form_url, is_created = EssayFormURL.objects.get_or_create(
+            week_id=WeekID.get_current(),
+            user_id=request.data['user'],
+        )
+        return Response(
+            self.get_serializer(form_url).data,
+            status=status.HTTP_201_CREATED if is_created else status.HTTP_200_OK,
+        )
 
 
 class EssayWithEvaluationsTextKeysView(generics.RetrieveAPIView):
@@ -68,16 +70,6 @@ class EssayFromFormURLCreate(generics.CreateAPIView):
         return Response(
             self.get_serializer(added_essay).data,
             status=status.HTTP_201_CREATED,
-        )
-
-
-class EssayFormURLUserListView(generics.ListAPIView):
-    serializer_class = EssayFormSerializer
-    permission_classes = [permissions.IsAdminUser]
-
-    def get_queryset(self):
-        return EssayFormURL.objects.filter(
-            user=self.kwargs['user'], week_id=WeekID.get_current()
         )
 
 

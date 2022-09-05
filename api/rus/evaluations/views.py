@@ -213,10 +213,9 @@ class EvaluationFormURLVolunteerCreate(generics.CreateAPIView):
         )
         # проверка если количество форм пользователя уже равняется числу сочинений
         # на текущей неделе
-        if (
-            forms.count()
-            == Essay.objects.filter(task__week_id=current_week_id).count() - 1
-        ):
+        if forms.count() == Essay.objects.filter(
+            task__week_id=current_week_id
+        ).count() - int(volunteer.is_week_participant):
             return Response(
                 EvaluationFormURLListViewSerializer(forms, many=True).data,
                 status=status.HTTP_200_OK,
@@ -229,9 +228,7 @@ class EvaluationFormURLVolunteerCreate(generics.CreateAPIView):
                 evaluator=volunteer, work__task__week_id=current_week_id
             ).count()
             < 3
-            and Essay.objects.filter(
-                author=volunteer, task__week_id=current_week_id
-            ).exists()
+            and volunteer.is_week_participant
         ):
             raise permissions.exceptions.ValidationError(
                 detail='Необходимо вначале проверить обязательные работы.'
@@ -261,5 +258,5 @@ class EvaluationFormURLVolunteerCreate(generics.CreateAPIView):
                 ),
                 many=True,
             ).data,
-            status=status.HTTP_200_OK,
+            status=status.HTTP_201_CREATED,
         )

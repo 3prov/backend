@@ -44,7 +44,7 @@ class ControlTest(APITestCase):
     def get_link_to_essay_form(self, user: User) -> str:
         data = {'user': user.id}
         response = self.client.post(
-            reverse('create_link_to_essay_form'), data, format='json'
+            reverse('get_or_create_essay_form_link'), data, format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()['url']
@@ -87,9 +87,6 @@ class ControlTest(APITestCase):
 
     def send_essay_from_user(self, user: User):
         encoded_url = self.get_link_to_essay_form(user)
-        response = self.client.get(
-            reverse('form_essay_by_encoded_part', args=[encoded_url])
-        )
         data = {'body': f'сочинение от {user.username}.'}
         response = self.client.post(
             reverse('essay_from_url_post', args=[encoded_url]), data, format='json'
