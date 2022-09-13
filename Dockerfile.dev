@@ -53,4 +53,4 @@ ENV PATH="${PATH}:/home/app/.local/bin/"
 RUN --mount=type=cache,target=/root/.cache pip install --upgrade pip
 #RUN pip install --no-cache /wheels/*
 RUN --mount=type=cache,target=/root/.cache pip install /wheels/*
-RUN --mount=type=cache,target=/root/.cache pip install gunicorn
+RUN --mount=type=cache,target=/root/.cache pip --default-timeout=1000 install gunicorn

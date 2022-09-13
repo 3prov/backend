@@ -39,7 +39,7 @@ urlpatterns = [
     path('authtoken/', include('djoser.urls.authtoken'), name='djoser_url_token'),
     path('rus/', include('api.rus.urls')),
     path('users/', views.UserListView.as_view()),
-    path('users/<uuid:pk>', views.UserDetailView.as_view()),
+    path('users/is_active/<uuid:pk>', views.UserActiveView.as_view()),
     path('control/', include('api.control.urls')),
     path('health_check/', views.health_check_view, name='health_check'),
     path('encoded-form-urls/', include('api.forms_decode_url.urls')),

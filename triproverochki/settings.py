@@ -173,7 +173,6 @@ DJOSER = {
     'SEND_ACTIVATION_EMAIL': False,
     'SERIALIZERS': {
         'user_create': 'api.serializers.UserCreateSerializer',
-        'current_user': 'api.serializers.UserDetailSerializer',
     },
 }
 

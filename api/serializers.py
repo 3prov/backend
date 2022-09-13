@@ -15,12 +15,10 @@ class UserListSerializer(serializers.ModelSerializer):
         ]
 
 
-class UserDetailSerializer(serializers.ModelSerializer):
+class UserActiveSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        exclude = ['password', 'groups', 'user_permissions']
-
-    read_only = ['id', 'email', 'date_joined', 'username']
+        fields = ['id', 'is_active']
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
@@ -28,20 +26,24 @@ class UserCreateSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'username',
-            'password',
             'first_name',
             'last_name',
             'vkontakte_id',
             'telegram_id',
+            'server_uuid',
         ]
 
-    required = ['username', 'password', 'vkontakte_id', 'telegram_id']
+    server_uuid = serializers.SerializerMethodField(read_only=True)
+
+    @staticmethod
+    def get_server_uuid(obj):
+        return obj.id
 
     def create(self, validated_data):
         """
-        Хеширует пароль при создании пользователя.
+        Устанавливает `set_unusable_password` на пользователя.
         """
         user = super(UserCreateSerializer, self).create(validated_data)
-        user.set_password(validated_data['password'])
+        user.set_unusable_password()
         user.save()
         return user

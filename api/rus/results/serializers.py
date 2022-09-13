@@ -3,7 +3,7 @@ from rest_framework import serializers
 from api.form_url.models import ResultsFormURL
 from api.rus.evaluations.models import RateEssayEvaluation
 from api.rus.texts.serializers import WeekIDSerializer
-from api.serializers import UserDetailSerializer
+from api.serializers import UserActiveSerializer
 
 
 class WeekResultsFormSerializer(serializers.ModelSerializer):
@@ -24,7 +24,7 @@ class RateEssayEvaluationSerializer(serializers.ModelSerializer):
         model = RateEssayEvaluation
         fields = '__all__'
 
-    rater = UserDetailSerializer(read_only=True)
+    rater = UserActiveSerializer(read_only=True)
 
 
 class RateEssayEvaluationAnonSerializer(serializers.ModelSerializer):

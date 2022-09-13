@@ -3,7 +3,7 @@ from rest_framework import generics, permissions
 from rest_framework.decorators import api_view, permission_classes
 
 from .models import User
-from .serializers import UserListSerializer, UserDetailSerializer
+from .serializers import UserListSerializer, UserActiveSerializer
 
 
 @api_view()
@@ -18,7 +18,7 @@ class UserListView(generics.ListAPIView):
     permission_classes = [permissions.IsAdminUser]
 
 
-class UserDetailView(generics.RetrieveAPIView):
+class UserActiveView(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
-    serializer_class = UserDetailSerializer
+    serializer_class = UserActiveSerializer
     permission_classes = [permissions.IsAdminUser]

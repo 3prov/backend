@@ -6,7 +6,7 @@ from ..evaluations.serializers import (
 )
 from ..models import Essay, Text
 from ...form_url.models import EssayFormURL
-from ...serializers import UserDetailSerializer
+from ...serializers import UserActiveSerializer
 from ..texts.serializers import (
     TextDetailSerializer,
     WeekIDSerializer,
@@ -32,7 +32,7 @@ class EssayDetailSerializer(serializers.ModelSerializer):
         model = Essay
         fields = '__all__'
 
-    author = UserDetailSerializer(read_only=True)
+    author = UserActiveSerializer(read_only=True)
     task = TextDetailSerializer(read_only=True)
     created_at = serializers.DateTimeField(read_only=True)
 
