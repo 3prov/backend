@@ -41,8 +41,8 @@ class UserTest(APITestCase):
             "telegram_id": None,
         }
         response = self.client.post(reverse('user-list'), data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(User.objects.all().count(), 0)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(User.objects.all().count(), 1)
 
     def test_check_user_from_api_with_username_and_password(self):
         data = {
