@@ -35,6 +35,9 @@ build_dev:
 up_dev:
 	$(DOCKER_COMPOSE) --file=$(DOCKER_COMPOSE_DEV_FILE) up -d
 
+stop_dev:
+	$(DOCKER_COMPOSE) --file=$(DOCKER_COMPOSE_DEV_FILE) stop
+
 logs_dev:
 	$(DOCKER_COMPOSE) --file=$(DOCKER_COMPOSE_DEV_FILE) logs -f
 

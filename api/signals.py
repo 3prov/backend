@@ -6,7 +6,7 @@ from django.db.utils import IntegrityError
 from api.form_url.models import EssayFormURL, EvaluationFormURL, ResultsFormURL
 from api.rus.models import Text, Essay
 from api.control.models import WeekID, Stage
-from api.tasks import DistributionTasks, FormURLTasks
+from api.tasks import DistributionTasks, FormURLTasks, SendTelegramMessage
 from api.work_distribution.models import WorkDistributionToEvaluate
 
 
@@ -46,24 +46,33 @@ def post_save_essay_form_url(sender, instance, created, **kwargs):
 def post_save_stage(sender, instance, created, **kwargs):
     """
     Отслеживает, если этап становится 'S3', то делает распределение работ по участникам.
-    """
-    if instance.stage == Stage.StagesEnum.EVALUATION_ACCEPTING:
-        if Essay.objects.filter(task__week_id=WeekID.get_current()).count() > 0:
-            with transaction.atomic():
-                DistributionTasks.make_necessary_for_week_participants.delay()
-        else:
-            print('No need for distribution.')  # TODO: to logger
-
-
-@receiver(signals.post_save, sender=Stage)
-def post_save_stage(sender, instance, created, **kwargs):
-    """
     Отслеживает, если этап становится 'S4', то создаёт ссылки на формы просмотра
     проверок.
+    Также отправляет уведомления.
     """
-    if instance.stage == Stage.StagesEnum.CLOSED_ACCEPT:
-        with transaction.atomic():
-            FormURLTasks.create_result_form_urls_for_essay_authors.delay()
+    match instance.stage:
+        case Stage.StagesEnum.WORK_ACCEPTING:
+            message = 'Начался прием работ. Пора писать!'
+            task = None  # TODO: is it ok?
+
+        case Stage.StagesEnum.EVALUATION_ACCEPTING:
+            if Essay.objects.filter(task__week_id=WeekID.get_current()).count() > 0:
+                message = 'Началась оценка работ. Пора оценивать!'
+                task = DistributionTasks.make_necessary_for_week_participants
+            else:
+                return print('No need for distribution.')  # TODO: to logger
+
+        case Stage.StagesEnum.CLOSED_ACCEPT:
+            message = 'Прием оценок закончен. Пора смотреть результаты!'
+            task = FormURLTasks.create_result_form_urls_for_essay_authors
+        case default:
+            return
+
+    send_message_task = SendTelegramMessage.send_message_to_active_users
+    with transaction.atomic():
+        if task:
+            return task.apply_async(link=send_message_task.si(message))
+        return send_message_task.delay(message)
 
 
 @receiver(signals.post_save, sender=WorkDistributionToEvaluate)

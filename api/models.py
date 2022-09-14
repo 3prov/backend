@@ -12,6 +12,7 @@ from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
 from api.control.models import WeekID
+from telegram import TelegramHelper
 
 
 class AbstractModelMeta(abc.ABCMeta, type(models.Model)):
@@ -63,6 +64,9 @@ class User(AbstractUser, metaclass=AbstractModelMeta):
         return Essay.objects.filter(
             author=self, task__week_id=WeekID.get_current()
         ).exists()
+
+    def send_telegram_message(self, message: str):
+        TelegramHelper.send_message(self.telegram_id, message)
 
 
 class FormURL(models.Model, metaclass=AbstractModelMeta):
