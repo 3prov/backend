@@ -6,6 +6,7 @@ from django.db.utils import IntegrityError
 from api.form_url.models import EssayFormURL, EvaluationFormURL, ResultsFormURL
 from api.rus.models import Text, Essay
 from api.control.models import WeekID, Stage
+from api.services import filter_objects
 from api.tasks import DistributionTasks, FormURLTasks, SendTelegramMessage
 from api.work_distribution.models import WorkDistributionToEvaluate
 
@@ -56,7 +57,12 @@ def post_save_stage(sender, instance, created, **kwargs):
             task = None  # TODO: is it ok?
 
         case Stage.StagesEnum.EVALUATION_ACCEPTING:
-            if Essay.objects.filter(task__week_id=WeekID.get_current()).count() > 0:
+            if (
+                filter_objects(
+                    Essay.objects, task__week_id=WeekID.get_current()
+                ).count()
+                > 0
+            ):
                 message = 'Началась оценка работ. Пора оценивать!'
                 task = DistributionTasks.make_necessary_for_week_participants
             else:

@@ -15,6 +15,7 @@ from .models import WorkDistributionToEvaluate
 from ..control.models import WeekID
 from ..models import User
 from ..rus.models import Essay, Text
+from ..services import all_objects, filter_objects
 
 
 class WorkDistributionTest(APITestCase):
@@ -99,7 +100,7 @@ class WorkDistributionTest(APITestCase):
         WorkDistributionToEvaluate.make_necessary_for_week_participants()
 
         self.assertEqual(
-            WorkDistributionToEvaluate.objects.all().count(), 3 * 4
+            all_objects(WorkDistributionToEvaluate.objects).count(), 3 * 4
         )  # по 3 назначения для 4 пользователей
 
     def test_5_essays(self):
@@ -112,22 +113,22 @@ class WorkDistributionTest(APITestCase):
         WorkDistributionToEvaluate.make_necessary_for_week_participants()
 
         self.assertEqual(
-            WorkDistributionToEvaluate.objects.all().count(), 4 * 5
+            all_objects(WorkDistributionToEvaluate.objects).count(), 4 * 5
         )  # по 4 назначения для 5 пользователей
 
     def make_N_essay_distribution(self, n: int, clear_after: bool = True):
         participants_count = n
         for i in range(4, participants_count + 4):
             self.create_common_user_and_send_essay(f'common_user_{i}')
-        self.assertEqual(Essay.objects.all().count(), participants_count)
+        self.assertEqual(all_objects(Essay.objects).count(), participants_count)
         WorkDistributionToEvaluate.make_necessary_for_week_participants()
         self.assertEqual(
-            WorkDistributionToEvaluate.objects.all().count(),
+            all_objects(WorkDistributionToEvaluate.objects).count(),
             (participants_count - 1) * participants_count,
         )  # по (participants_count - 1) назначения для participants_count пользователей
         if clear_after:
-            Essay.objects.all().delete()
-            User.objects.filter(username__startswith='common_user_').delete()
+            all_objects(Essay.objects).delete()
+            filter_objects(User.objects, username__startswith='common_user_').delete()
 
     def test_10_essays(self):
         self.make_N_essay_distribution(10)
@@ -144,7 +145,7 @@ class WorkDistributionTest(APITestCase):
 
         WorkDistributionToEvaluate.make_optionally_for_volunteer(self.admin_user)
         self.assertEqual(
-            WorkDistributionToEvaluate.objects.all().count(), participants_count
+            all_objects(WorkDistributionToEvaluate.objects).count(), participants_count
         )
 
     def test_1_volunteer_with_eq_rating(self):
@@ -159,12 +160,12 @@ class WorkDistributionTest(APITestCase):
         self.admin_user.save()
 
         WorkDistributionToEvaluate.make_optionally_for_volunteer(self.admin_user)
-        first_work_to_evaluate = WorkDistributionToEvaluate.objects.filter(
-            evaluator=self.admin_user
+        first_work_to_evaluate = filter_objects(
+            WorkDistributionToEvaluate.objects, evaluator=self.admin_user
         ).first()
         self.assertEqual(first_work_to_evaluate.work.author, common_user_4)
-        for future_eval in WorkDistributionToEvaluate.objects.filter(
-            evaluator=self.admin_user
+        for future_eval in filter_objects(
+            WorkDistributionToEvaluate.objects, evaluator=self.admin_user
         ):
             self.assertEqual(future_eval.is_required, False)
 
@@ -174,8 +175,10 @@ class WorkDistributionTest(APITestCase):
         picked_user = User.objects.get(username='common_user_7')
 
         i = 0
-        for future_eval in WorkDistributionToEvaluate.objects.filter(
-            evaluator=picked_user, week_id=WeekID.get_current()
+        for future_eval in filter_objects(
+            WorkDistributionToEvaluate.objects,
+            evaluator=picked_user,
+            week_id=WeekID.get_current(),
         ):
             if i in [0, 1, 2]:
                 self.assertEqual(future_eval.is_required, True)
@@ -184,8 +187,10 @@ class WorkDistributionTest(APITestCase):
             i += 1
 
         self.assertEqual(
-            WorkDistributionToEvaluate.objects.filter(
-                week_id=WeekID.get_current(), is_required=True
+            filter_objects(
+                WorkDistributionToEvaluate.objects,
+                week_id=WeekID.get_current(),
+                is_required=True,
             ).count(),
             3 * 10,
         )
@@ -193,9 +198,13 @@ class WorkDistributionTest(APITestCase):
     def test_distribution_no_ourself_user(self):
         self.make_N_essay_distribution(25, clear_after=False)
 
-        for participant in User.objects.filter(username__startswith='common_user_'):
-            for future_eval in WorkDistributionToEvaluate.objects.filter(
-                week_id=WeekID.get_current(), evaluator=participant
+        for participant in filter_objects(
+            User.objects, username__startswith='common_user_'
+        ):
+            for future_eval in filter_objects(
+                WorkDistributionToEvaluate.objects,
+                week_id=WeekID.get_current(),
+                evaluator=participant,
             ):
                 self.assertNotEqual(future_eval.work.author, participant)
 
@@ -204,24 +213,32 @@ class WorkDistributionTest(APITestCase):
         for i in range(1, participants_count + 1):
             self.create_common_user_and_send_essay(f'iuweqng_user_{i}')
 
-        for participant in User.objects.filter(username__startswith='iuweqng_user_'):
+        for participant in filter_objects(
+            User.objects, username__startswith='iuweqng_user_'
+        ):
             participant.rating = random.randint(10, 300)
             participant.save()
         WorkDistributionToEvaluate.make_necessary_for_week_participants()
         self.assertEqual(
-            WorkDistributionToEvaluate.objects.all().count(),
+            all_objects(WorkDistributionToEvaluate.objects).count(),
             (participants_count - 1) * participants_count,
         )
         self.assertEqual(
-            WorkDistributionToEvaluate.objects.filter(
-                week_id=WeekID.get_current(), is_required=True
+            filter_objects(
+                WorkDistributionToEvaluate.objects,
+                week_id=WeekID.get_current(),
+                is_required=True,
             ).count(),
             3 * participants_count,
         )
-        for participant in User.objects.filter(username__startswith='iuweqng_user_'):
+        for participant in filter_objects(
+            User.objects, username__startswith='iuweqng_user_'
+        ):
             i = 0
-            for future_eval in WorkDistributionToEvaluate.objects.filter(
-                evaluator=participant, week_id=WeekID.get_current()
+            for future_eval in filter_objects(
+                WorkDistributionToEvaluate.objects,
+                evaluator=participant,
+                week_id=WeekID.get_current(),
             ):
                 if i in [0, 1, 2]:
                     self.assertEqual(future_eval.is_required, True)
@@ -229,9 +246,13 @@ class WorkDistributionTest(APITestCase):
                     self.assertEqual(future_eval.is_required, False)
                 i += 1
 
-        for participant in User.objects.filter(username__startswith='iuweqng_user_'):
-            for future_eval in WorkDistributionToEvaluate.objects.filter(
-                week_id=WeekID.get_current(), evaluator=participant
+        for participant in filter_objects(
+            User.objects, username__startswith='iuweqng_user_'
+        ):
+            for future_eval in filter_objects(
+                WorkDistributionToEvaluate.objects,
+                week_id=WeekID.get_current(),
+                evaluator=participant,
             ):
                 self.assertNotEqual(future_eval.work.author, participant)
 

@@ -20,13 +20,14 @@ from api.rus.evaluations.serializers import (
     EssaySelectionReviewWithoutSelectionSerializer,
 )
 from api.rus.models import Essay
+from api.services import all_objects, filter_objects
 from api.work_distribution.models import WorkDistributionToEvaluate
 
 from django_filters.rest_framework import DjangoFilterBackend
 
 
 class EssaySelectionReviewFromFormURLCreate(generics.CreateAPIView):
-    queryset = EssaySelectionReview.objects.all()
+    queryset = all_objects(EssaySelectionReview.objects)
     serializer_class = EssaySelectionReviewSerializer
     permission_classes = [permissions.AllowAny, IsEvaluationAcceptingStage]
 
@@ -52,7 +53,8 @@ class EssaySelectionReviewFromFormURLCreate(generics.CreateAPIView):
                 detail='Индекс конца выделения должен быть больше 0 и не больше длины текста сочинения.'
             )
 
-        if EssaySelectionReview.objects.filter(
+        if filter_objects(
+            EssaySelectionReview.objects,
             evaluator=form_url.user,
             essay=form_url.evaluation_work,
             start_selection_char_index=serialized.data['start_selection_char_index'],
@@ -77,7 +79,7 @@ class EssaySelectionReviewFromFormURLCreate(generics.CreateAPIView):
 
 
 class EssaySelectionReviewFormURLView(generics.RetrieveUpdateAPIView):
-    queryset = EssaySelectionReview.objects.all()
+    queryset = all_objects(EssaySelectionReview.objects)
     permission_classes = [permissions.AllowAny, IsEvaluationAcceptingStage]
     serializer_class = EssaySelectionReviewWithoutSelectionSerializer
 
@@ -103,7 +105,9 @@ class EvaluationFormURLGetCurrentWeekList(generics.ListAPIView):
     filterset_fields = ['evaluator', 'work', 'is_required']
 
     def get_queryset(self):
-        return WorkDistributionToEvaluate.objects.filter(week_id=WeekID.get_current())
+        return filter_objects(
+            WorkDistributionToEvaluate.objects, week_id=WeekID.get_current()
+        )
 
 
 class EvaluationFormURLListView(generics.ListAPIView):
@@ -111,21 +115,25 @@ class EvaluationFormURLListView(generics.ListAPIView):
     serializer_class = EvaluationFormURLListViewSerializer
 
     def get_queryset(self):
-        return EvaluationFormURL.objects.filter(
-            week_id=WeekID.get_current(), user=self.kwargs['user']
+        return filter_objects(
+            EvaluationFormURL.objects,
+            week_id=WeekID.get_current(),
+            user=self.kwargs['user'],
         )
 
 
 class EvaluationFormURLWorkCreate(generics.CreateAPIView):
-    queryset = EvaluationFormURL.objects.all()
+    queryset = all_objects(EvaluationFormURL.objects)
     serializer_class = EssayEvaluationSerializer
     permission_classes = [permissions.AllowAny, IsEvaluationAcceptingStage]
 
     @transaction.atomic
     def create(self, request, *args, **kwargs):
         form_url = EvaluationFormURL.get_from_url_or_404(url=kwargs['encoded_part'])
-        if EssayEvaluation.objects.filter(
-            evaluator=form_url.user, work=form_url.evaluation_work
+        if filter_objects(
+            EssayEvaluation.objects,
+            evaluator=form_url.user,
+            work=form_url.evaluation_work,
         ).exists():
             raise permissions.exceptions.ValidationError(
                 {'detail': 'Проверка уже отправлена.'}
@@ -144,7 +152,8 @@ class EvaluationFormURLWorkCreate(generics.CreateAPIView):
             evaluator=form_url.user,
             criteria=criteria_instance,
         )
-        # EssaySentenceReview.objects.filter(essay=form_url.evaluation_work, evaluator=form_url.user) <--- RETURN IN TOO
+        # filter_objects(
+        # EssaySentenceReview.objects,essay=form_url.evaluation_work, evaluator=form_url.user) <--- RETURN IN TOO
         return Response(
             self.get_serializer(added_evaluation).data,
             status=status.HTTP_201_CREATED,
@@ -152,7 +161,7 @@ class EvaluationFormURLWorkCreate(generics.CreateAPIView):
 
 
 class EvaluationFormURLView(generics.RetrieveUpdateAPIView):
-    queryset = EssayEvaluation.objects.all()
+    queryset = all_objects(EssayEvaluation.objects)
     permission_classes = [permissions.AllowAny, IsEvaluationAcceptingStage]
     serializer_class = EssayEvaluationSerializer
 
@@ -180,19 +189,23 @@ class WorkDistributionToEvaluateVolunteerListView(generics.ListAPIView):
                 detail='Пользователь с таким UUID не найден.'
             )
 
-        queryset = WorkDistributionToEvaluate.objects.filter(
-            evaluator=volunteer, week_id=WeekID.get_current()
+        queryset = filter_objects(
+            WorkDistributionToEvaluate.objects,
+            evaluator=volunteer,
+            week_id=WeekID.get_current(),
         )
         if queryset.exists():
             return queryset
         WorkDistributionToEvaluate.make_optionally_for_volunteer(volunteer)
-        return WorkDistributionToEvaluate.objects.filter(
-            evaluator=volunteer, week_id=WeekID.get_current()
+        return filter_objects(
+            WorkDistributionToEvaluate.objects,
+            evaluator=volunteer,
+            week_id=WeekID.get_current(),
         )
 
 
 class EvaluationFormURLVolunteerCreate(generics.CreateAPIView):
-    queryset = EvaluationFormURL.objects.all()
+    queryset = all_objects(EvaluationFormURL.objects)
     serializer_class = EvaluationFormURLVolunteerCreateSerializer
     permission_classes = [permissions.IsAdminUser, IsEvaluationAcceptingStage]
 
@@ -207,14 +220,15 @@ class EvaluationFormURLVolunteerCreate(generics.CreateAPIView):
 
         # TODO: убрать ORM запросы из views
         current_week_id = WeekID.get_current()
-        forms = EvaluationFormURL.objects.filter(
+        forms = filter_objects(
+            EvaluationFormURL.objects,
             user=volunteer,
             week_id=current_week_id,
         )
         # проверка если количество форм пользователя уже равняется числу сочинений
         # на текущей неделе
-        if forms.count() == Essay.objects.filter(
-            task__week_id=current_week_id
+        if forms.count() == filter_objects(
+            Essay.objects, task__week_id=current_week_id
         ).count() - int(volunteer.is_week_participant):
             return Response(
                 EvaluationFormURLListViewSerializer(forms, many=True).data,
@@ -224,8 +238,10 @@ class EvaluationFormURLVolunteerCreate(generics.CreateAPIView):
         # проверка чтобы пользователь не смог проверить необязательные работы
         # до проверки обязательных
         if (
-            EssayEvaluation.objects.filter(
-                evaluator=volunteer, work__task__week_id=current_week_id
+            filter_objects(
+                EssayEvaluation.objects,
+                evaluator=volunteer,
+                work__task__week_id=current_week_id,
             ).count()
             < 3
             and volunteer.is_week_participant
@@ -234,8 +250,10 @@ class EvaluationFormURLVolunteerCreate(generics.CreateAPIView):
                 detail='Необходимо вначале проверить обязательные работы.'
             )
 
-        work_distribution = WorkDistributionToEvaluate.objects.filter(
-            evaluator=volunteer, week_id=current_week_id
+        work_distribution = filter_objects(
+            WorkDistributionToEvaluate.objects,
+            evaluator=volunteer,
+            week_id=current_week_id,
         )
         if not work_distribution.exists():
             raise permissions.exceptions.ValidationError(
@@ -253,8 +271,8 @@ class EvaluationFormURLVolunteerCreate(generics.CreateAPIView):
 
         return Response(
             EvaluationFormURLListViewSerializer(
-                EvaluationFormURL.objects.filter(
-                    user=volunteer, week_id=current_week_id
+                filter_objects(
+                    EvaluationFormURL.objects, user=volunteer, week_id=current_week_id
                 ),
                 many=True,
             ).data,

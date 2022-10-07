@@ -12,6 +12,7 @@ from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
 from api.control.models import WeekID
+from api.services import filter_objects
 from telegram import TelegramHelper
 
 
@@ -61,8 +62,8 @@ class User(AbstractUser, metaclass=AbstractModelMeta):
     def is_week_participant(self) -> bool:
         from api.rus.models import Essay
 
-        return Essay.objects.filter(
-            author=self, task__week_id=WeekID.get_current()
+        return filter_objects(
+            Essay.objects, author=self, task__week_id=WeekID.get_current()
         ).exists()
 
     def send_telegram_message(self, message: str):
@@ -108,8 +109,8 @@ class FormURL(models.Model, metaclass=AbstractModelMeta):
     ):
         from api.form_url.models import EvaluationFormURL
 
-        _user_evaluation_form_already_count = EvaluationFormURL.objects.filter(
-            user=self.user, week_id=WeekID.get_current()
+        _user_evaluation_form_already_count = filter_objects(
+            EvaluationFormURL.objects, user=self.user, week_id=WeekID.get_current()
         ).count()
         self.url = self._hash_string(
             settings.STRING_HASH_TEMPLATE.format(

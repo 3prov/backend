@@ -2,6 +2,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase, APIClient, APIRequestFactory
 from .models import User
+from .services import all_objects
 
 
 class UserTest(APITestCase):
@@ -12,11 +13,11 @@ class UserTest(APITestCase):
     def test_check_user_from_model(self):
         user = User.objects.create_user('username', 'p@ssw0rd')
         self.assertIsNotNone(user.auth_token)
-        self.assertEqual(User.objects.all().count(), 1)
+        self.assertEqual(all_objects(User.objects).count(), 1)
         self.assertNotEqual('p@ssw0rd', user.password)
         self.assertTrue(user.is_active)
         user.delete()
-        self.assertEqual(User.objects.all().count(), 0)
+        self.assertEqual(all_objects(User.objects).count(), 0)
 
     def test_check_user_from_api_empty(self):
         data = {
@@ -29,7 +30,7 @@ class UserTest(APITestCase):
         }
         response = self.client.post(reverse('user-list'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(User.objects.all().count(), 0)
+        self.assertEqual(all_objects(User.objects).count(), 0)
 
     def test_check_user_from_api_with_username(self):
         data = {
@@ -42,7 +43,7 @@ class UserTest(APITestCase):
         }
         response = self.client.post(reverse('user-list'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(User.objects.all().count(), 1)
+        self.assertEqual(all_objects(User.objects).count(), 1)
 
     def test_check_user_from_api_with_username_and_password(self):
         data = {
@@ -55,7 +56,7 @@ class UserTest(APITestCase):
         }
         response = self.client.post(reverse('user-list'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(User.objects.all().count(), 1)
+        self.assertEqual(all_objects(User.objects).count(), 1)
         self.assertIsNotNone(User.objects.get(username='username1').auth_token)
 
     def test_check_user_from_api_with_username_and_password_and_vk(self):
@@ -69,7 +70,7 @@ class UserTest(APITestCase):
         }
         response = self.client.post(reverse('user-list'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(User.objects.all().count(), 1)
+        self.assertEqual(all_objects(User.objects).count(), 1)
         self.assertEqual(User.objects.get(username='username1').vkontakte_id, 157651005)
         self.assertIsNone(User.objects.get(username='username1').telegram_id)
         self.assertIsNotNone(User.objects.get(username='username1').auth_token)
@@ -85,7 +86,7 @@ class UserTest(APITestCase):
         }
         response = self.client.post(reverse('user-list'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(User.objects.all().count(), 1)
+        self.assertEqual(all_objects(User.objects).count(), 1)
         self.assertIsNotNone(User.objects.get(username='username2').auth_token)
 
         data['username'] = 'username3'
@@ -93,7 +94,7 @@ class UserTest(APITestCase):
         data['telegram_id'] = 189245914
         response = self.client.post(reverse('user-list'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(User.objects.all().count(), 2)
+        self.assertEqual(all_objects(User.objects).count(), 2)
         self.assertEqual(User.objects.get(username='username3').vkontakte_id, 157651007)
         self.assertEqual(User.objects.get(username='username3').telegram_id, 189245914)
         self.assertIsNotNone(User.objects.get(username='username3').auth_token)
@@ -109,7 +110,7 @@ class UserTest(APITestCase):
         }
         response = self.client.post(reverse('user-list'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(User.objects.all().count(), 1)
+        self.assertEqual(all_objects(User.objects).count(), 1)
         self.assertNotEqual(
             User.objects.get(username='username_full').password, 'aboba22'
         )

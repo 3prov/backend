@@ -11,6 +11,7 @@ from rest_framework.test import (
 from api.form_url.models import EvaluationFormURL
 from api.models import User
 from api.rus.evaluations.models import EssayEvaluation, EssaySelectionReview
+from api.services import all_objects
 
 
 class FormsDecodeURLTest(APITestCase):
@@ -108,7 +109,7 @@ class FormsDecodeURLTest(APITestCase):
         self.send_essay_from_user(common_user5)
 
         self.switch_stage(self.common_user)
-        self.assertEqual(EvaluationFormURL.objects.all().count(), 3 * 4)
+        self.assertEqual(all_objects(EvaluationFormURL.objects).count(), 3 * 4)
 
         form_eval = EvaluationFormURL.objects.first()
         response = self.client.get(
@@ -134,14 +135,14 @@ class FormsDecodeURLTest(APITestCase):
                 "k12": 1,
             }
         }
-        self.assertEqual(EssayEvaluation.objects.all().count(), 0)
+        self.assertEqual(all_objects(EssayEvaluation.objects).count(), 0)
         response = self.client.post(
             reverse('evaluation_from_url_post', args=[form_eval.url]),
             data,
             format='json',
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(EssayEvaluation.objects.all().count(), 1)
+        self.assertEqual(all_objects(EssayEvaluation.objects).count(), 1)
         id_before_change = response.json()['criteria']['id']
         for i in range(1, 13):
             self.assertEqual(
@@ -154,7 +155,7 @@ class FormsDecodeURLTest(APITestCase):
             format='json',
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(EssayEvaluation.objects.all().count(), 1)
+        self.assertEqual(all_objects(EssayEvaluation.objects).count(), 1)
 
         response = self.client.post(
             reverse('evaluation_from_url_post', args=[form_eval.url]),
@@ -191,12 +192,12 @@ class FormsDecodeURLTest(APITestCase):
             format='json',
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(EssayEvaluation.objects.all().count(), 1)
+        self.assertEqual(all_objects(EssayEvaluation.objects).count(), 1)
         response = self.client.get(
             reverse('evaluation_from_url_edit', args=[form_eval.url]), format='json'
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(EssayEvaluation.objects.all().count(), 1)
+        self.assertEqual(all_objects(EssayEvaluation.objects).count(), 1)
         for i in range(1, 13):
             self.assertEqual(
                 response.json()['criteria'][f'k{i}'], data['criteria'][f'k{i}']
@@ -216,7 +217,7 @@ class FormsDecodeURLTest(APITestCase):
             "evaluator_comment": "Мой комментарий, длина которого 15!!!!",
             "mistake_type": "K09",
         }
-        self.assertEqual(EssaySelectionReview.objects.all().count(), 0)
+        self.assertEqual(all_objects(EssaySelectionReview.objects).count(), 0)
         response = self.client.post(
             reverse(
                 'evaluation_essay_selection_review_form_url_post', args=[form_eval.url]
@@ -236,7 +237,7 @@ class FormsDecodeURLTest(APITestCase):
             format='json',
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(EssaySelectionReview.objects.all().count(), 1)
+        self.assertEqual(all_objects(EssaySelectionReview.objects).count(), 1)
         data['mistake_type'] = 'K11'
         response = self.client.post(
             reverse(
@@ -246,7 +247,7 @@ class FormsDecodeURLTest(APITestCase):
             format='json',
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(EssaySelectionReview.objects.all().count(), 1)
+        self.assertEqual(all_objects(EssaySelectionReview.objects).count(), 1)
 
         data['evaluator_comment'] = 'комментарий к фрагменту (изменённый).'
         response = self.client.post(
@@ -260,7 +261,7 @@ class FormsDecodeURLTest(APITestCase):
         self.assertEqual(
             response.json()['detail'], 'Проверка этого фрагмента уже отправлена.'
         )
-        self.assertEqual(EssaySelectionReview.objects.all().count(), 1)
+        self.assertEqual(all_objects(EssaySelectionReview.objects).count(), 1)
 
         data['start_selection_char_index'] = 2
         response = self.client.post(
@@ -298,7 +299,7 @@ class FormsDecodeURLTest(APITestCase):
             format='json',
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(EssaySelectionReview.objects.all().count(), 3)
+        self.assertEqual(all_objects(EssaySelectionReview.objects).count(), 3)
 
         data['start_selection_char_index'] = 24
         data['selection_length'] = 1
@@ -310,7 +311,7 @@ class FormsDecodeURLTest(APITestCase):
             format='json',
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(EssaySelectionReview.objects.all().count(), 4)
+        self.assertEqual(all_objects(EssaySelectionReview.objects).count(), 4)
 
         data['start_selection_char_index'] = 24
         data['selection_length'] = 2
@@ -322,7 +323,7 @@ class FormsDecodeURLTest(APITestCase):
             format='json',
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(EssaySelectionReview.objects.all().count(), 5)
+        self.assertEqual(all_objects(EssaySelectionReview.objects).count(), 5)
 
         data['start_selection_char_index'] = 24
         data['selection_length'] = 3
@@ -334,7 +335,7 @@ class FormsDecodeURLTest(APITestCase):
             format='json',
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(EssaySelectionReview.objects.all().count(), 5)
+        self.assertEqual(all_objects(EssaySelectionReview.objects).count(), 5)
 
         data['evaluator_comment'] = 'изменённый'
         response = self.client.put(
@@ -364,7 +365,7 @@ class FormsDecodeURLTest(APITestCase):
             format='json',
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(EssaySelectionReview.objects.all().count(), 5)
+        self.assertEqual(all_objects(EssaySelectionReview.objects).count(), 5)
         self.assertEqual(
             response.json()['evaluator_comment'], data['evaluator_comment']
         )

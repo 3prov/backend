@@ -10,6 +10,7 @@ from api.rus.evaluations.models import (
 )
 from api.rus.models import Text, TextKey, Essay
 from api.management.commands.init_stage import Command as InitStageCommand
+from api.services import all_objects, filter_objects
 from api.work_distribution.models import WorkDistributionToEvaluate
 
 
@@ -160,9 +161,9 @@ class Mock:
         """
 
         def _make_random_one(evaluator: User):
-            for eval_work in WorkDistributionToEvaluate.objects.filter(
-                evaluator=evaluator
-            ).only('work'):
+            for eval_work in filter_objects(
+                WorkDistributionToEvaluate.objects, evaluator=evaluator, only=('work',)
+            ):
                 _essay_criteria_table = dict()
                 for i in range(1, 13):
                     _essay_criteria_table[f'k{i}'] = (
@@ -203,7 +204,7 @@ class Mock:
         """
         Создаёт оценки для рандомных проверок.
         """
-        for evaluation in EssayEvaluation.objects.all():
+        for evaluation in all_objects(EssayEvaluation.objects):
             if randint(0, 3) == 0:
                 RateEssayEvaluation.objects.create(
                     score=randint(1, 5),

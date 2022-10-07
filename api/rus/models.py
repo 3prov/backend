@@ -6,6 +6,7 @@ from django.db import models, transaction
 from django.db.models import QuerySet
 
 from api.models import Work, Task, User
+from api.services import filter_objects
 
 
 class Text(Task):
@@ -50,7 +51,7 @@ class Essay(Work):
 
     @classmethod
     def filter_by_current_task(cls) -> QuerySet:
-        return cls.objects.filter(task=Text.get_current())
+        return filter_objects(cls.objects, task=Text.get_current())
 
 
 class TextKey(models.Model):

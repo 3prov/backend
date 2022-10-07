@@ -16,6 +16,7 @@ from api.form_url.models import EvaluationFormURL
 from api.models import User
 from api.rus.evaluations.models import EssayEvaluation
 from api.rus.models import Text, Essay
+from api.services import all_objects, filter_objects
 
 
 class EvaluationsTest(APITestCase):
@@ -57,7 +58,7 @@ class EvaluationsTest(APITestCase):
         )
         response = self.client.post(reverse('text_assign'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Text.objects.all().count(), 1)
+        self.assertEqual(all_objects(Text.objects).count(), 1)
 
     def switch_stage(self, user_to_return):
         self.client.credentials(
@@ -107,7 +108,7 @@ class EvaluationsTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def send_all_required_evaluations_from_user(self, user: User):
-        form_eval = EvaluationFormURL.objects.filter(user=user)
+        form_eval = filter_objects(EvaluationFormURL.objects, user=user)
         for evaluation in form_eval:
             self.send_evaluation_from_user_with_form_url(
                 evaluation.user, evaluation.url
@@ -119,16 +120,20 @@ class EvaluationsTest(APITestCase):
             response = self.client.get(
                 reverse('volunteer_get_distribution', args=[user.id])
             )
-            self.assertEqual(response.json()['count'], Essay.objects.all().count() - 1)
             self.assertEqual(
-                len(response.json()['results']), Essay.objects.all().count() - 1
+                response.json()['count'], all_objects(Essay.objects).count() - 1
+            )
+            self.assertEqual(
+                len(response.json()['results']), all_objects(Essay.objects).count() - 1
             )
             response = self.client.get(
                 reverse('volunteer_get_distribution', args=[user.id])
             )
-            self.assertEqual(response.json()['count'], Essay.objects.all().count() - 1)
             self.assertEqual(
-                len(response.json()['results']), Essay.objects.all().count() - 1
+                response.json()['count'], all_objects(Essay.objects).count() - 1
+            )
+            self.assertEqual(
+                len(response.json()['results']), all_objects(Essay.objects).count() - 1
             )
 
             set_of_work_authors = set()
@@ -140,7 +145,9 @@ class EvaluationsTest(APITestCase):
                 set_of_work_authors.add(
                     Essay.objects.get(id=UUID(evaluation['work'])).author
                 )
-            self.assertEqual(len(set_of_work_authors), Essay.objects.all().count() - 1)
+            self.assertEqual(
+                len(set_of_work_authors), all_objects(Essay.objects).count() - 1
+            )
 
         self.switch_stage(self.admin_user)
         self.send_essay_from_user(self.common_user_1)
@@ -169,15 +176,15 @@ class EvaluationsTest(APITestCase):
         self.send_essay_from_user(self.common_user_3)
         self.send_essay_from_user(self.common_user_4)
         self.switch_stage(self.admin_user)
-        self.assertEqual(EssayEvaluation.objects.all().count(), 0)
+        self.assertEqual(all_objects(EssayEvaluation.objects).count(), 0)
         self.send_all_required_evaluations_from_user(self.common_user_1)
-        self.assertEqual(EssayEvaluation.objects.all().count(), 3)
+        self.assertEqual(all_objects(EssayEvaluation.objects).count(), 3)
         self.send_all_required_evaluations_from_user(self.common_user_2)
-        self.assertEqual(EssayEvaluation.objects.all().count(), 6)
+        self.assertEqual(all_objects(EssayEvaluation.objects).count(), 6)
         self.send_all_required_evaluations_from_user(self.common_user_3)
-        self.assertEqual(EssayEvaluation.objects.all().count(), 9)
+        self.assertEqual(all_objects(EssayEvaluation.objects).count(), 9)
         self.send_all_required_evaluations_from_user(self.common_user_4)
-        self.assertEqual(EssayEvaluation.objects.all().count(), 12)
+        self.assertEqual(all_objects(EssayEvaluation.objects).count(), 12)
 
     @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def test_evaluate_from_participant_5(self):
@@ -188,17 +195,17 @@ class EvaluationsTest(APITestCase):
         self.send_essay_from_user(self.common_user_4)
         self.send_essay_from_user(self.common_user_5)
         self.switch_stage(self.admin_user)
-        self.assertEqual(EssayEvaluation.objects.all().count(), 0)
+        self.assertEqual(all_objects(EssayEvaluation.objects).count(), 0)
         self.send_all_required_evaluations_from_user(self.common_user_1)
-        self.assertEqual(EssayEvaluation.objects.all().count(), 3)
+        self.assertEqual(all_objects(EssayEvaluation.objects).count(), 3)
         self.send_all_required_evaluations_from_user(self.common_user_2)
-        self.assertEqual(EssayEvaluation.objects.all().count(), 6)
+        self.assertEqual(all_objects(EssayEvaluation.objects).count(), 6)
         self.send_all_required_evaluations_from_user(self.common_user_3)
-        self.assertEqual(EssayEvaluation.objects.all().count(), 9)
+        self.assertEqual(all_objects(EssayEvaluation.objects).count(), 9)
         self.send_all_required_evaluations_from_user(self.common_user_4)
-        self.assertEqual(EssayEvaluation.objects.all().count(), 12)
+        self.assertEqual(all_objects(EssayEvaluation.objects).count(), 12)
         self.send_all_required_evaluations_from_user(self.common_user_5)
-        self.assertEqual(EssayEvaluation.objects.all().count(), 15)
+        self.assertEqual(all_objects(EssayEvaluation.objects).count(), 15)
 
     @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def evaluate_from_volunteer_n(self, users: set[User]):
@@ -212,15 +219,19 @@ class EvaluationsTest(APITestCase):
         response = self.client.get(
             reverse('volunteer_get_distribution', args=[self.volunteer_1.id])
         )
-        self.assertEqual(response.json()['count'], Essay.objects.all().count())
-        self.assertEqual(len(response.json()['results']), Essay.objects.all().count())
+        self.assertEqual(response.json()['count'], all_objects(Essay.objects).count())
+        self.assertEqual(
+            len(response.json()['results']), all_objects(Essay.objects).count()
+        )
         response = self.client.get(
             reverse('volunteer_get_distribution', args=[self.volunteer_1.id])
         )
-        self.assertEqual(response.json()['count'], Essay.objects.all().count())
-        self.assertEqual(len(response.json()['results']), Essay.objects.all().count())
+        self.assertEqual(response.json()['count'], all_objects(Essay.objects).count())
+        self.assertEqual(
+            len(response.json()['results']), all_objects(Essay.objects).count()
+        )
 
-        for i in range(1, Essay.objects.all().count() + 1):
+        for i in range(1, all_objects(Essay.objects).count() + 1):
             response = self.client.post(
                 reverse(
                     'volunteer_create_next_and_get_form_urls_user',
@@ -238,7 +249,7 @@ class EvaluationsTest(APITestCase):
                 )
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertEqual(len(response.json()), Essay.objects.all().count())
+            self.assertEqual(len(response.json()), all_objects(Essay.objects).count())
 
         response = self.client.post(
             reverse(
@@ -246,7 +257,7 @@ class EvaluationsTest(APITestCase):
                 args=[self.volunteer_1.id],
             )
         )
-        for i in range(Essay.objects.all().count()):
+        for i in range(all_objects(Essay.objects).count()):
             self.send_evaluation_from_user_with_form_url(
                 self.volunteer_1, response.json()[i]['url']
             )

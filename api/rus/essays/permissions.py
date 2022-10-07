@@ -7,6 +7,7 @@ from .serializers import (
     EssayFormURLCreateSerializer,
 )
 from ...models import User
+from ...services import filter_objects
 
 
 class OwnUserPermission(permissions.BasePermission):
@@ -59,7 +60,7 @@ class IsWorkDoesNotAlreadyExistsFromFormURL(permissions.BasePermission):
         serializer.is_valid(raise_exception=True)
         current_text = Text.get_current()
         form_url = EssayFormURL.get_from_url_or_404(view.kwargs['encoded_part'])
-        already_sent_essay = Essay.objects.filter(
-            author=form_url.user, task=current_text
+        already_sent_essay = filter_objects(
+            Essay.objects, author=form_url.user, task=current_text
         )
         return not already_sent_essay.exists()

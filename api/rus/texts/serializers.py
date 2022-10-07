@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from ..models import Text, TextKey
 from ...control.models import WeekID
+from ...services import filter_objects
 
 
 class WeekIDSerializer(serializers.ModelSerializer):
@@ -27,7 +28,7 @@ class TextDetailSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_keys(obj):
-        text_keys = TextKey.objects.filter(text=obj)
+        text_keys = filter_objects(TextKey.objects, text=obj)
         serializer = TextKeySerializer(text_keys, many=True)
         return serializer.data
 
@@ -62,7 +63,7 @@ class TextWithKeysSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_keys(obj):
-        text_keys = TextKey.objects.filter(text=obj)
+        text_keys = filter_objects(TextKey.objects, text=obj)
         serializer = TextKeySerializer(text_keys, many=True)
         return serializer.data
 

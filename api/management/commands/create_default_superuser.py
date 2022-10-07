@@ -2,6 +2,7 @@ from django.db import utils
 from django.core.management import BaseCommand
 
 from api.models import User
+from api.services import filter_objects
 from triproverochki import settings
 
 
@@ -10,7 +11,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         try:
-            if settings.DEBUG and not User.objects.filter(username='admin').exists():
+            if (
+                settings.DEBUG
+                and not filter_objects(User.objects, username='admin').exists()
+            ):
                 User.objects.create_superuser(username='admin', password='admin')
                 self.stdout.write(
                     self.style.SUCCESS('Superuser `admin` created successfully!')

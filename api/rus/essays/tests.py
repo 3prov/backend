@@ -13,6 +13,7 @@ from rest_framework.test import (
 from ..models import Text, Essay
 from api.models import User
 from ...form_url.models import EssayFormURL
+from ...services import all_objects
 
 
 class EssaysTest(APITestCase):
@@ -45,7 +46,7 @@ class EssaysTest(APITestCase):
         )
         response = self.client.post(reverse('text_assign'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Text.objects.all().count(), 1)
+        self.assertEqual(all_objects(Text.objects).count(), 1)
 
     def get_or_create_essay_form_link(self, user):
         data = {'user': user.id}
@@ -80,16 +81,16 @@ class EssaysTest(APITestCase):
 
     @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def test_common_pass_essay_good_state(self):
-        self.assertEqual(Essay.objects.all().count(), 0)
+        self.assertEqual(all_objects(Essay.objects).count(), 0)
         self.switch_stage(self.common_user)
         response = self.get_or_create_essay_form_link(self.common_user)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(EssayFormURL.objects.all().count(), 1)
+        self.assertEqual(all_objects(EssayFormURL.objects).count(), 1)
         response_p1 = self.pass_essay(self.common_user, response.json()['url'])
         self.assertEqual(response_p1.status_code, status.HTTP_201_CREATED)
         response_p2 = self.pass_essay(self.common_user, response.json()['url'])
         self.assertEqual(response_p2.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(Essay.objects.all().count(), 1)
+        self.assertEqual(all_objects(Essay.objects).count(), 1)
 
     @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def test_common_pass_essay_wrong_stage_after(self):
@@ -99,7 +100,7 @@ class EssaysTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         response_p1 = self.pass_essay(self.common_user, response.json()['url'])
         self.assertEqual(response_p1.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(Essay.objects.all().count(), 0)
+        self.assertEqual(all_objects(Essay.objects).count(), 0)
         self.assertEqual(
             response_p1.json()['detail'],
             "Ошибка текущего этапа. Для отправки сочинения необходим 'S2' этап.",
@@ -107,7 +108,7 @@ class EssaysTest(APITestCase):
         self.switch_stage(self.common_user)
         response_p1 = self.pass_essay(self.common_user, response.json()['url'])
         self.assertEqual(response_p1.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(Essay.objects.all().count(), 0)
+        self.assertEqual(all_objects(Essay.objects).count(), 0)
         self.assertEqual(response_p1.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(
             response_p1.json()['detail'],
@@ -116,7 +117,7 @@ class EssaysTest(APITestCase):
         self.switch_stage(self.common_user)
         response_p1 = self.pass_essay(self.common_user, response.json()['url'])
         self.assertEqual(response_p1.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(Essay.objects.all().count(), 0)
+        self.assertEqual(all_objects(Essay.objects).count(), 0)
         self.assertEqual(
             response_p1.json()['detail'],
             "Ошибка текущего этапа. Для отправки сочинения необходим 'S2' этап.",
@@ -124,13 +125,13 @@ class EssaysTest(APITestCase):
         self.switch_stage(self.common_user)
         response_p1 = self.pass_essay(self.common_user, response.json()['url'])
         self.assertEqual(response_p1.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Essay.objects.all().count(), 1)
+        self.assertEqual(all_objects(Essay.objects).count(), 1)
 
     @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def test_get_link_to_form(self):
         self.switch_stage(self.common_user)
         data = {'user': self.common_user.id}
-        self.assertEqual(EssayFormURL.objects.all().count(), 0)
+        self.assertEqual(all_objects(EssayFormURL.objects).count(), 0)
         self.client.credentials(
             HTTP_AUTHORIZATION=f'Token {self.common_user.auth_token}'
         )
@@ -141,7 +142,7 @@ class EssaysTest(APITestCase):
         self.assertIsNotNone(response.json()['url'])
         self.assertEqual(len(response.json()['url']), 16)
         # self.assertEqual(response.json()['id'], 1)
-        self.assertEqual(EssayFormURL.objects.all().count(), 1)
+        self.assertEqual(all_objects(EssayFormURL.objects).count(), 1)
         self.assertEqual(response.json()['user'], str(self.common_user.id))
 
     @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
@@ -159,7 +160,7 @@ class EssaysTest(APITestCase):
             reverse('get_or_create_essay_form_link'), data, format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(EssayFormURL.objects.all().count(), 1)
+        self.assertEqual(all_objects(EssayFormURL.objects).count(), 1)
         self.assertEqual(UUID(response.json()['user']), data['user'])
 
     @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
@@ -178,13 +179,13 @@ class EssaysTest(APITestCase):
             reverse('essay_from_url_post', args=[form_url_url]), data, format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Essay.objects.all().count(), 1)
+        self.assertEqual(all_objects(Essay.objects).count(), 1)
 
         response = self.client.post(
             reverse('essay_from_url_post', args=[form_url_url]), data, format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(Essay.objects.all().count(), 1)
+        self.assertEqual(all_objects(Essay.objects).count(), 1)
         self.assertEqual(
             response.json()['detail'], 'Сочинение на этой неделе уже существует.'
         )
@@ -202,13 +203,13 @@ class EssaysTest(APITestCase):
             reverse('essay_from_url_post', args=[form_url_url]), data, format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Essay.objects.all().count(), 1)
+        self.assertEqual(all_objects(Essay.objects).count(), 1)
 
         response = self.client.post(
             reverse('essay_from_url_post', args=[form_url_url]), data, format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(Essay.objects.all().count(), 1)
+        self.assertEqual(all_objects(Essay.objects).count(), 1)
         self.assertEqual(
             response.json()['detail'], 'Сочинение на этой неделе уже существует.'
         )
@@ -225,7 +226,7 @@ class EssaysTest(APITestCase):
             reverse('essay_from_url_post', args=[form_url_url]), data, format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(Essay.objects.all().count(), 0)
+        self.assertEqual(all_objects(Essay.objects).count(), 0)
         self.assertEqual(
             response.json()['detail'],
             "Ошибка текущего этапа. Для отправки сочинения необходим 'S2' этап.",
@@ -235,7 +236,7 @@ class EssaysTest(APITestCase):
             reverse('essay_from_url_post', args=[form_url_url]), data, format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(Essay.objects.all().count(), 0)
+        self.assertEqual(all_objects(Essay.objects).count(), 0)
         self.assertEqual(
             response.json()['detail'],
             "Ошибка текущего этапа. Для отправки сочинения необходим 'S2' этап.",
@@ -247,7 +248,7 @@ class EssaysTest(APITestCase):
             reverse('essay_from_url_post', args=[form_url_url]), data, format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(Essay.objects.all().count(), 0)
+        self.assertEqual(all_objects(Essay.objects).count(), 0)
         self.assertEqual(
             response.json()['detail'],
             "Ошибка текущего этапа. Для отправки сочинения необходим 'S2' этап.",
@@ -257,7 +258,7 @@ class EssaysTest(APITestCase):
             reverse('essay_from_url_post', args=[form_url_url]), data, format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(Essay.objects.all().count(), 0)
+        self.assertEqual(all_objects(Essay.objects).count(), 0)
         self.assertEqual(
             response.json()['detail'],
             "Ошибка текущего этапа. Для отправки сочинения необходим 'S2' этап.",
@@ -267,7 +268,7 @@ class EssaysTest(APITestCase):
             reverse('essay_from_url_post', args=[form_url_url]), data, format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(Essay.objects.all().count(), 0)
+        self.assertEqual(all_objects(Essay.objects).count(), 0)
         self.assertEqual(
             response.json()['detail'],
             "Ошибка текущего этапа. Для отправки сочинения необходим 'S2' этап.",

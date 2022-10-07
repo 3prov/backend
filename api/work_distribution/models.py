@@ -7,6 +7,7 @@ from .exceptions import UsersCountLessThenFour, WorkDistributionAlreadyExists
 from ..models import WeekID, User
 from ..rus.evaluations.models import EssayEvaluation
 from ..rus.models import Essay
+from ..services import filter_objects
 
 
 class WorkDistributionToEvaluate(models.Model):
@@ -36,13 +37,16 @@ class WorkDistributionToEvaluate(models.Model):
 
     @staticmethod
     def _check_before_make():
-        if Essay.objects.filter(task__week_id=WeekID.get_current()).count() < 4:
+        if (
+            filter_objects(Essay.objects, task__week_id=WeekID.get_current()).count()
+            < 4
+        ):
             raise UsersCountLessThenFour(
                 'Невозможно сделать распределение работ. Число пользователей меньше четырех.'
             )
         if (
-            WorkDistributionToEvaluate.objects.filter(
-                week_id=WeekID.get_current()
+            filter_objects(
+                WorkDistributionToEvaluate.objects, week_id=WeekID.get_current()
             ).count()
             > 0
         ):
@@ -58,16 +62,19 @@ class WorkDistributionToEvaluate(models.Model):
     ):
         for pair in algo_result:
             _is_evaluator_have_three_required = (
-                WorkDistributionToEvaluate.objects.filter(
-                    week_id=current_week, evaluator=pair.evaluator, is_required=True
+                filter_objects(
+                    WorkDistributionToEvaluate.objects,
+                    week_id=current_week,
+                    evaluator=pair.evaluator,
+                    is_required=True,
                 ).count()
                 >= 3
             )
             WorkDistributionToEvaluate.objects.create(
                 week_id=current_week,
                 evaluator=pair.evaluator,
-                work=Essay.objects.filter(
-                    author=pair.work_author, task__week_id=current_week
+                work=filter_objects(
+                    Essay.objects, author=pair.work_author, task__week_id=current_week
                 ).first(),
                 is_required=True
                 if need_first_three_set_required
@@ -80,7 +87,7 @@ class WorkDistributionToEvaluate(models.Model):
         WorkDistributionToEvaluate._check_before_make()
         work_authors = set()
         current_week = WeekID.get_current()
-        for work in Essay.objects.filter(task__week_id=current_week):
+        for work in filter_objects(Essay.objects, task__week_id=current_week):
             work_authors.add(work.author)
 
         pairs = (
@@ -96,15 +103,15 @@ class WorkDistributionToEvaluate(models.Model):
     def make_optionally_for_volunteer(volunteer: User):
         work_authors = set()
         current_week = WeekID.get_current()
-        week_works = Essay.objects.filter(task__week_id=current_week)
+        week_works = filter_objects(Essay.objects, task__week_id=current_week)
         for work in week_works:
             work_authors.add(work.author)
 
         pairs = SortByRatingAlgorithm.make_optionally_distribution_for_volunteer(
             volunteer=volunteer,
             participants=list(work_authors),
-            existing_evaluations_of_works=EssayEvaluation.objects.filter(
-                work__task__week_id=current_week
+            existing_evaluations_of_works=filter_objects(
+                EssayEvaluation.objects, work__task__week_id=current_week
             ),
         )
         WorkDistributionToEvaluate._save_pairs_from_algos_results(

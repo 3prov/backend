@@ -6,6 +6,7 @@ from api.rus.evaluations.models import (
     EssaySelectionReview,
     EssayCriteria,
 )
+from api.services import filter_objects
 from api.work_distribution.models import WorkDistributionToEvaluate
 
 
@@ -78,15 +79,15 @@ class EssayEvaluationSerializer(serializers.ModelSerializer):
     selections_review = serializers.SerializerMethodField(read_only=True)
 
     def update(self, instance, validated_data):
-        EssayCriteria.objects.filter(evaluation=instance).update(
+        filter_objects(EssayCriteria.objects, evaluation=instance).update(
             **validated_data['criteria']
         )
         return instance
 
     @staticmethod
     def get_selections_review(obj):
-        essay_selections_review = EssaySelectionReview.objects.filter(
-            evaluator=obj.evaluator, essay=obj.work
+        essay_selections_review = filter_objects(
+            EssaySelectionReview.objects, evaluator=obj.evaluator, essay=obj.work
         )
         return EssaySelectionReviewSerializer(essay_selections_review, many=True).data
 

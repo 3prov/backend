@@ -17,11 +17,13 @@ from api.rus.results.serializers import (
     RateEssayEvaluationSerializer,
     RateEssayEvaluationAnonSerializer,
 )
+from api.services import all_objects, filter_objects
 
 
 class WeekResultsListView(generics.ListAPIView):
-    queryset = Essay.objects.all().order_by(
-        '-task__week_id__week_number', '-task__week_id__study_year_from'
+    queryset = all_objects(
+        Essay.objects,
+        order_by=('-task__week_id__week_number', '-task__week_id__study_year_from'),
     )
     serializer_class = EssayListSerializer
     permission_classes = [permissions.AllowAny]
@@ -37,14 +39,16 @@ class WeekResultsFormURLUserListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        queryset = ResultsFormURL.objects.filter(
+        queryset = filter_objects(
+            ResultsFormURL.objects,
             user=self.kwargs['user'],
-        ).order_by('-week_id__week_number', '-week_id__study_year_from')
+            order_by=('-week_id__week_number', '-week_id__study_year_from'),
+        )
         return queryset
 
 
 class WeekResultsFromFormURLListView(generics.ListAPIView):
-    queryset = EssayEvaluation.objects.all()
+    queryset = all_objects(EssayEvaluation.objects)
     permission_classes = [permissions.AllowAny]
     serializer_class = EssayEvaluationSerializer
 
@@ -72,7 +76,8 @@ class RateEssayEvaluationFromFormURLCreate(generics.CreateAPIView):
             raise permissions.exceptions.ValidationError(
                 detail='Эта оценка не принадлежит этой неделе.'
             )
-        if RateEssayEvaluation.objects.filter(
+        if filter_objects(
+            RateEssayEvaluation.objects,
             rater=form_url.user,
             evaluation_criteria_id=serializer.data['evaluation_criteria'],
         ).exists():

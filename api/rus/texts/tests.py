@@ -5,6 +5,7 @@ from rest_framework.test import APITestCase, APIClient, APIRequestFactory
 
 from ..models import Text, TextKey
 from api.models import User
+from ...services import all_objects
 
 
 class TextsTest(APITestCase):
@@ -29,7 +30,7 @@ class TextsTest(APITestCase):
         }
         response = self.client.post(reverse('text_assign'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        self.assertEqual(Text.objects.all().count(), 0)
+        self.assertEqual(all_objects(Text.objects).count(), 0)
 
     def test_auth_user_text_assign(self):
         data = {
@@ -43,7 +44,7 @@ class TextsTest(APITestCase):
         )
         response = self.client.post(reverse('text_assign'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(Text.objects.all().count(), 0)
+        self.assertEqual(all_objects(Text.objects).count(), 0)
 
     def test_admin_user_text_assign(self):
         data = {
@@ -57,10 +58,10 @@ class TextsTest(APITestCase):
         )
         response = self.client.post(reverse('text_assign'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Text.objects.all().count(), 1)
+        self.assertEqual(all_objects(Text.objects).count(), 1)
         response = self.client.post(reverse('text_assign'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Text.objects.all().count(), 2)
+        self.assertEqual(all_objects(Text.objects).count(), 2)
 
     def test_anon_user_texts_list_all(self):
         response = self.client.get(reverse('texts_list_all'))
@@ -93,7 +94,7 @@ class TextsTest(APITestCase):
         )
         response = self.client.post(reverse('text_assign'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Text.objects.all().count(), 1)
+        self.assertEqual(all_objects(Text.objects).count(), 1)
 
         response = self.client.get(reverse('texts_list_all'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -101,7 +102,7 @@ class TextsTest(APITestCase):
 
         response = self.client.post(reverse('text_assign'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Text.objects.all().count(), 2)
+        self.assertEqual(all_objects(Text.objects).count(), 2)
 
         response = self.client.get(reverse('texts_list_all'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -114,7 +115,7 @@ class TextsTest(APITestCase):
         )
         response = self.client.post(reverse('add_text_keys'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(TextKey.objects.all().count(), 0)
+        self.assertEqual(all_objects(TextKey.objects).count(), 0)
 
     def test_admin_user_add_text_keys_good(self):
         data = {
@@ -128,11 +129,11 @@ class TextsTest(APITestCase):
         )
         response = self.client.post(reverse('text_assign'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Text.objects.all().count(), 1)
+        self.assertEqual(all_objects(Text.objects).count(), 1)
         text_id = response.json()['id']
         self.assertIsNotNone(text_id)
 
-        self.assertEqual(TextKey.objects.all().count(), 0)
+        self.assertEqual(all_objects(TextKey.objects).count(), 0)
         data = {
             "range_of_problems": "wkjeuhweriohiowg",
             "authors_position": "weiuguiweunguweugowegwenguweohigwegwe",
@@ -143,7 +144,7 @@ class TextsTest(APITestCase):
         )
         response = self.client.post(reverse('add_text_keys'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(TextKey.objects.all().count(), 1)
+        self.assertEqual(all_objects(TextKey.objects).count(), 1)
 
     def test_admin_user_add_text_keys_good_many(self):
         data = {
@@ -157,11 +158,11 @@ class TextsTest(APITestCase):
         )
         response = self.client.post(reverse('text_assign'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Text.objects.all().count(), 1)
+        self.assertEqual(all_objects(Text.objects).count(), 1)
         text_id = response.json()['id']
         self.assertIsNotNone(text_id)
 
-        self.assertEqual(TextKey.objects.all().count(), 0)
+        self.assertEqual(all_objects(TextKey.objects).count(), 0)
         data = {
             "range_of_problems": "wkjeuhweriohiowg",
             "authors_position": "weiuguiweunguweugowegwenguweohigwegwe",
@@ -172,7 +173,7 @@ class TextsTest(APITestCase):
         )
         response = self.client.post(reverse('add_text_keys'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(TextKey.objects.all().count(), 1)
+        self.assertEqual(all_objects(TextKey.objects).count(), 1)
 
         data = {
             "range_of_problems": "289f2jivo",
@@ -181,4 +182,4 @@ class TextsTest(APITestCase):
         }
         response = self.client.post(reverse('add_text_keys'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(TextKey.objects.all().count(), 2)
+        self.assertEqual(all_objects(TextKey.objects).count(), 2)

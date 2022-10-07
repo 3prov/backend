@@ -16,10 +16,11 @@ from .permissions import (
 from ...form_url.models import EssayFormURL
 from ...control.models import WeekID
 from ...models import User
+from ...services import all_objects
 
 
 class EssayListView(generics.ListAPIView):
-    queryset = Essay.objects.all()
+    queryset = all_objects(Essay.objects)
     serializer_class = EssayListSerializer
     permission_classes = [permissions.IsAdminUser]
     filter_backends = [DjangoFilterBackend]
@@ -48,13 +49,13 @@ class EssayFormURLUserGetOrCreate(generics.CreateAPIView):
 
 
 class EssayWithEvaluationsTextKeysView(generics.RetrieveAPIView):
-    queryset = Essay.objects.all()
+    queryset = all_objects(Essay.objects)
     serializer_class = EssayWithEvaluationsSerializer
     permission_classes = [permissions.AllowAny]
 
 
 class EssayFromFormURLCreate(generics.CreateAPIView):
-    queryset = EssayFormURL.objects.all()
+    queryset = all_objects(EssayFormURL.objects)
     serializer_class = EssayFormURLCreateSerializer
     permission_classes = [
         permissions.AllowAny,
@@ -74,7 +75,7 @@ class EssayFromFormURLCreate(generics.CreateAPIView):
 
 
 class EssayFromFormURLDetailView(generics.RetrieveUpdateAPIView):
-    queryset = Essay.objects.all()
+    queryset = all_objects(Essay.objects)
     permission_classes = [permissions.AllowAny, IsWorkAcceptingStage]
     serializer_class = EssayFormURLCreateSerializer
 

@@ -9,6 +9,7 @@ from .serializers import (
     TextKeyCreateSerializer,
 )
 from ...form_url.models import ResultsFormURL
+from ...services import all_objects
 
 
 class TextCreate(generics.CreateAPIView):
@@ -17,15 +18,15 @@ class TextCreate(generics.CreateAPIView):
 
 
 class TextListView(generics.ListAPIView):
-    queryset = Text.objects.all().order_by(
-        '-week_id__week_number', '-week_id__study_year_from'
+    queryset = all_objects(
+        Text.objects, order_by=('-week_id__week_number', '-week_id__study_year_from')
     )
     serializer_class = TextListSerializer
     permission_classes = [permissions.AllowAny]
 
 
 class TextDetailView(generics.RetrieveUpdateAPIView):
-    queryset = Text.objects.all()
+    queryset = all_objects(Text.objects)
     serializer_class = TextSerializer
     permission_classes = [permissions.IsAdminUser]
 
@@ -45,6 +46,6 @@ class TextByFormURLView(generics.RetrieveAPIView):
 
 
 class TextView(generics.RetrieveAPIView):
-    queryset = Text.objects.all()
+    queryset = all_objects(Text.objects)
     serializer_class = TextWithKeysSerializer
     permission_classes = [permissions.AllowAny]

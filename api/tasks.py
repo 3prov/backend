@@ -2,6 +2,7 @@ from api.form_url.models import ResultsFormURL
 from api.control.models import WeekID
 from api.models import User
 from api.rus.models import Essay
+from api.services import filter_objects
 from api.work_distribution.models import WorkDistributionToEvaluate
 from triproverochki.celery import app
 
@@ -25,7 +26,9 @@ class FormURLTasks(CeleryTasks):
     @app.task
     def create_result_form_urls_for_essay_authors():
         current_week_id = WeekID.get_current()
-        for essay in Essay.objects.filter(task__week_id=current_week_id).only('author'):
+        for essay in filter_objects(
+            Essay.objects, task__week_id=current_week_id, only=('author',)
+        ):
             ResultsFormURL.objects.create(user=essay.author, week_id=current_week_id)
 
 
@@ -33,7 +36,7 @@ class SendTelegramMessage(CeleryTasks):
     @staticmethod
     @app.task(bind=True)
     def send_message_to_active_users(self, message: str):
-        users = User.objects.filter(is_active=True)
+        users = filter_objects(User.objects, is_active=True)
         users_count = users.count()
         i = 1
         for user in users:
