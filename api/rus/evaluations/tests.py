@@ -16,7 +16,7 @@ from api.form_url.models import EvaluationFormURL
 from api.models import User
 from api.rus.evaluations.models import EssayEvaluation
 from api.rus.models import Text, Essay
-from api.services import all_objects, filter_objects
+from api.services import all_objects, filter_objects, get_object
 
 
 class EvaluationsTest(APITestCase):
@@ -140,10 +140,10 @@ class EvaluationsTest(APITestCase):
             for evaluation in response.json()['results']:
                 self.assertEqual(UUID(evaluation['evaluator']), user.id)
                 self.assertNotEqual(
-                    Essay.objects.get(id=UUID(evaluation['work'])).author, user
+                    get_object(Essay.objects, id=UUID(evaluation['work'])).author, user
                 )
                 set_of_work_authors.add(
-                    Essay.objects.get(id=UUID(evaluation['work'])).author
+                    get_object(Essay.objects, id=UUID(evaluation['work'])).author
                 )
             self.assertEqual(
                 len(set_of_work_authors), all_objects(Essay.objects).count() - 1

@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase, APIClient, APIRequestFactory
 from .models import User
-from .services import all_objects
+from .services import all_objects, get_object
 
 
 class UserTest(APITestCase):
@@ -57,7 +57,7 @@ class UserTest(APITestCase):
         response = self.client.post(reverse('user-list'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(all_objects(User.objects).count(), 1)
-        self.assertIsNotNone(User.objects.get(username='username1').auth_token)
+        self.assertIsNotNone(get_object(User.objects, username='username1').auth_token)
 
     def test_check_user_from_api_with_username_and_password_and_vk(self):
         data = {
@@ -71,9 +71,11 @@ class UserTest(APITestCase):
         response = self.client.post(reverse('user-list'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(all_objects(User.objects).count(), 1)
-        self.assertEqual(User.objects.get(username='username1').vkontakte_id, 157651005)
-        self.assertIsNone(User.objects.get(username='username1').telegram_id)
-        self.assertIsNotNone(User.objects.get(username='username1').auth_token)
+        self.assertEqual(
+            get_object(User.objects, username='username1').vkontakte_id, 157651005
+        )
+        self.assertIsNone(get_object(User.objects, username='username1').telegram_id)
+        self.assertIsNotNone(get_object(User.objects, username='username1').auth_token)
 
     def test_check_user_from_api_with_username_and_password_and_vk_double(self):
         data = {
@@ -87,7 +89,7 @@ class UserTest(APITestCase):
         response = self.client.post(reverse('user-list'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(all_objects(User.objects).count(), 1)
-        self.assertIsNotNone(User.objects.get(username='username2').auth_token)
+        self.assertIsNotNone(get_object(User.objects, username='username2').auth_token)
 
         data['username'] = 'username3'
         data['vkontakte_id'] = 157651007
@@ -95,9 +97,13 @@ class UserTest(APITestCase):
         response = self.client.post(reverse('user-list'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(all_objects(User.objects).count(), 2)
-        self.assertEqual(User.objects.get(username='username3').vkontakte_id, 157651007)
-        self.assertEqual(User.objects.get(username='username3').telegram_id, 189245914)
-        self.assertIsNotNone(User.objects.get(username='username3').auth_token)
+        self.assertEqual(
+            get_object(User.objects, username='username3').vkontakte_id, 157651007
+        )
+        self.assertEqual(
+            get_object(User.objects, username='username3').telegram_id, 189245914
+        )
+        self.assertIsNotNone(get_object(User.objects, username='username3').auth_token)
 
     def test_check_user_from_api_full_creds(self):
         data = {
@@ -112,18 +118,24 @@ class UserTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(all_objects(User.objects).count(), 1)
         self.assertNotEqual(
-            User.objects.get(username='username_full').password, 'aboba22'
-        )
-        self.assertEqual(User.objects.get(username='username_full').first_name, 'John')
-        self.assertEqual(User.objects.get(username='username_full').last_name, 'Doe')
-        self.assertEqual(
-            User.objects.get(username='username_full').vkontakte_id, 6127584
+            get_object(User.objects, username='username_full').password, 'aboba22'
         )
         self.assertEqual(
-            User.objects.get(username='username_full').telegram_id, 891267646512
+            get_object(User.objects, username='username_full').first_name, 'John'
         )
-        self.assertIsNotNone(User.objects.get(username='username_full').id)
-        self.assertIsNotNone(User.objects.get(username='username_full').auth_token)
+        self.assertEqual(
+            get_object(User.objects, username='username_full').last_name, 'Doe'
+        )
+        self.assertEqual(
+            get_object(User.objects, username='username_full').vkontakte_id, 6127584
+        )
+        self.assertEqual(
+            get_object(User.objects, username='username_full').telegram_id, 891267646512
+        )
+        self.assertIsNotNone(get_object(User.objects, username='username_full').id)
+        self.assertIsNotNone(
+            get_object(User.objects, username='username_full').auth_token
+        )
 
     def test_check_user_from_api_wrong_serialized(self):
         data = {

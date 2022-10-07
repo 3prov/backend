@@ -10,7 +10,7 @@ from api.rus.evaluations.models import EssayEvaluation
 from api.rus.evaluations.serializers import EssayEvaluationSerializer
 from api.rus.models import Essay, Text, TextKey
 from api.rus.texts.serializers import TextSerializer, TextKeySerializer
-from api.services import filter_objects
+from api.services import filter_objects, get_object
 
 
 class EssayDecodeURLView(APIView):
@@ -27,8 +27,8 @@ class EssayDecodeURLView(APIView):
         form_url = EssayFormURL.get_from_url_or_404(kwargs['encoded_part'])
         data_to_response['task'] = TextSerializer(Text.get_current()).data
         try:
-            essay = Essay.objects.get(
-                author=form_url.user, task__week_id=WeekID.get_current()
+            essay = get_object(
+                Essay.objects, author=form_url.user, task__week_id=WeekID.get_current()
             )
             data_to_response['essay_already_sent'] = True
             data_to_response['essay'] = EssaySerializer(essay).data
@@ -63,8 +63,10 @@ class EvaluationDecodeURLView(APIView):
             many=True,
         ).data
         try:
-            evaluation = EssayEvaluation.objects.get(
-                evaluator=form_url.user, work=form_url.evaluation_work
+            evaluation = get_object(
+                EssayEvaluation.objects,
+                evaluator=form_url.user,
+                work=form_url.evaluation_work,
             )
             data_to_response['evaluation_already_sent'] = True
             data_to_response['evaluation'] = EssayEvaluationSerializer(evaluation).data

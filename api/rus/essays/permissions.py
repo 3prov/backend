@@ -7,7 +7,7 @@ from .serializers import (
     EssayFormURLCreateSerializer,
 )
 from ...models import User
-from ...services import filter_objects
+from ...services import filter_objects, get_object
 
 
 class OwnUserPermission(permissions.BasePermission):
@@ -28,7 +28,7 @@ class OwnUserPermission(permissions.BasePermission):
         user_token = user_token.replace('Token ', '')
 
         try:
-            user_with_token = User.objects.get(auth_token=user_token)
+            user_with_token = get_object(User.objects, auth_token=user_token)
         except User.DoesNotExist:
             return False
         return obj.author == user_with_token

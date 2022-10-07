@@ -22,12 +22,17 @@ def order_by_objects_decorator(func: callable):
 @order_by_objects_decorator
 @only_objects_decorator
 def all_objects(objects: Manager) -> QuerySet:
-    """Return all objects in the database"""
+    """Return all objects from the database"""
     return objects.all()
 
 
 @order_by_objects_decorator
 @only_objects_decorator
 def filter_objects(objects: Manager, **kwargs) -> QuerySet:
-    """Return filtered objects in the database"""
+    """Return filtered objects from the database"""
     return objects.filter(**kwargs)
+
+
+def get_object(objects: Manager, **kwargs):
+    """Return one object from the database"""
+    return objects.get(**kwargs)

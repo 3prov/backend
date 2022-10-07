@@ -17,7 +17,7 @@ from api.rus.results.serializers import (
     RateEssayEvaluationSerializer,
     RateEssayEvaluationAnonSerializer,
 )
-from api.services import all_objects, filter_objects
+from api.services import all_objects, filter_objects, get_object
 
 
 class WeekResultsListView(generics.ListAPIView):
@@ -69,8 +69,8 @@ class RateEssayEvaluationFromFormURLCreate(generics.CreateAPIView):
         form_url = ResultsFormURL.get_from_url_or_404(url=self.kwargs['encoded_part'])
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        evaluation_criteria = EssayCriteria.objects.get(
-            id=serializer.data['evaluation_criteria']
+        evaluation_criteria = get_object(
+            EssayCriteria.objects, id=serializer.data['evaluation_criteria']
         )
         if form_url.week_id != evaluation_criteria.evaluation.work.task.week_id:
             raise permissions.exceptions.ValidationError(

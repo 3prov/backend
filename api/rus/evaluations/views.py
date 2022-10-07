@@ -20,7 +20,7 @@ from api.rus.evaluations.serializers import (
     EssaySelectionReviewWithoutSelectionSerializer,
 )
 from api.rus.models import Essay
-from api.services import all_objects, filter_objects
+from api.services import all_objects, filter_objects, get_object
 from api.work_distribution.models import WorkDistributionToEvaluate
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -183,7 +183,7 @@ class WorkDistributionToEvaluateVolunteerListView(generics.ListAPIView):
     def get_queryset(self):
         _volunteer_uuid = self.kwargs['user']
         try:
-            volunteer = User.objects.get(id=_volunteer_uuid)
+            volunteer = get_object(User.objects, id=_volunteer_uuid)
         except User.DoesNotExist:
             raise permissions.exceptions.ValidationError(
                 detail='Пользователь с таким UUID не найден.'
@@ -212,7 +212,7 @@ class EvaluationFormURLVolunteerCreate(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         _volunteer_uuid = self.kwargs['user']
         try:
-            volunteer = User.objects.get(id=_volunteer_uuid)
+            volunteer = get_object(User.objects, id=_volunteer_uuid)
         except User.DoesNotExist:
             raise permissions.exceptions.ValidationError(
                 detail='Пользователь с таким UUID не найден.'

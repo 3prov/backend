@@ -12,7 +12,7 @@ from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
 from api.control.models import WeekID
-from api.services import filter_objects
+from api.services import filter_objects, get_object
 from telegram import TelegramHelper
 
 
@@ -44,7 +44,7 @@ class User(AbstractUser, metaclass=AbstractModelMeta):
 
     @transaction.atomic
     def delete(self, using=None, keep_parents=False):
-        Token.objects.get(user=self).delete()
+        get_object(Token.objects, user=self).delete()
         return super(User, self).delete(using, keep_parents)
 
     def increase_rating(self, value: int):

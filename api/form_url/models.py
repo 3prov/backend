@@ -7,6 +7,8 @@ from api.rus.models import Essay
 
 from django.db import models
 
+from api.services import get_object
+
 
 class EssayFormURL(FormURL):
     class Meta:
@@ -16,7 +18,7 @@ class EssayFormURL(FormURL):
     @classmethod
     def get_from_url_or_404(cls, url: str) -> EssayFormURL | None:
         try:
-            return cls.objects.get(url=url)
+            return get_object(cls.objects, url=url)
         except cls.DoesNotExist:
             raise permissions.exceptions.ValidationError(
                 {'detail': 'Ссылка недействительна.'}
@@ -38,7 +40,7 @@ class EvaluationFormURL(FormURL):
     @classmethod
     def get_from_url_or_404(cls, url: str) -> EvaluationFormURL | None:
         try:
-            return cls.objects.get(url=url)
+            return get_object(cls.objects, url=url)
         except cls.DoesNotExist:
             raise permissions.exceptions.ValidationError(
                 {'detail': 'Ссылка недействительна.'}
@@ -53,7 +55,7 @@ class ResultsFormURL(FormURL):
     @classmethod
     def get_from_url_or_404(cls, url: str) -> ResultsFormURL | None:
         try:
-            return cls.objects.get(url=url)
+            return get_object(cls.objects, url=url)
         except cls.DoesNotExist:
             raise permissions.exceptions.ValidationError(
                 {'detail': 'Ссылка недействительна.'}

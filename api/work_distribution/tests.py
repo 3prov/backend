@@ -15,7 +15,7 @@ from .models import WorkDistributionToEvaluate
 from ..control.models import WeekID
 from ..models import User
 from ..rus.models import Essay, Text
-from ..services import all_objects, filter_objects
+from ..services import all_objects, filter_objects, get_object
 
 
 class WorkDistributionTest(APITestCase):
@@ -153,7 +153,7 @@ class WorkDistributionTest(APITestCase):
         for i in range(4, participants_count + 4):
             self.create_common_user_and_send_essay(f'common_user_{i}')
 
-        common_user_4 = User.objects.get(username='common_user_4')
+        common_user_4 = get_object(User.objects, username='common_user_4')
         common_user_4.rating = 100
         common_user_4.save()
         self.admin_user.rating = 100
@@ -172,7 +172,7 @@ class WorkDistributionTest(APITestCase):
     def test_10_distributions_is_required(self):
         self.make_N_essay_distribution(10, clear_after=False)
 
-        picked_user = User.objects.get(username='common_user_7')
+        picked_user = get_object(User.objects, username='common_user_7')
 
         i = 0
         for future_eval in filter_objects(
