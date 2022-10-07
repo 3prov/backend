@@ -65,7 +65,7 @@ def post_save_stage(sender, instance, created, **kwargs):
         case Stage.StagesEnum.CLOSED_ACCEPT:
             message = 'Прием оценок закончен. Пора смотреть результаты!'
             task = FormURLTasks.create_result_form_urls_for_essay_authors
-        case default:
+        case _:
             return
 
     send_message_task = SendTelegramMessage.send_message_to_active_users

@@ -38,16 +38,19 @@ class ControlTest(APITestCase):
         response = self.client.get(reverse('get_stage'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def test_anon_user_switch_stage_to_next(self):
         response = self.client.get(reverse('switch_stage_to_next'))
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def test_auth_user_switch_stage_to_next(self):
         common_user = User.objects.create_user(username='common_user')
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {common_user.auth_token}')
         response = self.client.get(reverse('switch_stage_to_next'))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def test_admin_user_switch_stage_to_next(self):
         admin_user = User.objects.create_superuser(username='test_admin')
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {admin_user.auth_token}')
@@ -124,6 +127,7 @@ class ControlTest(APITestCase):
             author=admin_user,
         )
 
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def test_admin_user_statistics_with_essays(self):
         admin_user = User.objects.create_superuser(username='admin_user')
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {admin_user.auth_token}')

@@ -13,7 +13,7 @@ from api.models import User
 from api.rus.evaluations.models import EssayEvaluation, EssaySelectionReview
 
 
-class ControlTest(APITestCase):
+class FormsDecodeURLTest(APITestCase):
     def setUp(self) -> None:
         call_command('init_stage')
         self.factory = APIRequestFactory()
@@ -49,6 +49,7 @@ class ControlTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()['url']
 
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def test_simulate_essay_pass(self):
         self.assign_text(self.common_user)
         self.switch_stage(self.common_user)

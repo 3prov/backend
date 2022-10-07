@@ -3,7 +3,12 @@ import random
 from django.core.management import call_command
 from rest_framework import status
 from rest_framework.reverse import reverse
-from rest_framework.test import APITestCase, APIClient, APIRequestFactory
+from rest_framework.test import (
+    APITestCase,
+    APIClient,
+    APIRequestFactory,
+    override_settings,
+)
 
 from .exceptions import UsersCountLessThenFour, WorkDistributionAlreadyExists
 from .models import WorkDistributionToEvaluate
@@ -13,6 +18,7 @@ from ..rus.models import Essay, Text
 
 
 class WorkDistributionTest(APITestCase):
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def setUp(self) -> None:
         call_command('init_stage')
         self.factory = APIRequestFactory()

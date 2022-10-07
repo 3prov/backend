@@ -78,6 +78,7 @@ class EssaysTest(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def test_common_pass_essay_good_state(self):
         self.assertEqual(Essay.objects.all().count(), 0)
         self.switch_stage(self.common_user)
@@ -143,6 +144,7 @@ class EssaysTest(APITestCase):
         self.assertEqual(EssayFormURL.objects.all().count(), 1)
         self.assertEqual(response.json()['user'], str(self.common_user.id))
 
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def test_get_link_to_form_more_times(self):
         self.switch_stage(self.common_user)
         data = {'user': self.common_user.id}
@@ -160,6 +162,7 @@ class EssaysTest(APITestCase):
         self.assertEqual(EssayFormURL.objects.all().count(), 1)
         self.assertEqual(UUID(response.json()['user']), data['user'])
 
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def test_pass_essay_by_form_url_link_common_user(self):
         self.switch_stage(self.common_user)
         data = {'user': self.common_user.id}
@@ -186,6 +189,7 @@ class EssaysTest(APITestCase):
             response.json()['detail'], 'Сочинение на этой неделе уже существует.'
         )
 
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def test_pass_essay_by_form_url_link_anon_user_without_creds(self):
         self.switch_stage(self.common_user)
         data = {'user': self.common_user.id}
