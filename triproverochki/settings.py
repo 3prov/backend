@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 
 from corsheaders.defaults import default_headers
 
+from triproverochki.logging_formatters import CustomJsonFormatter
 
 load_dotenv()
 
@@ -199,7 +200,7 @@ ESSAY_EVALUATION_TABLE = {
         },
         "k2": {
             "name": "К2: Комментарий к сформулированной проблеме исходного текста",
-            "max_score": 6,
+            "max_score": 6,  # TODO: to 5
         },
         "k3": {
             "name": "К3: Отражение позиции автора исходного текста",
@@ -253,6 +254,54 @@ RATINGS_CONFIGURATION = {
     'increase_essay_pass': 10,
     'increase_check_pass': 7,
 }
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'main_formatter': {
+            'format': '{asctime} {levelname} - {module} - {funcName} ({lineno:d}): {message}',
+            'datefmt': '%H:%M:%S %d.%m.%Y',
+            'style': '{',
+        },
+        'json_formatter': {
+            '()': CustomJsonFormatter,
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'main_formatter',
+        },
+        'django_file': {
+            'class': 'logging.FileHandler',
+            'filename': 'django_info.log',
+            'formatter': 'json_formatter',
+        },
+        'celery_file': {
+            'class': 'logging.FileHandler',
+            'filename': 'celery_info.log',
+            'formatter': 'json_formatter',
+        },
+        'send_telegram': {
+            'class': 'triproverochki.logging_handlers.SendTelegramHandler',
+            'level': 'ERROR',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'django_file', 'send_telegram'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'celery': {
+            'handlers': ['console', 'celery_file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
+
 
 # Redis/Celery settings
 REDIS_HOST = os.getenv('REDIS_HOST')

@@ -9,9 +9,9 @@ from triproverochki.celery import app
 def mailing_decorator(func: callable):
     @functools.wraps(func)
     def mailing_wrapper(*args, **kwargs):
-        TelegramHelper.send_message_to_admins('Начало рассылки')
+        TelegramHelper.send_message_to_admins('[✉️]: Начало рассылки')
         func_result = func(*args, **kwargs)
-        TelegramHelper.send_message_to_admins('Конец рассылки')
+        TelegramHelper.send_message_to_admins('[✉️]: Конец рассылки')
         return func_result
 
     return mailing_wrapper
