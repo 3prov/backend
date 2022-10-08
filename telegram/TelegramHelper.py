@@ -21,4 +21,6 @@ class TelegramHelper:
         }
 
         response = requests.get(url, params=params)
-        print(response.text)
+        print(
+            response.text
+        )  # TODO: handle errors (BotBlocked, CharNotFound); to logger

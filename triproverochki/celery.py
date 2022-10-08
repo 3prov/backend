@@ -8,7 +8,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'triproverochki.settings')
 
 app = Celery('triproverochki')
 app.config_from_object('django.conf:settings', namespace='CELERY')
-app.autodiscover_tasks(['api.tasks', 'api.tasks_beat'])
+app.autodiscover_tasks(['api.tasks', 'api.tasks.beats.switch_stage'])
 
 
 # celery beat tasks

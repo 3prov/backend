@@ -7,7 +7,7 @@ from api.form_url.models import EssayFormURL, EvaluationFormURL, ResultsFormURL
 from api.rus.models import Text, Essay
 from api.control.models import WeekID, Stage
 from api.services import filter_objects
-from api.tasks import DistributionTasks, FormURLTasks, SendTelegramMessage
+from api.tasks import form_url, telegram_message, distribution
 from api.work_distribution.models import WorkDistributionToEvaluate
 
 
@@ -53,7 +53,7 @@ def post_save_stage(sender, instance, created, **kwargs):
     """
     match instance.stage:
         case Stage.StagesEnum.WORK_ACCEPTING:
-            message = 'Начался прием работ. Пора писать!'
+            task_message = telegram_message.send_work_accepting_stage_start
             task = None  # TODO: is it ok?
 
         case Stage.StagesEnum.EVALUATION_ACCEPTING:
@@ -63,22 +63,21 @@ def post_save_stage(sender, instance, created, **kwargs):
                 ).count()
                 > 0
             ):
-                message = 'Началась оценка работ. Пора оценивать!'
-                task = DistributionTasks.make_necessary_for_week_participants
+                task_message = telegram_message.send_evaluation_accepting_stage_start
+                task = distribution.distribution_make_necessary_for_week_participants
             else:
                 return print('No need for distribution.')  # TODO: to logger
 
         case Stage.StagesEnum.CLOSED_ACCEPT:
-            message = 'Прием оценок закончен. Пора смотреть результаты!'
-            task = FormURLTasks.create_result_form_urls_for_essay_authors
+            task_message = telegram_message.send_closed_accept_stage
+            task = form_url.create_result_form_urls_for_essay_authors
         case _:
             return
 
-    send_message_task = SendTelegramMessage.send_message_to_active_users
     with transaction.atomic():
         if task:
-            return task.apply_async(link=send_message_task.si(message))
-        return send_message_task.delay(message)
+            return task.apply_async(link=task_message.si())  # TODO: check it!
+        return task_message.delay()
 
 
 @receiver(signals.post_save, sender=WorkDistributionToEvaluate)
