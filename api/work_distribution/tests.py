@@ -18,6 +18,10 @@ from ..rus.models import Essay, Text
 from ..services import all_objects, filter_objects, get_object
 
 
+test_settings = override_settings(TESTING_MODE=True)
+
+
+@test_settings
 class WorkDistributionTest(APITestCase):
     @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def setUp(self) -> None:

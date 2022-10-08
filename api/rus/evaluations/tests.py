@@ -19,6 +19,10 @@ from api.rus.models import Text, Essay
 from api.services import all_objects, filter_objects, get_object
 
 
+test_settings = override_settings(TESTING_MODE=True)
+
+
+@test_settings
 class EvaluationsTest(APITestCase):
     def setUp(self) -> None:
         call_command('init_stage')

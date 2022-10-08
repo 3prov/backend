@@ -16,6 +16,10 @@ from ..models import User
 from ..rus.models import Essay, Text
 
 
+test_settings = override_settings(TESTING_MODE=True)
+
+
+@test_settings
 class ControlTest(APITestCase):
     def setUp(self) -> None:
         call_command('init_stage')

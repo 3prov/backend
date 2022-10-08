@@ -10,7 +10,7 @@ import logging
 logger = logging.getLogger('celery')
 
 
-def mailing_decorator(func: callable):
+def mailing_status_decorator(func: callable):
     @functools.wraps(func)
     def mailing_wrapper(*args, **kwargs):
         TelegramHelper.send_message_to_admins('[✉️]: Начало рассылки')
@@ -21,7 +21,7 @@ def mailing_decorator(func: callable):
     return mailing_wrapper
 
 
-@mailing_decorator
+@mailing_status_decorator
 def __process(
     app_self, users: set, message: str, users_count: int, users_count_from: int = 1
 ):

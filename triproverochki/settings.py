@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 
 from corsheaders.defaults import default_headers
 
+from triproverochki.logging_filters import NotInTestingFilter
 from triproverochki.logging_formatters import CustomJsonFormatter
 
 load_dotenv()
@@ -42,6 +43,8 @@ if not DEBUG:
 ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS').split()
 
 CSRF_TRUSTED_ORIGINS = os.getenv('DJANGO_CSRF_TRUSTED_ORIGINS').split()
+
+TESTING_MODE = False  # unittests switch this to True automatically
 
 # Application definition
 
@@ -268,6 +271,7 @@ LOGGING = {
             '()': CustomJsonFormatter,
         },
     },
+    'filters': {'testing_mode': {'()': NotInTestingFilter}},
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
@@ -293,11 +297,13 @@ LOGGING = {
             'handlers': ['console', 'django_file', 'send_telegram'],
             'level': 'INFO',
             'propagate': True,
+            'filters': ['testing_mode'],
         },
         'celery': {
             'handlers': ['console', 'celery_file', 'send_telegram'],
             'level': 'INFO',
             'propagate': True,
+            'filters': ['testing_mode'],
         },
     },
 }

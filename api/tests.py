@@ -1,10 +1,19 @@
 from rest_framework import status
 from rest_framework.reverse import reverse
-from rest_framework.test import APITestCase, APIClient, APIRequestFactory
+from rest_framework.test import (
+    APITestCase,
+    APIClient,
+    APIRequestFactory,
+    override_settings,
+)
 from .models import User
 from .services import all_objects, get_object
 
 
+test_settings = override_settings(TESTING_MODE=True)
+
+
+@test_settings
 class UserTest(APITestCase):
     def setUp(self) -> None:
         self.factory = APIRequestFactory()
@@ -186,6 +195,7 @@ class UserTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
+@test_settings
 class HealthTest(APITestCase):
     def setUp(self) -> None:
         self.client = APIClient()

@@ -16,6 +16,10 @@ from ...form_url.models import EssayFormURL
 from ...services import all_objects
 
 
+test_settings = override_settings(TESTING_MODE=True)
+
+
+@test_settings
 class EssaysTest(APITestCase):
     def setUp(self) -> None:
         call_command('init_stage')
