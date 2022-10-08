@@ -1,8 +1,23 @@
+import functools
+
 from api.models import User
 from api.services import filter_objects
+from telegram import TelegramHelper
 from triproverochki.celery import app
 
 
+def mailing_decorator(func: callable):
+    @functools.wraps(func)
+    def mailing_wrapper(*args, **kwargs):
+        TelegramHelper.send_message_to_admins('Начало рассылки')
+        func_result = func(*args, **kwargs)
+        TelegramHelper.send_message_to_admins('Конец рассылки')
+        return func_result
+
+    return mailing_wrapper
+
+
+@mailing_decorator
 def __process(
     app_self, users: set, message: str, users_count: int, users_count_from: int = 1
 ):
@@ -12,6 +27,7 @@ def __process(
         app_self.update_state(
             state='PROGRESS', meta={'current': i, 'total': users_count}
         )
+        print(f'{i}/{users_count}: {user.username}')  # TODO: to logger
         i += 1
 
 

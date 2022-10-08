@@ -14,6 +14,7 @@ from rest_framework.authtoken.models import Token
 from api.control.models import WeekID
 from api.services import filter_objects, get_object
 from telegram import TelegramHelper
+from telegram.exceptions import BotBlocked, ChatNotFound
 
 
 class AbstractModelMeta(abc.ABCMeta, type(models.Model)):
@@ -67,7 +68,15 @@ class User(AbstractUser, metaclass=AbstractModelMeta):
         ).exists()
 
     def send_telegram_message(self, message: str):
-        TelegramHelper.send_message(self.telegram_id, message)
+        try:
+            TelegramHelper.send_message(self.telegram_id, message)
+        except (BotBlocked, ChatNotFound) as exception:
+            if not self.is_superuser:
+                self.is_active = False
+                self.save()
+            TelegramHelper.send_message_to_admins(
+                text=f'<b>[telegram send error]</b> <code>{self.id}</code>({self.username}): {exception.__doc__}'
+            )
 
 
 class FormURL(models.Model, metaclass=AbstractModelMeta):

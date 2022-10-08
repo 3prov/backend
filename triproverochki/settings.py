@@ -29,6 +29,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+TELEGRAM_LOGS_BOT_TOKEN = os.getenv('TELEGRAM_LOGS_BOT_TOKEN')
+TELEGRAM_LOGS_CHAT_ID = os.getenv('TELEGRAM_LOGS_CHAT_ID')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DJANGO_DEBUG', default=False) == 'True'
