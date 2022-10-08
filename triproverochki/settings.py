@@ -258,6 +258,7 @@ RATINGS_CONFIGURATION = {
     'increase_check_pass': 7,
 }
 
+# fmt: off
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -271,7 +272,11 @@ LOGGING = {
             '()': CustomJsonFormatter,
         },
     },
-    'filters': {'testing_mode': {'()': NotInTestingFilter}},
+    'filters': {
+        'testing_mode': {
+            '()': NotInTestingFilter
+        }
+    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
@@ -307,6 +312,7 @@ LOGGING = {
         },
     },
 }
+# fmt: on
 
 
 # Redis/Celery settings
