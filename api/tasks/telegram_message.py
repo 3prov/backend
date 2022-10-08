@@ -5,6 +5,10 @@ from api.services import filter_objects
 from telegram import TelegramHelper
 from triproverochki.celery import app
 
+import logging
+
+logger = logging.getLogger('celery')
+
 
 def mailing_decorator(func: callable):
     @functools.wraps(func)
@@ -27,7 +31,7 @@ def __process(
         app_self.update_state(
             state='PROGRESS', meta={'current': i, 'total': users_count}
         )
-        print(f'{i}/{users_count}: {user.username}')  # TODO: to logger
+        logger.info(f'{i}/{users_count}: {user.username}')
         i += 1
 
 

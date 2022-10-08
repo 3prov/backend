@@ -285,7 +285,7 @@ LOGGING = {
         },
         'send_telegram': {
             'class': 'triproverochki.logging_handlers.SendTelegramHandler',
-            'level': 'ERROR',
+            'level': 'WARNING',
         },
     },
     'loggers': {
@@ -295,7 +295,7 @@ LOGGING = {
             'propagate': True,
         },
         'celery': {
-            'handlers': ['console', 'celery_file'],
+            'handlers': ['console', 'celery_file', 'send_telegram'],
             'level': 'INFO',
             'propagate': True,
         },

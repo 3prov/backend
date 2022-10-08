@@ -16,6 +16,10 @@ from api.services import filter_objects, get_object
 from telegram import TelegramHelper
 from telegram.exceptions import BotBlocked, ChatNotFound
 
+import logging
+
+logger = logging.getLogger('celery')
+
 
 class AbstractModelMeta(abc.ABCMeta, type(models.Model)):
     pass
@@ -74,8 +78,8 @@ class User(AbstractUser, metaclass=AbstractModelMeta):
             if not self.is_superuser:
                 self.is_active = False
                 self.save()
-            TelegramHelper.send_message_to_admins(
-                text=f'<b>[telegram send error]</b> <code>{self.id}</code>({self.username}): {exception.__doc__}'
+            logger.error(
+                f'Error during message sending to {self.id} ({self.username}) - {exception.__doc__}'
             )
 
 

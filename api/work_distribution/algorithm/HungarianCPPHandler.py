@@ -3,6 +3,10 @@ from .mcximings_HungarianAlgorithm import HungarianAlgorithm
 from api.models import User
 from .structures import ResultPair, OneDistribution
 
+import logging
+
+logger = logging.getLogger('celery')
+
 
 class HungarianCPPAlgorithm:
     def __init__(self):
@@ -59,8 +63,8 @@ class HungarianCPPAlgorithm:
             pairs=self._HungarianLibrary.Solve(matrix), cost=self._HungarianLibrary.cost
         )
         if distribution.cost >= self._blocking_value:
-            print(f'ERROR: {distribution.cost=} too big!')  # TODO: to logger
-        # print(f'{distribution=}')  # TODO: to logger?
+            logger.error(f'{distribution.cost=} too big!')
+        logger.debug(f'{distribution=}')
         for pair in distribution.pairs:
             result.append(
                 ResultPair(
@@ -81,14 +85,14 @@ class HungarianCPPAlgorithm:
 
         result: list[ResultPair] = []
 
-        print(f"распределение: 0/{len(participants) - 2}")  # TODO: to logger
+        logger.info(f"распределение: 0/{len(participants) - 2}")
         matrix = self._create_first_matrix(ratings)
         distribution = self._make_distribution_and_append_result(
             participants, matrix, result
         )
         for i in range(1, len(participants) - 1):
-            print(f"распределение: {i}/{len(participants) - 2}")  # TODO: to logger
-            # print(f'{matrix=}')  # TODO: to logger (debug)
+            logger.info(f"распределение: {i}/{len(participants) - 2}")
+            logger.debug(f'{matrix=}')
             matrix = self._create_matrix_with_pair_blocks(
                 ratings, distribution.pairs, matrix
             )

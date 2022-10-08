@@ -27,9 +27,6 @@ class TelegramHelper:
         response_json = response.json()
 
         if not response_json['ok']:
-            print(
-                response_json['error_code'], response_json['description']
-            )  # TODO: to logger (error)
             match response_json['error_code']:
                 case 400:
                     raise ChatNotFound

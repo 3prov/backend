@@ -10,6 +10,10 @@ from api.services import filter_objects
 from api.tasks import form_url, telegram_message, distribution
 from api.work_distribution.models import WorkDistributionToEvaluate
 
+import logging
+
+logger = logging.getLogger('django')
+
 
 @receiver(signals.post_save, sender=Text)
 def post_save_text(sender, instance, created, **kwargs):
@@ -66,7 +70,8 @@ def post_save_stage(sender, instance, created, **kwargs):
                 task_message = telegram_message.send_evaluation_accepting_stage_start
                 task = distribution.distribution_make_necessary_for_week_participants
             else:
-                return print('No need for distribution.')  # TODO: to logger
+                logger.warning('No need for distribution.')
+                return
 
         case Stage.StagesEnum.CLOSED_ACCEPT:
             task_message = telegram_message.send_closed_accept_stage
