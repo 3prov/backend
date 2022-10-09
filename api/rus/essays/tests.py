@@ -88,8 +88,10 @@ class EssaysTest(APITestCase):
         self.assertEqual(all_objects(Essay.objects).count(), 0)
         self.switch_stage(self.common_user)
         response = self.get_or_create_essay_form_link(self.common_user)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(all_objects(EssayFormURL.objects).count(), 1)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            all_objects(EssayFormURL.objects).count(), all_objects(User.objects).count()
+        )
         response_p1 = self.pass_essay(self.common_user, response.json()['url'])
         self.assertEqual(response_p1.status_code, status.HTTP_201_CREATED)
         response_p2 = self.pass_essay(self.common_user, response.json()['url'])
@@ -101,7 +103,7 @@ class EssaysTest(APITestCase):
         self.switch_stage(self.common_user)
         self.switch_stage(self.common_user)
         response = self.get_or_create_essay_form_link(self.common_user)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        # self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         response_p1 = self.pass_essay(self.common_user, response.json()['url'])
         self.assertEqual(response_p1.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(all_objects(Essay.objects).count(), 0)
@@ -135,27 +137,35 @@ class EssaysTest(APITestCase):
     def test_get_link_to_form(self):
         self.switch_stage(self.common_user)
         data = {'user': self.common_user.id}
-        self.assertEqual(all_objects(EssayFormURL.objects).count(), 0)
+        self.assertEqual(
+            all_objects(EssayFormURL.objects).count(), all_objects(User.objects).count()
+        )
         self.client.credentials(
             HTTP_AUTHORIZATION=f'Token {self.common_user.auth_token}'
         )
         response = self.client.post(
             reverse('get_or_create_essay_form_link'), data, format='json'
         )
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNotNone(response.json()['url'])
         self.assertEqual(len(response.json()['url']), 16)
-        # self.assertEqual(response.json()['id'], 1)
-        self.assertEqual(all_objects(EssayFormURL.objects).count(), 1)
+        self.assertEqual(response.json()['id'], 1)
+        self.assertEqual(
+            all_objects(EssayFormURL.objects).count(), all_objects(User.objects).count()
+        )
         self.assertEqual(response.json()['user'], str(self.common_user.id))
 
     @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def test_get_link_to_form_more_times(self):
         self.switch_stage(self.common_user)
-        data = {'user': self.common_user.id}
+
         self.client.credentials(
             HTTP_AUTHORIZATION=f'Token {self.common_user.auth_token}'
         )
+
+        volunteer = User.objects.create_user(username='volunteer123412')
+        data = {'user': volunteer.id}
+
         response = self.client.post(
             reverse('get_or_create_essay_form_link'), data, format='json'
         )
@@ -164,7 +174,9 @@ class EssaysTest(APITestCase):
             reverse('get_or_create_essay_form_link'), data, format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(all_objects(EssayFormURL.objects).count(), 1)
+        self.assertEqual(
+            all_objects(EssayFormURL.objects).count(), all_objects(User.objects).count()
+        )
         self.assertEqual(UUID(response.json()['user']), data['user'])
 
     @override_settings(CELERY_TASK_ALWAYS_EAGER=True)

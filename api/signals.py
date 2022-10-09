@@ -12,7 +12,7 @@ from api.work_distribution.models import WorkDistributionToEvaluate
 
 import logging
 
-logger = logging.getLogger('django')
+logger = logging.getLogger('celery')
 
 
 @receiver(signals.post_save, sender=Text)

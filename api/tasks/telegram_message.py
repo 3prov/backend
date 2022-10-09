@@ -1,5 +1,9 @@
+from dataclasses import dataclass
+
 import functools
 
+from api.control.models import WeekID
+from api.form_url.models import EssayFormURL, EvaluationFormURL, ResultsFormURL
 from api.models import User
 from api.services import filter_objects
 from telegram import TelegramHelper
@@ -8,6 +12,12 @@ from triproverochki.celery import app
 import logging
 
 logger = logging.getLogger('celery')
+
+
+@dataclass
+class Message:
+    receiver: User
+    text: str
 
 
 def mailing_status_decorator(func: callable):
@@ -23,73 +33,103 @@ def mailing_status_decorator(func: callable):
 
 @mailing_status_decorator
 def __process(
-    app_self, users: set, message: str, users_count: int, users_count_from: int = 1
+    app_self, messages: list[Message], users_count: int, users_count_from: int = 1
 ):
     i = users_count_from
-    for user in users:
-        user.send_telegram_message(message=message)
+
+    for message in messages:
+        message.receiver.send_telegram_message(message=message.text)
+        logger.info(f'{i}/{users_count}: {message.receiver.username} - {message.text}')
         app_self.update_state(
             state='PROGRESS', meta={'current': i, 'total': users_count}
         )
-        logger.info(f'{i}/{users_count}: {user.username}')
         i += 1
 
 
 @app.task(bind=True)
 def send_work_accepting_stage_start(self):
-    message = 'Начался прием работ. Пора писать!'
-    users = filter_objects(User.objects, is_active=True)
-    users_count = users.count()
-    __process(self, set(users), message, users_count)
+    text = 'Начался прием работ. Пора писать!'
+    active_users = filter_objects(User.objects, is_active=True)
+    users_count = active_users.count()
+    messages = []
+    for user in active_users:
+        form_url, _ = EssayFormURL.objects.get_or_create(user=user)
+        messages.append(
+            Message(
+                receiver=user,
+                text=f'{text}\nВаша ссылка: {form_url.url}',
+            )
+        )
+
+    __process(self, messages, users_count)
 
 
 @app.task(bind=True)
 def send_evaluation_accepting_stage_start(self):
-    message_week_participants = (
+    text_week_participants = (
         '[Участник недели] Начался прием оценок. Пора смотреть и оценивать!'
     )
-    message_volunteer = '[Волонтер] Начался прием оценок. Пора смотреть и оценивать!'
-    users_week_participants = set()
-    users_volunteer = set()
+    text_volunteer = '[Волонтер] Начался прием оценок. Пора смотреть и оценивать!'
+    messages = []
 
-    for user in filter_objects(User.objects, is_active=True):
+    active_users = filter_objects(User.objects, is_active=True)
+    for user in active_users:
         if user.is_week_participant:
-            users_week_participants.add(user)
-        else:
-            users_volunteer.add(user)
+            required_evaluations = filter_objects(
+                EvaluationFormURL.objects,
+                user=user,
+                week_id=WeekID.get_current(),
+                only=('url',),
+            )
 
-    users_count = len(users_week_participants) + len(users_volunteer)
-    __process(self, users_week_participants, message_week_participants, users_count)
-    __process(
-        self,
-        users_volunteer,
-        message_volunteer,
-        users_count,
-        users_count_from=len(users_week_participants) + 1,
-    )
+            messages.append(
+                Message(
+                    receiver=user,
+                    text=f'{text_week_participants}\nВаши ссылки: {[x.url for x in required_evaluations]}',
+                )
+            )
+        else:
+            messages.append(
+                Message(
+                    receiver=user,
+                    text=f'{text_volunteer}\nВы можете принять участие: /volunteer_evaluation',
+                )
+            )
+
+    __process(self, messages, active_users.count())
 
 
 @app.task(bind=True)
 def send_closed_accept_stage(self):
-    message_week_participants = (
+    text_week_participants = (
         '[Участник недели] Прием оценок закончен. Пора смотреть результаты'
     )
-    message_volunteer = '[Волонтер] Прием оценок закончен. Пора смотреть результаты'
-    users_week_participants = set()
-    users_volunteer = set()
+    text_volunteer = '[Волонтер] Прием оценок закончен. Пора смотреть результаты'
+    messages = []
 
-    for user in filter_objects(User.objects, is_active=True):
+    active_users = filter_objects(User.objects, is_active=True)
+    for user in active_users:
         if user.is_week_participant:
-            users_week_participants.add(user)
-        else:
-            users_volunteer.add(user)
+            result_evaluations = filter_objects(
+                ResultsFormURL.objects,
+                user=user,
+                week_id=WeekID.get_current(),
+                only=('url',),
+            )
 
-    users_count = len(users_week_participants) + len(users_volunteer)
-    __process(self, users_week_participants, message_week_participants, users_count)
-    __process(
-        self,
-        users_volunteer,
-        message_volunteer,
-        users_count,
-        users_count_from=len(users_week_participants) + 1,
-    )
+            messages.append(
+                Message(
+                    receiver=user,
+                    text=f'{text_week_participants}\nВаши ссылки: {[x.url for x in result_evaluations]}\nВсе работы недели: /week_results',
+                )
+            )
+
+        else:
+            messages.append(
+                Message(
+                    receiver=user,
+                    text=f'{text_volunteer}\nВы можете посмотреть все работы неледи: /week_results',
+                )
+            )
+
+    __process(self, messages, active_users.count())

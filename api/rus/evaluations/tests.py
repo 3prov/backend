@@ -76,7 +76,7 @@ class EvaluationsTest(APITestCase):
         response = self.client.post(
             reverse('get_or_create_essay_form_link'), data, format='json'
         )
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         return response.json()['url']
 
     def send_essay_from_user(self, user: User):
